@@ -5,6 +5,14 @@
 :root {
     --foreground-rgb: 0, 0, 0;
     --background-rgb: 255, 255, 255;
+    --primary-color: #3641fc;
+    --primary-alt-color: #3641fc1a;
+}
+
+*,
+*::after,
+*::before {
+    box-sizing: border-box;
 }
 
 body {
@@ -12,6 +20,6 @@ body {
     background: rgb(var(--background-rgb));
 }
 
-#attribution_block {
-    display: none !important;
+.primary-bg {
+    background-color: var(--primary-color);
 }

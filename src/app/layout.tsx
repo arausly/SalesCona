@@ -1,8 +1,15 @@
 import SupabaseProvider from "@lib/supabaseBrowser";
-import "./globals.css";
-import { Inter } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+//styles
+import "./globals.css";
+
+//font
+import { Poppins } from "next/font/google";
+
+const poppin = Poppins({
+    weight: ["300", "400", "500", "600", "700"],
+    subsets: ["latin"],
+});
 
 export const metadata = {
     title: "kolony-buy",
@@ -18,7 +25,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="en" className={`${poppin.className} h-full bg-white`}>
             <body className="v-screen h-screen">
                 <SupabaseProvider>{children}</SupabaseProvider>
             </body>

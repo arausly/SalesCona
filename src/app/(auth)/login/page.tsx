@@ -34,7 +34,7 @@ export default function Login() {
                         await supabase.auth.signInWithPassword(values);
                     if (error) throw error;
                     toast.success("Successful login");
-                    router.replace("/");
+                    router.replace("/dashboard");
                 } catch (err) {
                     toast.error("Failed to login");
                 } finally {
