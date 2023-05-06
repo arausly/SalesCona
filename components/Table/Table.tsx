@@ -26,27 +26,44 @@ export const Table: React.FC<TableProps> = ({
     onSearch,
 }) => {
     const [paginationRange, setPaginationRange] = React.useState([1, 5]);
+    const [currentPage, setCurrentPage] = React.useState<number>(1);
+
+    const updateCurrentPage = React.useCallback(
+        (page: number) => {
+            onPaginate(page);
+            setCurrentPage(page);
+        },
+        [onPaginate]
+    );
 
     const handlePageSelection = React.useCallback(
         (action: string) => {
             if (typeof action === "string") {
                 switch (action) {
                     case "back":
-                        setPaginationRange(([start, end]) => [
-                            Math.max(1, start - 1),
-                            Math.max(5, end - 1),
-                        ]);
+                        setPaginationRange(([start, end]) => {
+                            const newStart = Math.max(1, start - 1);
+                            updateCurrentPage(newStart);
+                            return [newStart, Math.max(5, end - 1)];
+                        });
                         break;
                     case "forward":
-                        setPaginationRange(([start, end]) => [
-                            Math.min(pagination.finalPage - 4, start + 1),
-                            Math.min(pagination.finalPage - 1, end + 1),
-                        ]);
+                        setPaginationRange(([start, end]) => {
+                            const newStart = Math.min(
+                                pagination.finalPage - 4,
+                                start + 1
+                            );
+                            updateCurrentPage(newStart);
+                            return [
+                                newStart,
+                                Math.min(pagination.finalPage - 1, end + 1),
+                            ];
+                        });
                         break;
                 }
             }
         },
-        [pagination.finalPage]
+        [updateCurrentPage, pagination.finalPage]
     );
 
     const paginationNumbers = React.useCallback(() => {
@@ -56,7 +73,10 @@ export const Table: React.FC<TableProps> = ({
         for (let page = start; page <= end; page++) {
             pageNumbers.push(
                 <li
-                    className="px-3 cursor-pointer py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                    onClick={() => updateCurrentPage(page)}
+                    className={`px-3 cursor-pointer py-2 ${
+                        currentPage === page ? "bg-gray-100" : "bg-white"
+                    } leading-tight text-gray-500  border border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
                     key={page}
                 >
                     {page}
@@ -64,7 +84,7 @@ export const Table: React.FC<TableProps> = ({
             );
         }
         return pageNumbers;
-    }, [paginationRange]);
+    }, [paginationRange, currentPage, updateCurrentPage]);
 
     return (
         <div className="relative overflow-x-auto w-full">
@@ -175,7 +195,14 @@ export const Table: React.FC<TableProps> = ({
                                 ...
                             </li>
                         )}
-                    <li className="px-3 cursor-pointer py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">
+                    <li
+                        onClick={() => updateCurrentPage(pagination.finalPage)}
+                        className={`px-3 cursor-pointer py-2 leading-tight text-gray-500 ${
+                            currentPage === pagination.finalPage
+                                ? "bg-gray-100"
+                                : "bg-white"
+                        } border border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
+                    >
                         {pagination.finalPage}
                     </li>
                     <li onClick={() => handlePageSelection("forward")}>
