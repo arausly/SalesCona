@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Pacifico } from "next/font/google";
 
 //images
-import defaultProfile from "@assets/images/dan.jpeg";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 
 import styles from "./sidebar.module.css";

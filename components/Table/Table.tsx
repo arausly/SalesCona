@@ -2,10 +2,10 @@ import React from "react";
 import { truncateString } from "@lib/format-utils";
 
 interface TableProps {
-    title: string;
+    title: string | JSX.Element;
     headers: Array<{
         id: string;
-        label: string;
+        label: string | JSX.Element;
     }>;
     rows: { [key: string]: string | JSX.Element }[];
     pagination: {
@@ -17,6 +17,7 @@ interface TableProps {
     onPaginate: (page: number) => void;
 }
 
+//Todo pagination is broken, fix after launch
 export const Table: React.FC<TableProps> = ({
     title,
     headers,
@@ -89,7 +90,11 @@ export const Table: React.FC<TableProps> = ({
     return (
         <div className="relative overflow-x-auto w-full">
             <div className="flex flex-col md:flex-row items-center justify-between">
-                <p className="mb-2 md:mb-0">{title}</p>
+                {typeof title === "string" ? (
+                    <p className="mb-2 md:mb-0 font-semibold">{title}</p>
+                ) : (
+                    title
+                )}
                 <div className="pb-4 bg-white">
                     <label htmlFor="table-search" className="sr-only">
                         Search
@@ -143,7 +148,7 @@ export const Table: React.FC<TableProps> = ({
                             {headers.map((header) => (
                                 <td
                                     key={header.id}
-                                    className="px-6 text-gray-600 py-4"
+                                    className="px-6 text-gray-600 py-4 truncate"
                                 >
                                     {truncateString(row[header.id], 40)}
                                 </td>
@@ -153,10 +158,10 @@ export const Table: React.FC<TableProps> = ({
                 </tbody>
             </table>
             <nav
-                className="flex items-center justify-between pt-4"
+                className="flex flex-col md:flex-row items-center justify-between pt-4"
                 aria-label="Table navigation"
             >
-                <span className="text-sm font-normal text-sm text-gray-600">
+                <span className="text-sm font-normal text-sm text-gray-600 mb-2 md:md-0">
                     Showing{" "}
                     <span className="font-semibold text-sm text-gray-600">
                         1-{pagination.pageItemCount}

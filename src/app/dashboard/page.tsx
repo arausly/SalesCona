@@ -273,7 +273,7 @@ export default function Dashboard() {
                     <div className="flex flex-row justify-between items-center border-b border-slate-200 pb-2 mb-2">
                         <p className="text-lg md:text-xl mr-8">Reviews</p>
                         <div className="flex flex-col">
-                            <div className="flex flex-row items-center mb-4">
+                            <div className="flex flex-row flex-wrap items-center mb-4">
                                 <p className="text-base md:text-lg mr-3">
                                     3.9 / 5
                                 </p>
