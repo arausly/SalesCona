@@ -1,3 +1,4 @@
+import React from "react";
 import { truncateString } from "@lib/format-utils";
 
 interface TableProps {
@@ -24,6 +25,47 @@ export const Table: React.FC<TableProps> = ({
     onPaginate,
     onSearch,
 }) => {
+    const [paginationRange, setPaginationRange] = React.useState([1, 5]);
+
+    const handlePageSelection = React.useCallback(
+        (action: string) => {
+            if (typeof action === "string") {
+                switch (action) {
+                    case "back":
+                        setPaginationRange(([start, end]) => [
+                            Math.max(1, start - 1),
+                            Math.max(5, end - 1),
+                        ]);
+                        break;
+                    case "forward":
+                        setPaginationRange(([start, end]) => [
+                            Math.min(pagination.finalPage - 4, start + 1),
+                            Math.min(pagination.finalPage - 1, end + 1),
+                        ]);
+                        break;
+                }
+            }
+        },
+        [pagination.finalPage]
+    );
+
+    const paginationNumbers = React.useCallback(() => {
+        const pageNumbers = [];
+        const [start, end] = paginationRange;
+
+        for (let page = start; page <= end; page++) {
+            pageNumbers.push(
+                <li
+                    className="px-3 cursor-pointer py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                    key={page}
+                >
+                    {page}
+                </li>
+            );
+        }
+        return pageNumbers;
+    }, [paginationRange]);
+
     return (
         <div className="relative overflow-x-auto w-full">
             <div className="flex flex-col md:flex-row items-center justify-between">
@@ -105,10 +147,10 @@ export const Table: React.FC<TableProps> = ({
                     </span>
                 </span>
                 <ul className="inline-flex items-center -space-x-px">
-                    <li>
+                    <li onClick={() => handlePageSelection("back")}>
                         <a
                             href="#"
-                            className="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg"
+                            className="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 rounded-l-lg"
                         >
                             <span className="sr-only">Previous</span>
                             <svg
@@ -126,40 +168,20 @@ export const Table: React.FC<TableProps> = ({
                             </svg>
                         </a>
                     </li>
-                    {new Array(Math.min(5, pagination.finalPage))
-                        .fill(1)
-                        .map((_, pageIndex) => (
-                            <li key={pageIndex}>
-                                <a
-                                    href="#"
-                                    className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
-                                >
-                                    {pageIndex + 1}
-                                </a>
-                            </li>
-                        ))}
-                    {pagination.finalPage > 6 && (
-                        <li>
-                            <a
-                                href="#"
-                                className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
-                            >
+                    {paginationNumbers()}
+                    {pagination.finalPage > 6 &&
+                        pagination.finalPage - 1 !== paginationRange[1] && (
+                            <li className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300">
                                 ...
-                            </a>
-                        </li>
-                    )}
-                    <li>
-                        <a
-                            href="#"
-                            className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
-                        >
-                            {pagination.finalPage}
-                        </a>
+                            </li>
+                        )}
+                    <li className="px-3 cursor-pointer py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">
+                        {pagination.finalPage}
                     </li>
-                    <li>
+                    <li onClick={() => handlePageSelection("forward")}>
                         <a
                             href="#"
-                            className="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg"
+                            className="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100"
                         >
                             <span className="sr-only">Next</span>
                             <svg
