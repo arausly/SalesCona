@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
             pathname.startsWith("/register") ||
             pathname.startsWith("/verify"))
     ) {
-        req.nextUrl.pathname = "";
+        req.nextUrl.pathname = "/dashboard";
         return NextResponse.redirect(req.nextUrl);
     }
 

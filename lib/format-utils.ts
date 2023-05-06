@@ -16,3 +16,26 @@ export function truncateString(str: any, maxLen: number) {
         return str.slice(0, maxLen) + "...";
     }
 }
+
+export const generateAvatarInitials = (char: string) => {
+    if (char.length < 2) return char;
+    const charsSplitted = char.split(" ");
+    return charsSplitted.reduce((avatarInitials, char) => {
+        avatarInitials += char[0];
+        return avatarInitials;
+    }, "");
+};
+
+export const generateAvatarBg = () => {
+    const bgColors = [
+        "#DBDFEA",
+        "#A4D0A4",
+        "#C9A7EB",
+        "#B0A4A4",
+        "#B9EDDD",
+        "#FFABAB",
+        "#A2A378",
+    ];
+    const randomIndex = Math.floor(Math.random() * bgColors.length);
+    return bgColors[randomIndex].toLowerCase();
+};

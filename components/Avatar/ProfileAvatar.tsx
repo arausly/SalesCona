@@ -1,27 +1,21 @@
-import Image, { StaticImageData } from "next/image";
+"use client";
+import { generateAvatarBg, generateAvatarInitials } from "@lib/format-utils";
+import { useGetUser } from "../../hooks/useGetUser";
 
-import styles from "./avatar.module.css";
+export const ProfileAvatar = (props: any) => {
+    const user = useGetUser();
+    if (!user) return null;
 
-interface IProps {
-    src: StaticImageData;
-    className: string;
-}
-
-export const ProfileAvatar: React.FC<IProps> = ({
-    src,
-    className,
-    ...otherProps
-}) => {
     return (
         <div
-            className={`w-8 h-8 rounded-full object-cover ${className}`}
-            {...otherProps}
+            style={{ backgroundColor: generateAvatarBg() }}
+            className="w-8 h-8 rounded-full uppercase flex flex-col items-center justify-center block md:hidden"
         >
-            <Image
-                className="w-full h-full rounded-full"
-                src={src}
-                alt="profile"
-            />
+            <p className="text-sm text-slate-800">
+                {generateAvatarInitials(
+                    `${user.user_metadata?.firstname} ${user.user_metadata.lastname}`
+                )}
+            </p>
         </div>
     );
 };

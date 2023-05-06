@@ -18,7 +18,7 @@ export default function RootLayout({
     return (
         <div className="v-screen h-screen flex flex-row">
             <div className="w-full md:w-1/2">{children}</div>
-            <div className="hidden md:block w-1/2 h-full">
+            <div className="hidden md:block w-1/2 h-full bg-fixed">
                 <Image
                     className="mx-auto bg-contain"
                     src={authImage}

@@ -81,10 +81,7 @@ export default function Sidebar() {
                 <p className={styles.sideMobileOnly}>
                     {links.find((l) => l.pathname === pathname)?.title}
                 </p>
-                <ProfileAvatar
-                    src={defaultProfile}
-                    className={styles.sideMobileOnly}
-                />
+                <ProfileAvatar />
             </div>
             <div
                 className={`${styles.sidebarNavLinks} ${
@@ -106,7 +103,7 @@ export default function Sidebar() {
                         <link.icon className="h-5 w-5" />
                         <p className="text-sm md:text-base">{link.title}</p>
                         {link.title === "Messages" && (
-                            <div className="w-7 h-5 flex flex-row items-center justify-center text-white rounded-full primary-bg ml-2 text-xs">
+                            <div className="ml-auto w-7 h-5 flex flex-row items-center justify-center text-white rounded-full primary-bg ml-2 text-xs">
                                 10
                             </div>
                         )}
@@ -116,7 +113,7 @@ export default function Sidebar() {
                     className={styles.sidebarNavLinkItem}
                     onClick={handleSignOut}
                 >
-                    <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+                    <ArrowLeftOnRectangleIcon className="h-6 w-6" />
                     <p className="text-sm md:text-lg">Logout</p>
                 </div>
             </div>

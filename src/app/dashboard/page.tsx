@@ -7,7 +7,12 @@ import {
     BuildingStorefrontIcon,
     CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
-import { formatNumberWithSuffix } from "@lib/format-utils";
+import {
+    formatNumberWithSuffix,
+    generateAvatarBg,
+    generateAvatarInitials,
+    truncateString,
+} from "@lib/format-utils";
 import { Table } from "@components/Table/Table";
 import Image from "next/image";
 
@@ -53,7 +58,7 @@ const rows = [
         ),
         price: Number(4500).toLocaleString(),
         category: "creams",
-        views: "10",
+        views: "73",
         description:
             "All shi-oil creams are top notch and well soothing to the skin",
     },
@@ -70,7 +75,7 @@ const rows = [
         ),
         price: Number(3500).toLocaleString(),
         category: "sneakers",
-        views: "15",
+        views: "27",
         description: "Affordable male sneaker wears,",
     },
     {
@@ -85,7 +90,7 @@ const rows = [
         price: Number(1700).toLocaleString(),
         category: "shirts",
         description: "Casual male shirts",
-        views: "73",
+        views: "15",
     },
     {
         name: (
@@ -97,7 +102,42 @@ const rows = [
         price: Number(2900).toLocaleString(),
         category: "bag",
         description: "luxury bags available",
-        views: "27",
+        views: "10",
+    },
+];
+
+const pagination = {
+    finalPage: 50,
+    totalItemsCount: 500,
+    pageItemCount: 10,
+};
+
+const reviews = [
+    {
+        name: "Emmanuel ikechukwu",
+        comment: "I will never sleep on your sales, one of the best",
+        rating: 4.5,
+    },
+    {
+        name: "Chinedu moses",
+        comment: "A good experience all in all",
+        rating: 4,
+    },
+    {
+        name: "Babajide simons",
+        comment: "I am had to wait 5 days before receiving your product ",
+        rating: 2,
+    },
+    {
+        name: "Sarah ajib",
+        comment:
+            "I really like your shop page, I found exactly what I was looking for and received within 3 days",
+        rating: 5,
+    },
+    {
+        name: "Akanbi",
+        comment: "I couldn't find the cream advertized on your main page",
+        rating: 1,
     },
 ];
 
@@ -220,23 +260,58 @@ export default function Dashboard() {
                     {/** Top Viewed products */}
                     <div className="mt-11">
                         <Table
-                            title="Top viewed products"
+                            title="Products views ranking"
                             headers={headers}
                             rows={rows}
+                            pagination={pagination}
+                            onSearch={() => {}}
+                            onPaginate={() => {}}
                         />
                     </div>
                 </div>
-                <aside className="h-full shadow-md bg-white w-max p-3 flex flex-col">
-                    <div className="flex flex-row items-center border-b border-slate-200">
-                        <p className="text-lg md:text-xl">Reviews</p>
+                <aside className="h-full shadow-md bg-white mt-6 md:mt-0 ml-0 md:ml-10 w-full md:w-max p-3 rounded-sm flex flex-col overflow-auto">
+                    <div className="flex flex-row justify-between items-center border-b border-slate-200 pb-2 mb-2">
+                        <p className="text-lg md:text-xl mr-8">Reviews</p>
                         <div className="flex flex-col">
-                            <div className="flex flex-row">
-                                <p className="text-base mr-3">4.9</p>
-                                <Rating rating={1} />
+                            <div className="flex flex-row items-center mb-4">
+                                <p className="text-base md:text-lg mr-3">
+                                    3.9 / 5
+                                </p>
+                                <Rating rating={3.9} />
                             </div>
-                            <p className="font-light text-sm">(43 Reviews)</p>
+                            <p className="font-thin text-slate-600 text-xs">
+                                (5 Reviews)
+                            </p>
                         </div>
                     </div>
+                    {reviews.map((review, i) => (
+                        <div
+                            key={i}
+                            className="flex flex-col p-2 mb-2 border-b border-slate-100 pb-4"
+                        >
+                            <div className="flex flex-row items-center ">
+                                <div
+                                    style={{
+                                        backgroundColor: generateAvatarBg(),
+                                    }}
+                                    className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
+                                >
+                                    <p className="text-lg text-gray-600">
+                                        {generateAvatarInitials(review.name)}{" "}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col ml-3">
+                                    <p className="capitalize text-semibold text-base">
+                                        {review.name}
+                                    </p>
+                                    <Rating rating={review.rating} />
+                                </div>
+                            </div>
+                            <p className="text-sm text-slate-500 mt-4 font-light">
+                                {truncateString(review.comment, 100)}
+                            </p>
+                        </div>
+                    ))}
                 </aside>
             </div>
         </div>
