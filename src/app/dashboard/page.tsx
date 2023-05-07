@@ -117,27 +117,32 @@ const reviews = [
         name: "Emmanuel ikechukwu",
         comment: "I will never sleep on your sales, one of the best",
         rating: 4.5,
+        date: "12-02-2023",
     },
     {
         name: "Chinedu moses",
         comment: "A good experience all in all",
         rating: 4,
+        date: "13-02-2023",
     },
     {
         name: "Babajide simons",
         comment: "I am had to wait 5 days before receiving your product ",
         rating: 2,
+        date: "now",
     },
     {
         name: "Sarah ajib",
         comment:
             "I really like your shop page, I found exactly what I was looking for and received within 3 days",
         rating: 5,
+        date: "2-01-2023",
     },
     {
         name: "Akanbi",
         comment: "I couldn't find the cream advertized on your main page",
         rating: 1,
+        date: "23-02-2023",
     },
 ];
 
@@ -289,23 +294,31 @@ export default function Dashboard() {
                             key={i}
                             className="flex flex-col p-2 mb-2 border-b border-slate-100 pb-4"
                         >
-                            <div className="flex flex-row items-center ">
-                                <div
-                                    style={{
-                                        backgroundColor: generateAvatarBg(),
-                                    }}
-                                    className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
-                                >
-                                    <p className="text-lg text-gray-600">
-                                        {generateAvatarInitials(review.name)}{" "}
-                                    </p>
+                            <div className="flex flex-row">
+                                <div className="flex flex-row items-center">
+                                    <div
+                                        style={{
+                                            backgroundColor: generateAvatarBg(),
+                                        }}
+                                        className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
+                                    >
+                                        <p className="text-lg text-gray-600">
+                                            {generateAvatarInitials(
+                                                review.name
+                                            )}{" "}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col ml-3">
+                                        <p className="capitalize text-semibold text-base">
+                                            {review.name}
+                                        </p>
+                                        <Rating rating={review.rating} />
+                                    </div>
                                 </div>
-                                <div className="flex flex-col ml-3">
-                                    <p className="capitalize text-semibold text-base">
-                                        {review.name}
-                                    </p>
-                                    <Rating rating={review.rating} />
-                                </div>
+
+                                <p className="ml-auto text-xs text-slate-400 font-light">
+                                    {review.date}
+                                </p>
                             </div>
                             <p className="text-sm text-slate-500 mt-4 font-light">
                                 {truncateString(review.comment, 100)}
