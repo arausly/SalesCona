@@ -161,7 +161,7 @@ export default function Dashboard() {
     ); //todo remove with real data
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col p-6">
             {/** filters  */}
             <div className="flex flex-col md:flex-row">
                 <div className="mb-3 md:mr-3">

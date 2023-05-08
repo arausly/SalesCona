@@ -160,7 +160,7 @@ export default function Followers() {
     }, []);
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col p-6">
             <Modal
                 title="Customer contact information"
                 isOpen={isModalOpen}
