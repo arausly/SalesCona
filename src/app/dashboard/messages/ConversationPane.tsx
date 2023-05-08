@@ -119,11 +119,11 @@ const ConversationPane = () => {
                             key={message.name}
                         >
                             <div
-                                className={`flex flex-col p-4 border-slate-100 cursor-pointer hover:bg-slate-50 ${
+                                className={`flex flex-col p-4 cursor-pointer transition ease-in-out hover:bg-slate-100 ${
                                     message.id === lastPathname
                                         ? "border-r-2 border-[#3641fc]"
-                                        : "border-b"
-                                } ${message.unread ? "bg-slate-100" : ""}`}
+                                        : "border-b border-slate-100"
+                                } ${message.unread ? "bg-slate-50" : ""}`}
                             >
                                 <div className="flex flex-row justify-between">
                                     <div className="flex flex-row items-center">
