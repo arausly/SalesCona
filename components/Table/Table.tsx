@@ -119,7 +119,7 @@ export const Table: React.FC<TableProps> = ({
                             type="text"
                             id="table-search"
                             className="block p-2 pl-10 text-sm text-black border border-gray-100 rounded-lg w-80 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Search items"
+                            placeholder="Search"
                             onChange={(e) => onSearch(e.target.value)}
                         />
                     </div>

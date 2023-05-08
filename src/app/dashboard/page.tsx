@@ -22,6 +22,7 @@ import cream from "@assets/images/cream.jpeg";
 import shirt from "@assets/images/shirts.webp";
 import bag from "@assets/images/bag.jpeg";
 import { Rating } from "@components/Rating";
+import { RegularAvatar } from "@components/Avatar/RegularAvatar";
 
 const dateSelections = [
     { label: "Last 24 hours" },
@@ -296,18 +297,10 @@ export default function Dashboard() {
                         >
                             <div className="flex flex-row">
                                 <div className="flex flex-row items-center">
-                                    <div
-                                        style={{
-                                            backgroundColor: generateAvatarBg(),
-                                        }}
-                                        className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
-                                    >
-                                        <p className="text-lg text-gray-600">
-                                            {generateAvatarInitials(
-                                                review.name
-                                            )}{" "}
-                                        </p>
-                                    </div>
+                                    <RegularAvatar
+                                        name={review.name}
+                                        className="h-9 w-9 md:w-10 md:h-10"
+                                    />
                                     <div className="flex flex-col ml-3">
                                         <p className="capitalize text-semibold text-base">
                                             {review.name}
@@ -315,7 +308,6 @@ export default function Dashboard() {
                                         <Rating rating={review.rating} />
                                     </div>
                                 </div>
-
                                 <p className="ml-auto text-xs text-slate-400 font-light">
                                     {review.date}
                                 </p>

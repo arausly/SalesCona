@@ -16,6 +16,7 @@ import {
 //image
 import blurredImage from "@assets/images/blurred-image.png";
 import { Modal } from "@components/Dialog/Dialog";
+import { RegularAvatar } from "@components/Avatar/RegularAvatar";
 
 /**
  * if paid user, you can see the email and phone number of your subscribers
@@ -25,16 +26,7 @@ const rows = [
     {
         name: (
             <div className="flex flex-row items-center ">
-                <div
-                    style={{
-                        backgroundColor: generateAvatarBg(),
-                    }}
-                    className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
-                >
-                    <p className="text-lg text-gray-600">
-                        {generateAvatarInitials("Emmanuel Bolanle")}{" "}
-                    </p>
-                </div>
+                <RegularAvatar name="Emmanuel Bolanle" />
                 <p className="ml-4 truncate">Emmanuel Bolanle</p>
             </div>
         ),
