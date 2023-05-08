@@ -89,12 +89,13 @@ export default function Sidebar() {
                         : styles.sidebarNavLinksHide
                 }`}
             >
-                {links.map((link) => (
+                {links.map((link, i) => (
                     <Link
                         key={link.title}
                         href={link.pathname}
                         className={`${styles.sidebarNavLinkItem} ${
-                            link.pathname === pathname
+                            (!i && pathname === link.pathname) ||
+                            (i && pathname.indexOf(link.pathname) > -1)
                                 ? styles.sidebarActiveLinkItem
                                 : ""
                         }`}
