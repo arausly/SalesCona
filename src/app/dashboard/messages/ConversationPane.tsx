@@ -103,7 +103,7 @@ const ConversationPane = () => {
                             <div
                                 className={`flex flex-col p-4 cursor-pointer transition ease-in-out hover:bg-slate-100 ${
                                     message.id === lastPathname
-                                        ? "border-r-2 border-[#3641fc]"
+                                        ? "border-r-2 border-[#6d67e4]"
                                         : "border-b border-slate-100"
                                 } ${message.unread ? "bg-slate-50" : ""}`}
                             >

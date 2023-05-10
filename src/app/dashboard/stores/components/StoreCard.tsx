@@ -13,7 +13,7 @@ interface StoreCardProps {
 export const StoreCard: React.FC<StoreCardProps> = ({ store, img }) => {
     return (
         <div
-            className={`${styles.storeCard} w-full md:w-56 md:mx-6 flex flex-col h-36 mt-8 md:h-64 bg-white rounded-md transition ease-in-out shadow-xl`}
+            className={`${styles.storeCard} w-full md:w-56 md:mr-6 flex flex-col h-36 mt-8 md:h-64 bg-white rounded-md transition ease-in-out shadow-xl`}
         >
             {/** cover art/thumbnail */}
             <div className="h-20 md:h-44 relative">
