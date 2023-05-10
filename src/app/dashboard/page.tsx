@@ -7,12 +7,7 @@ import {
     BuildingStorefrontIcon,
     CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
-import {
-    formatNumberWithSuffix,
-    generateAvatarBg,
-    generateAvatarInitials,
-    truncateString,
-} from "@lib/format-utils";
+import { formatNumberWithSuffix, truncateString } from "@lib/format-utils";
 import { Table } from "@components/Table/Table";
 import Image from "next/image";
 

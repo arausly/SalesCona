@@ -4,10 +4,10 @@ import SupabaseProvider from "@lib/supabaseBrowser";
 import "./globals.css";
 
 //font
-import { Poppins } from "next/font/google";
+import { Lato } from "next/font/google";
 
-const poppin = Poppins({
-    weight: ["300", "400", "500", "600", "700"],
+const raleway = Lato({
+    weight: ["100", "300", "400", "700", "900"],
     subsets: ["latin"],
 });
 
@@ -25,7 +25,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={`${poppin.className} h-full bg-white`}>
+        <html lang="en" className={`${raleway.className} h-full bg-white`}>
             <body className="v-screen h-screen">
                 <SupabaseProvider>{children}</SupabaseProvider>
             </body>

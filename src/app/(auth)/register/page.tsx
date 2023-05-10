@@ -5,7 +5,7 @@ import logo from "@assets/images/kolony-logo.webp";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
-import { inputClasses } from "../../../../components/input";
+import { inputClasses } from "../../../../components/Input/input";
 import { useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 
