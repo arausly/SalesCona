@@ -42,7 +42,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
                 </div>
             </div>
             <div className="w-full mt-4">
-                <label className="text-sm mb-2 select-none">{`To confirm type "${textToConfirm}" in the box below`}</label>
+                <label className="text-sm mb-3 select-none">{`To confirm, type "${textToConfirm}" in the box below`}</label>
                 <input
                     type="text"
                     id="table-search"

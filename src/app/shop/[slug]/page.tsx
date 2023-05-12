@@ -1,3 +1,3 @@
 export default function Shop() {
-    return <></>;
+    return <>Shop</>;
 }

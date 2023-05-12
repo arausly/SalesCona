@@ -1,3 +1,3 @@
 export default function Store() {
-    return <></>;
+    return <>Store page</>;
 }

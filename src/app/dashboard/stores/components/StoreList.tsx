@@ -65,7 +65,7 @@ export const StoreList = () => {
         <StoreProvider>
             {stores.entries.map((store, i) => (
                 <StoreCard
-                    key={store.url}
+                    key={store.url + i}
                     store={store}
                     img={(storeCoverImages ?? [])[i]}
                 />

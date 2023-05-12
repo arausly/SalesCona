@@ -1,5 +1,2 @@
-export const preventCopy = (event: React.ClipboardEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    return false;
-};
+export const generateShopUrl = (spaceSeparatedWords: string) =>
+    spaceSeparatedWords.toLowerCase().split(" ").join("-");

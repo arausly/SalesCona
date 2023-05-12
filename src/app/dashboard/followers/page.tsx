@@ -134,7 +134,6 @@ export default function Followers() {
         stores[0].label
     );
     const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
-    console.log({ isModalOpen });
 
     const headers = [
         { id: "name", label: "Name" },
