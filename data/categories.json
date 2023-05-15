@@ -1,0 +1,11 @@
+{
+    "entries": [
+        { "id": "0", "label": "Electronics" },
+        { "id": "1", "label": "Clothes" },
+        { "id": "2", "label": "Fabrics" },
+        { "id": "3", "label": "Drinks" },
+        { "id": "4", "label": "Jewelry" },
+        { "id": "5", "label": "Vehicles" },
+        { "id": "6", "label": "Car spare parts" }
+    ]
+}

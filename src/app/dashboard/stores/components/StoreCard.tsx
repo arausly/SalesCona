@@ -5,7 +5,7 @@ import { truncateString } from "@lib/format-utils";
 import styles from "../styles/store-card.module.css";
 import { StoreCardMenuDropdown } from "./StoreCardMenuDropdown";
 import Link from "next/link";
-import { generateShopUrl } from "@lib/common.utils";
+import { generateShopAlias } from "@lib/common.utils";
 
 interface StoreCardProps {
     store: any;
@@ -20,11 +20,11 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store, img }) => {
             {/** cover art/thumbnail */}
             <div className="h-20 md:h-44 relative">
                 <Link
-                    href={`/dashboard/stores/${generateShopUrl(store.name)}`}
+                    href={`/dashboard/stores/${generateShopAlias(store.name)}`}
                     className="absolute opacity-60 md:opacity-0 top-0 left-0 w-full h-full bg-black transition rounded-tl-md rounded-tr-md ease-in-out cursor-pointer"
                 />
                 {img}
-                <StoreCardMenuDropdown />
+                <StoreCardMenuDropdown name={store.name} />
             </div>
             <div className="flex flex-col p-3">
                 <p className="font-normal text-base text-ellipsis">

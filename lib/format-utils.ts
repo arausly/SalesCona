@@ -39,3 +39,13 @@ export const generateAvatarBg = () => {
     const randomIndex = Math.floor(Math.random() * bgColors.length);
     return bgColors[randomIndex].toLowerCase();
 };
+
+const fileSizes = ["B", "KB", "MB", "GB"];
+const KILOBYTE = 1024;
+
+export const formatByteToSize = (bytes: number, level: number = 0): string => {
+    if (bytes < KILOBYTE) {
+        return `${bytes}${fileSizes[level]}`;
+    }
+    return formatByteToSize(Math.round(bytes / KILOBYTE), ++level);
+};

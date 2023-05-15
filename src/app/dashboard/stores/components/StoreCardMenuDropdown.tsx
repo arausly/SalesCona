@@ -3,32 +3,49 @@ import React, { ReactNode } from "react";
 import Dropdown from "@components/Menudrown";
 import { Menu } from "@headlessui/react";
 import {
+    ClipboardIcon,
     EllipsisHorizontalIcon,
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
 import { StoreContext } from "./StoreList";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
+import { generateShopAlias } from "@lib/common.utils";
 
-interface StoreCardMenuProps {}
+interface StoreCardMenuProps {
+    name: string;
+}
 
 const actions = [
     { label: "Rename", icon: PencilIcon },
     { label: "Delete", icon: TrashIcon },
+    { label: "Open shop page", icon: ArrowTopRightOnSquareIcon },
 ];
+
 export const StoreCardMenuDropdown: React.FC<StoreCardMenuProps> = (props) => {
     const { toggleDeleteModal, toggleRenameModal } =
         React.useContext(StoreContext);
 
     const handleDropdownSelection = React.useCallback(
         (item: string) => {
-            if (item === "Rename") {
-                toggleRenameModal();
-            }
-            if (item == "Delete") {
-                toggleDeleteModal();
+            switch (item) {
+                case "Rename":
+                    toggleRenameModal();
+                    break;
+                case "Delete":
+                    toggleDeleteModal();
+                    break;
+                case "Open shop page":
+                    window.open(
+                        `${window.location.origin}/shop/${generateShopAlias(
+                            props.name
+                        )}`,
+                        "_blank",
+                        "noreferrer"
+                    );
             }
         },
-        [toggleDeleteModal, toggleRenameModal]
+        [props.name, toggleDeleteModal, toggleRenameModal]
     );
 
     return (

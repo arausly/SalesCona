@@ -23,3 +23,7 @@ body {
 .primary-bg {
     background-color: var(--primary-color);
 }
+
+.dashboard-screen-height {
+    height: calc(100vh - 3rem);
+}

@@ -1,0 +1,17 @@
+.aboveFoldBannerAnimation {
+    animation: slideIn 1s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    75% {
+        transform: translateX(5%);
+    }
+
+    100% {
+        transform: translateX(0%);
+    }
+}

@@ -190,7 +190,17 @@ export default function Register() {
                             type="submit"
                             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
-                            {loading ? "Loading..." : "Register"}
+                            {loading ? (
+                                <>
+                                    <svg
+                                        className="animate-spin h-5 w-5 mr-3 ..."
+                                        viewBox="0 0 24 24"
+                                    ></svg>
+                                    Registering...
+                                </>
+                            ) : (
+                                "Register"
+                            )}
                         </button>
                     </div>
                 </form>
