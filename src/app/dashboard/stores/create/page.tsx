@@ -135,14 +135,14 @@ export default function CreateStore() {
                         New Store
                     </p>
                 </div>
-                <div className="flex items-center justify-between mt-6">
-                    <div className="flex items-center">
+                <div className="flex flex-col md:flex-row items-center justify-between mt-6">
+                    <div className="flex items-center self-start">
                         <h3 className="text-lg font-base mr-3">New Store</h3>
                         <span className="inline-block bg-slate-200 text-xs flex text-slate-700 items-center justify-center rounded-full w-10 h-5">
                             Draft
                         </span>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center mt-4 md:mt-0">
                         <button className="w-28 h-10 rounded-full bg-white hover:bg-slate-100 transition mr-4 border border-slate-200 shadow-md flex justify-center items-center">
                             <PencilIcon className="h-4 w-4 mr-2 text-gray-700" />
                             <p className="text-gray-700 text-sm">Save draft</p>
@@ -154,8 +154,8 @@ export default function CreateStore() {
                     </div>
                 </div>
             </div>
-            <div className="flex w-full mt-6">
-                <div className="flex-1 px-6 overflow-auto">
+            <div className="flex flex-col md:flex-row w-full mt-6">
+                <div className="flex-1 order-last md:px-6 md:order-first overflow-auto">
                     <div className="flex flex-col mb-6">
                         <div className="flex mb-1">
                             <p className="mr-1">Name</p>
@@ -311,7 +311,7 @@ export default function CreateStore() {
                         />
                     </div>
                 </div>
-                <div className="flex-1 px-6 overflow-auto border-0 md:border-l md:border-slate-100">
+                <div className="flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto border-0 md:border-l md:border-slate-100">
                     <div className="flex flex-col">
                         {/** slider and dropbox */}
                         <div className="flex relative h-80">
@@ -407,7 +407,7 @@ export default function CreateStore() {
                                 (banner, index) => (
                                     <div
                                         key={index}
-                                        className="flex h-20 w-full md:w-2/5  rounded-md shadow-md mb-4 mr-4 p-2"
+                                        className="flex h-20 w-full md:w-2/5 rounded-md shadow-md mb-4 md:mr-4 p-2"
                                     >
                                         <Image
                                             src={banner[1].preview}
