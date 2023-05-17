@@ -64,8 +64,6 @@ export default function CreateStore() {
         []
     );
 
-    console.log(aboveFoldBanners);
-
     const handleBannerInputChange = React.useCallback(
         (files: FileWithPreview[]) => {
             /** if the files are multiple  spread across the indexes, else */
@@ -73,13 +71,15 @@ export default function CreateStore() {
                 (prevBanners) =>
                     new Map([
                         ...prevBanners,
-                        ...files.map(
-                            (f, i) =>
-                                [currentAboveFoldBannerIndex + i, f] as [
-                                    number,
-                                    FileWithPreview
-                                ]
-                        ),
+                        ...files
+                            .slice(0, 4 - currentAboveFoldBannerIndex)
+                            .map(
+                                (f, i) =>
+                                    [currentAboveFoldBannerIndex + i, f] as [
+                                        number,
+                                        FileWithPreview
+                                    ]
+                            ),
                     ])
             );
         },
@@ -224,8 +224,8 @@ export default function CreateStore() {
                                                 <Image
                                                     src={shopLogo.preview}
                                                     alt="shop logo"
-                                                    width={30}
-                                                    height={30}
+                                                    width={48}
+                                                    height={48}
                                                 />
                                             ) : (
                                                 <PhotoIcon className="h-5 w-5" />
@@ -417,7 +417,7 @@ export default function CreateStore() {
                                             className="object-cover rounded-md"
                                         />
                                         <div className="flex flex-col ml-2">
-                                            <p className="text-xs text-gray-800 mb-2">
+                                            <p className="text-xs text-gray-800 mb-2 text-ellipsis overflow-hidden">
                                                 {banner[1].name}
                                             </p>
                                             <p className="text-xs text-gray-700">
