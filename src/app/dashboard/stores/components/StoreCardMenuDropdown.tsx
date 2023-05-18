@@ -3,7 +3,6 @@ import React, { ReactNode } from "react";
 import Dropdown from "@components/Menudrown";
 import { Menu } from "@headlessui/react";
 import {
-    ClipboardIcon,
     EllipsisHorizontalIcon,
     PencilIcon,
     TrashIcon,

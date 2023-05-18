@@ -4,19 +4,21 @@ import { Combobox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-interface MultiSelectProps {
+export interface MultiSelectProps {
     items: Array<{
         id: string;
         label: string;
     }>;
     onSelect: (selectedCategories: string[]) => void;
-    createNewItem: (label: string) => MultiSelectProps["items"][number];
+    createNewItem?: (label: string) => MultiSelectProps["items"][number];
+    multiple?: boolean;
 }
 
 export default function MultiSelectInput({
     items,
     onSelect,
     createNewItem,
+    multiple = true,
 }: MultiSelectProps) {
     const [selected, setSelected] = useState<MultiSelectProps["items"]>([]);
     const [query, setQuery] = useState("");
@@ -33,6 +35,7 @@ export default function MultiSelectInput({
 
     const handleCreateNewLabel = React.useCallback(
         async (label: string) => {
+            if (!createNewItem) return;
             const newItem = await createNewItem(label);
             setSelected((prev) => [...prev, newItem]);
         },
@@ -53,14 +56,23 @@ export default function MultiSelectInput({
         onSelect([]);
     }, [handleSelection, onSelect]);
 
+    // the type false, I really don't understand, I think it's a type bug with the combobox
     return (
-        <Combobox<any, any> value={selected} onChange={setSelected} multiple>
+        <Combobox<any, any>
+            value={selected}
+            onChange={setSelected}
+            multiple={multiple as false}
+        >
             <div className="relative mt-1">
                 <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
                     <Combobox.Input
                         className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
-                        displayValue={(items: MultiSelectProps["items"]) =>
-                            items.map((item) => item.label).join(", ")
+                        displayValue={(items: any) =>
+                            multiple
+                                ? items
+                                      .map((item: any) => item.label)
+                                      .join(", ")
+                                : items.label
                         }
                         onChange={(event) => setQuery(event.target.value)}
                         placeholder="Choose from options"
@@ -90,8 +102,10 @@ export default function MultiSelectInput({
                     leaveTo="opacity-0"
                     afterLeave={() => setQuery("")}
                 >
-                    <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                        {filteredItems.length === 0 && query !== "" ? (
+                    <Combobox.Options className="z-10 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        {filteredItems.length === 0 &&
+                        createNewItem &&
+                        query !== "" ? (
                             <div
                                 className="relative cursor-pointer flex items-center w-full select-none py-2 px-4 text-gray-700 hover:bg-slate-100"
                                 onClick={() => handleCreateNewLabel(query)}

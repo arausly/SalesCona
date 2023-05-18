@@ -1,3 +1,5 @@
+import currencies from "currency-list";
+
 export function formatNumberWithSuffix(number: number) {
     const suffixes = ["", "k", "M", "B", "T"]; // Define suffixes for powers of 10
     const power = Math.floor(Math.log10(Math.abs(number)) / 3); // Calculate the power of 10
@@ -48,4 +50,18 @@ export const formatByteToSize = (bytes: number, level: number = 0): string => {
         return `${bytes}${fileSizes[level]}`;
     }
     return formatByteToSize(Math.round(bytes / KILOBYTE), ++level);
+};
+
+export const convertPathToSpaceSeparatedStr = (path: string) => {
+    const [lastPath] = path.split("/").slice(-1);
+    const fmt = lastPath.split("-").join(" ");
+    return { lastPath, fmt };
+};
+
+export const getCurrencies = () => {
+    const rawCurrencies = currencies.getAll("en_US");
+    return Object.values(rawCurrencies).map((curr) => ({
+        id: curr.code,
+        label: `${curr.name} (${curr.symbol})`,
+    }));
 };

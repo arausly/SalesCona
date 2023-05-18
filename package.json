@@ -21,6 +21,7 @@
         "autoprefixer": "10.4.14",
         "class-variance-authority": "0.4.0",
         "clsx": "1.2.1",
+        "currency-list": "^1.0.8",
         "eslint": "8.39.0",
         "eslint-config-next": "13.3.1",
         "next": "13.3.1",
