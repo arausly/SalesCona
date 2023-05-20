@@ -16,11 +16,11 @@ import { ProductSearch } from "../components/ProductSearch";
 //todo add correct from API categories
 const categories = [
     {
-        label: "published",
+        label: "Published",
         icon: DocumentArrowUpIcon
     },
     {
-        label: "draft",
+        label: "Draft",
         icon: DocumentArrowDownIcon
     },
     {

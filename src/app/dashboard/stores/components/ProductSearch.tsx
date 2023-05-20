@@ -53,9 +53,9 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
             }
         };
 
-        //each is 112px
+        //each is 112px + 12px horizontal padding making
+        //each box 124px. the actual width is the div with excluding the div padding
         const maxBoxes = Math.floor((searchBox.offsetWidth - 24) / 124);
-        console.log(searchBox.offsetWidth - 24, searchBox.offsetWidth);
         setShowCategoriesCap(() =>
             categories.length > maxBoxes ? maxBoxes - 1 : maxBoxes
         );
