@@ -14,7 +14,7 @@ interface TableProps {
         totalItemsCount: number;
         pageItemCount: number;
     };
-    onSearch: (query: string) => void;
+    onSearch?: (query: string) => void;
     onPaginate: (page: number) => void;
 }
 
@@ -25,7 +25,7 @@ export const Table: React.FC<TableProps> = ({
     rows,
     pagination,
     onPaginate,
-    onSearch,
+    onSearch
 }) => {
     const [paginationRange, setPaginationRange] = React.useState([1, 5]);
     const [currentPage, setCurrentPage] = React.useState<number>(1);
@@ -58,7 +58,7 @@ export const Table: React.FC<TableProps> = ({
                             updateCurrentPage(newStart);
                             return [
                                 newStart,
-                                Math.min(pagination.finalPage - 1, end + 1),
+                                Math.min(pagination.finalPage - 1, end + 1)
                             ];
                         });
                         break;
@@ -96,16 +96,19 @@ export const Table: React.FC<TableProps> = ({
                 ) : (
                     title
                 )}
-                <div className="pb-4 bg-white">
-                    <label htmlFor="table-search" className="sr-only">
-                        Search
-                    </label>
-                    <SearchField
-                        className="w-80"
-                        placeholder="Search"
-                        onChange={(e) => onSearch(e.target.value)}
-                    />
-                </div>
+                {(onSearch && (
+                    <div className="pb-4 bg-white">
+                        <label htmlFor="table-search" className="sr-only">
+                            Search
+                        </label>
+                        <SearchField
+                            className="w-80"
+                            placeholder="Search"
+                            onChange={(e) => onSearch(e.target.value)}
+                        />
+                    </div>
+                )) ||
+                    null}
             </div>
             <table className="w-full text-sm text-left text-gray-500">
                 <thead className="text-xs text-gray-700 uppercase bg-slate-100">

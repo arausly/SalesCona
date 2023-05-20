@@ -87,7 +87,7 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
     return (
         <div
             ref={searchBoxRef}
-            className="flex flex-col items-center w-full md:w-3/6"
+            className="flex flex-col items-center w-full md:w-3/6 relative"
         >
             <div className="relative w-full shadow-md rounded-md">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -112,7 +112,7 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
                 leaveTo="opacity-0"
                 show={showFilter}
             >
-                <div className="bg-white w-full shadow-md rounded-md p-3 mt-2">
+                <div className="bg-white w-full shadow-md rounded-md p-3 absolute top-16">
                     <div className="my-2 flex items-center justify-between">
                         <div className="flex items-center">
                             <FunnelIcon className="h-5 w-5 mr-1 text-slate-600" />
@@ -194,8 +194,8 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                         show={
-                            !selectedFilterCategories.has("draft") ||
-                            selectedFilterCategories.has("published")
+                            !selectedFilterCategories.has("Draft") ||
+                            selectedFilterCategories.has("Published")
                         }
                     >
                         <div className="mt-4 border-b border-gray-200 pb-3">
@@ -235,8 +235,8 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                         show={
-                            !selectedFilterCategories.has("published") ||
-                            selectedFilterCategories.has("draft")
+                            !selectedFilterCategories.has("Published") ||
+                            selectedFilterCategories.has("Draft")
                         }
                     >
                         <div className="mt-4">

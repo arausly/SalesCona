@@ -1,17 +1,20 @@
 "use client";
-import React from "react";
+import React, { Fragment } from "react";
 import { Breadcrumb } from "@components/Breadcrumb";
 import {
     CubeIcon,
     DocumentArrowDownIcon,
     DocumentArrowUpIcon,
+    ListBulletIcon,
     PencilIcon,
-    PlusIcon
+    PlusIcon,
+    Squares2X2Icon
 } from "@heroicons/react/24/outline";
 import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ProductSearch } from "../components/ProductSearch";
+import { Tab } from "@headlessui/react";
 
 //todo add correct from API categories
 const categories = [
@@ -69,9 +72,16 @@ const lastSeen = {
     ]
 };
 
+enum PRESENTATION_MODES {
+    LIST_VIEW = "LIST_VIEW",
+    GRID_VIEW = "GRID_VIEW"
+}
+
 export default function Store() {
     const pathname = usePathname();
     const { fmt, lastPath } = convertPathToSpaceSeparatedStr(pathname);
+    const [presentationMode, setPresentationMode] =
+        React.useState<PRESENTATION_MODES>(PRESENTATION_MODES.LIST_VIEW);
 
     const crumbs = React.useRef([
         {
@@ -82,6 +92,16 @@ export default function Store() {
             name: fmt
         }
     ]).current;
+
+    const togglePresentationViews = React.useCallback(
+        () =>
+            setPresentationMode((mode) =>
+                mode === PRESENTATION_MODES.GRID_VIEW
+                    ? PRESENTATION_MODES.LIST_VIEW
+                    : PRESENTATION_MODES.GRID_VIEW
+            ),
+        []
+    );
 
     return (
         <section className="p-6 flex flex-col w-full h-full">
@@ -109,6 +129,83 @@ export default function Store() {
             </div>
             <div className="w-full flex justify-center">
                 <ProductSearch categories={categories} lastSeen={lastSeen} />
+            </div>
+            {/** tab */}
+            <div className="mt-8">
+                <Tab.Group>
+                    <Tab.List>
+                        <div className="flex items-center">
+                            <Tab as={Fragment}>
+                                {({ selected }) => (
+                                    <button
+                                        className={`${
+                                            selected
+                                                ? "bg-gray-100 text-black"
+                                                : "bg-transparent text-gray-600"
+                                        } mr-6 flex items-center justify-center focus:outline-none focus:ring-0 cursor-pointer h-10 w-auto rounded-md px-3 py-0.5`}
+                                    >
+                                        All
+                                    </button>
+                                )}
+                            </Tab>
+                            <Tab as={Fragment}>
+                                {({ selected }) => (
+                                    <button
+                                        className={`${
+                                            selected
+                                                ? "bg-gray-100 text-black"
+                                                : "bg-transparent text-gray-600"
+                                        } mr-6 flex items-center transition ease-in-out justify-center cursor-pointer h-10 w-auto focus:outline-none focus:ring-0 rounded-md px-3 py-0.5`}
+                                    >
+                                        Published
+                                    </button>
+                                )}
+                            </Tab>
+                            <Tab as={Fragment}>
+                                {({ selected }) => (
+                                    <button
+                                        className={`${
+                                            selected
+                                                ? "bg-gray-100 text-black"
+                                                : "bg-transparent text-gray-600"
+                                        } flex items-center justify-center transition ease-in-out cursor-pointer h-10 w-auto focus:outline-none focus:ring-0 rounded-md px-3 py-0.5`}
+                                    >
+                                        Draft
+                                    </button>
+                                )}
+                            </Tab>
+                            <div className="ml-auto flex items-center">
+                                <button
+                                    onClick={togglePresentationViews}
+                                    className={`${
+                                        presentationMode ===
+                                        PRESENTATION_MODES.LIST_VIEW
+                                            ? "bg-gray-100 text-black"
+                                            : "bg-transparent text-gray-600"
+                                    } px-3 h-10 py-0.5 mr-4 rounded-md transition ease-in-out`}
+                                >
+                                    <ListBulletIcon className="h-6 w-6" />
+                                </button>
+                                <button
+                                    onClick={togglePresentationViews}
+                                    className={`${
+                                        presentationMode ===
+                                        PRESENTATION_MODES.GRID_VIEW
+                                            ? "bg-gray-100 text-black"
+                                            : "bg-transparent text-gray-600"
+                                    } px-3 h-10 py-0.5 rounded-md transition ease-in-out`}
+                                >
+                                    <Squares2X2Icon className="h-6 w-6" />
+                                </button>
+                            </div>
+                        </div>
+                    </Tab.List>
+                    <Tab.Panels className="mt-6">
+                        <Tab.Panel>Content 1</Tab.Panel>
+                        <Tab.Panel>Content 2</Tab.Panel>
+                        <Tab.Panel>Content 3</Tab.Panel>
+                    </Tab.Panels>
+                </Tab.Group>
             </div>
         </section>
     );
