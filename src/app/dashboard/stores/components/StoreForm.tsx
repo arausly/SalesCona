@@ -188,7 +188,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         </div>
                         <MultiSelectInput
                             items={currencies.current}
-                            onSelect={() => {}}
+                            onSelect={() => { }}
                             multiple={false}
                         />
                     </div>
@@ -300,7 +300,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         </p>
                         <MultiSelectInput
                             items={categories}
-                            onSelect={() => {}}
+                            onSelect={() => { }}
                             createNewItem={handleCreateNewItem}
                         />
                     </div>

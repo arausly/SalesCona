@@ -5,7 +5,7 @@ import { Menu } from "@headlessui/react";
 import {
     EllipsisHorizontalIcon,
     PencilIcon,
-    TrashIcon,
+    TrashIcon
 } from "@heroicons/react/24/outline";
 import { StoreContext } from "./StoreList";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
@@ -18,7 +18,7 @@ interface StoreCardMenuProps {
 const actions = [
     { label: "Rename", icon: PencilIcon },
     { label: "Delete", icon: TrashIcon },
-    { label: "Open shop page", icon: ArrowTopRightOnSquareIcon },
+    { label: "Open shop page", icon: ArrowTopRightOnSquareIcon }
 ];
 
 export const StoreCardMenuDropdown: React.FC<StoreCardMenuProps> = (props) => {
@@ -50,6 +50,7 @@ export const StoreCardMenuDropdown: React.FC<StoreCardMenuProps> = (props) => {
     return (
         <Dropdown
             items={actions}
+            wrapperClasses="!static"
             menuButton={
                 <Menu.Button>
                     <EllipsisHorizontalIcon className="h-6 w-6 text-white absolute right-2 top-2" />

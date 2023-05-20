@@ -18,7 +18,7 @@ export default function Login() {
     const {
         handleSubmit,
         register,
-        formState: { errors },
+        formState: { errors }
     } = useForm<LoginFormValues>();
     const [loading, setLoading] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
@@ -78,7 +78,7 @@ export default function Login() {
                                 autoComplete="email"
                                 required
                                 className={inputClasses({
-                                    mode: errors.email ? "error" : "default",
+                                    mode: errors.email ? "error" : "default"
                                 })}
                                 {...register("email", { required: true })}
                             />
@@ -109,7 +109,7 @@ export default function Login() {
                                 autoComplete="current-password"
                                 required
                                 className={inputClasses({
-                                    mode: errors.password ? "error" : "default",
+                                    mode: errors.password ? "error" : "default"
                                 })}
                                 {...register("password", { required: true })}
                             />
@@ -125,7 +125,7 @@ export default function Login() {
                             {loading ? (
                                 <>
                                     <svg
-                                        className="animate-spin h-5 w-5 mr-3 ..."
+                                        className="animate-spin h-5 w-5 mr-3 text-white"
                                         viewBox="0 0 24 24"
                                     ></svg>
                                     Signing in...

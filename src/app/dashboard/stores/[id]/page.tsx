@@ -1,23 +1,87 @@
 "use client";
+import React from "react";
 import { Breadcrumb } from "@components/Breadcrumb";
-import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+    CubeIcon,
+    DocumentArrowDownIcon,
+    DocumentArrowUpIcon,
+    PencilIcon,
+    PlusIcon
+} from "@heroicons/react/24/outline";
 import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ProductSearch } from "../components/ProductSearch";
+
+//todo add correct from API categories
+const categories = [
+    {
+        label: "published",
+        icon: DocumentArrowUpIcon
+    },
+    {
+        label: "draft",
+        icon: DocumentArrowDownIcon
+    },
+    {
+        label: "Phones",
+        icon: CubeIcon
+    },
+    {
+        label: "Shoes",
+        icon: CubeIcon
+    },
+    {
+        label: "Electronics",
+        icon: CubeIcon
+    },
+    {
+        label: "Clothing",
+        icon: CubeIcon
+    },
+    {
+        label: "Home Appliances",
+        icon: CubeIcon
+    },
+    {
+        label: "Books",
+        icon: CubeIcon
+    },
+    {
+        label: "Sports Equipment",
+        icon: CubeIcon
+    },
+    {
+        label: "Beauty Products",
+        icon: CubeIcon
+    }
+];
+
+const lastSeen = {
+    published: [
+        { name: "Product A", time: "2023-05-16T10:30:00Z" },
+        { name: "Product B", time: "2023-05-17T14:45:00Z" },
+        { name: "Product C", time: "2023-05-18T09:15:00Z" }
+    ],
+    draft: [
+        { name: "Product D", time: "2023-05-19T12:00:00Z" },
+        { name: "Product E", time: "2023-05-20T08:20:00Z" }
+    ]
+};
 
 export default function Store() {
     const pathname = usePathname();
     const { fmt, lastPath } = convertPathToSpaceSeparatedStr(pathname);
 
-    const crumbs = [
+    const crumbs = React.useRef([
         {
             name: "Stores",
-            link: "/dashboard/stores",
+            link: "/dashboard/stores"
         },
         {
-            name: fmt,
-        },
-    ];
+            name: fmt
+        }
+    ]).current;
 
     return (
         <section className="p-6 flex flex-col w-full h-full">
@@ -43,7 +107,9 @@ export default function Store() {
                     <p className="text-white text-sm">New Product</p>
                 </button>
             </div>
-            <div></div>
+            <div className="w-full flex justify-center">
+                <ProductSearch categories={categories} lastSeen={lastSeen} />
+            </div>
         </section>
     );
 }

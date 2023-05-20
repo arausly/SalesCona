@@ -20,7 +20,7 @@ export default function Register() {
     const {
         handleSubmit,
         register,
-        formState: { errors },
+        formState: { errors }
     } = useForm<RegisterFormValues>();
     const [loading, setLoading] = React.useState<boolean>(false);
     const router = useRouter();
@@ -38,9 +38,9 @@ export default function Register() {
                             emailRedirectTo: `${window.location.protocol}//${window.location.hostname}:3000/verify`,
                             data: {
                                 firstname: values.firstname,
-                                lastname: values.lastname,
-                            },
-                        },
+                                lastname: values.lastname
+                            }
+                        }
                     });
                     if (error) throw error;
                     toast.success("Successfully registered");
@@ -89,7 +89,7 @@ export default function Register() {
                                 required
                                 {...register("email", { required: true })}
                                 className={inputClasses({
-                                    mode: errors.email ? "error" : "default",
+                                    mode: errors.email ? "error" : "default"
                                 })}
                             />
                         </div>
@@ -109,9 +109,7 @@ export default function Register() {
                                 required
                                 {...register("firstname", { required: true })}
                                 className={inputClasses({
-                                    mode: errors.firstname
-                                        ? "error"
-                                        : "default",
+                                    mode: errors.firstname ? "error" : "default"
                                 })}
                             />
                         </div>
@@ -131,7 +129,7 @@ export default function Register() {
                                 required
                                 {...register("lastname", { required: true })}
                                 className={inputClasses({
-                                    mode: errors.lastname ? "error" : "default",
+                                    mode: errors.lastname ? "error" : "default"
                                 })}
                             />
                         </div>
@@ -165,11 +163,11 @@ export default function Register() {
                                     minLength: {
                                         value: 6,
                                         message:
-                                            "Password must be at least 6 characters",
-                                    },
+                                            "Password must be at least 6 characters"
+                                    }
                                 })}
                                 className={inputClasses({
-                                    mode: errors.password ? "error" : "default",
+                                    mode: errors.password ? "error" : "default"
                                 })}
                             />
                             {errors.password ? (
@@ -193,7 +191,7 @@ export default function Register() {
                             {loading ? (
                                 <>
                                     <svg
-                                        className="animate-spin h-5 w-5 mr-3 ..."
+                                        className="animate-spin h-5 w-5 mr-3 text-white"
                                         viewBox="0 0 24 24"
                                     ></svg>
                                     Registering...
