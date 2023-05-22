@@ -1,3 +1,4 @@
+"use client";
 import { Table } from "@components/Table/Table";
 import { Product } from "../typing";
 
@@ -8,6 +9,8 @@ import Image from "next/image";
 import { formatNumberWithSuffix, truncateString } from "@lib/format-utils";
 import { ProductStatus } from "./ProductStatus";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface ProductsTableViewProps {
     products: Array<Product>;
@@ -31,6 +34,8 @@ const headers = [
 export const ProductsTableView: React.FC<ProductsTableViewProps> = ({
     products
 }) => {
+    const pathname = usePathname();
+
     const rows = products.map((product) => ({
         ...product,
         status: <ProductStatus product={product} />,
@@ -40,10 +45,15 @@ export const ProductsTableView: React.FC<ProductsTableViewProps> = ({
             </p>
         ),
         action: (
-            <div className="flex items-center cursor-pointer">
+            <Link
+                href={`/dashboard/stores/${
+                    pathname.split("/").slice(-1)[0]
+                }/products/${product.product.split(" ").join("-")}`}
+                className="flex items-center cursor-pointer"
+            >
                 <PencilSquareIcon className="h-5 w-5 mr-2 text-[#6d67e4]" />
                 <p className="text-[#6d67e4] text-sm">Edit</p>
-            </div>
+            </Link>
         ),
         product: (
             <div className="flex items-center">

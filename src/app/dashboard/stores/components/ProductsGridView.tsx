@@ -1,16 +1,29 @@
-import shirt from "@assets/images/shirts.webp";
+"use client";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
 import { Product } from "../typing";
 import { ProductStatus } from "./ProductStatus";
 import { formatNumberWithSuffix } from "@lib/format-utils";
 import { PencilIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+
+//images
+import shirt from "@assets/images/shirts.webp";
 
 const ProductCard = ({ product }: { product: Product }) => {
+    const pathname = usePathname();
+
     return (
         <div className="flex flex-col w-96 mb-8 rounded-md border border-slate-100 shadow-md relative">
-            <div className="absolute top-4 right-4 flex justify-center items-center cursor-pointer h-10 w-10 transition ease-in-out bg-white hover:bg-slate-50 shadow-md rounded-full">
+            <Link
+                href={`/dashboard/stores/${
+                    pathname.split("/").slice(-1)[0]
+                }/products/${product.product.split(" ").join("-")}`}
+                className="absolute top-4 right-4 flex justify-center items-center cursor-pointer h-10 w-10 transition ease-in-out bg-white hover:bg-slate-50 shadow-md rounded-full"
+            >
                 <PencilIcon className="h-5 w-5 text-[#6d67e4]" />
-            </div>
+            </Link>
             <div className="w-full flex-1">
                 <Image src={shirt} className="object-cover" alt="shirt" />
             </div>

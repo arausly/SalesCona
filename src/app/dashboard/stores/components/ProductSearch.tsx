@@ -203,8 +203,11 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
                                 Published
                             </p>
                             <div className="flex flex-col">
-                                {lastSeen.published.map((pub) => (
-                                    <div className="flex items-center mt-4 w-full cursor-pointer hover:bg-gray-50 py-1">
+                                {lastSeen.published.map((pub, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex items-center mt-4 w-full cursor-pointer hover:bg-gray-50 py-1"
+                                    >
                                         <div className="relative w-14 h-14 rounded-full border-2 border-slate-100 shadow-sm mr-2">
                                             <span className="absolute top-0 left-0 w-full h-full rounded-full bg-black opacity-20" />
                                             <Image

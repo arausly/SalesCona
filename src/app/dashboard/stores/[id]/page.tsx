@@ -139,10 +139,13 @@ export default function Store() {
             </div>
             <div className="flex justify-between my-6">
                 <p className="text-xl mr-3 capitalize">Products</p>
-                <button className="w-32 h-10 rounded-full primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center">
+                <Link
+                    href={`/dashboard/stores/${lastPath}/products/new`}
+                    className="w-32 h-10 rounded-full primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                >
                     <PlusIcon className="h-4 w-4 text-white mr-2" />
                     <p className="text-white text-sm">New Product</p>
-                </button>
+                </Link>
             </div>
             <div className="w-full flex justify-center">
                 <ProductSearch categories={categories} lastSeen={lastSeen} />
