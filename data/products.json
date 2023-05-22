@@ -1,0 +1,84 @@
+{
+    "products": [
+        {
+            "product": "iPhone 13 Pro Max",
+            "status": "Published",
+            "price": "1299.99",
+            "inventoryCount": "10",
+            "viewCount": "1000",
+            "description": "The latest flagship iPhone with an advanced camera system and powerful performance."
+        },
+        {
+            "product": "Samsung Galaxy S21 Ultra",
+            "status": "Draft",
+            "price": "1199.99",
+            "inventoryCount": "5",
+            "viewCount": "500",
+            "description": "A premium Android smartphone with a high-resolution display and versatile camera capabilities."
+        },
+        {
+            "product": "Nike Air Max 90",
+            "status": "Published",
+            "price": "99.99",
+            "inventoryCount": "20",
+            "viewCount": "1500",
+            "description": "Iconic Nike sneakers known for their comfortable cushioning and stylish design."
+        },
+        {
+            "product": "Sony PlayStation 5",
+            "status": "Published",
+            "price": "499.99",
+            "inventoryCount": "2",
+            "viewCount": "2000",
+            "description": "The next-generation gaming console with stunning graphics and immersive gameplay experiences."
+        },
+        {
+            "product": "MacBook Pro 2021",
+            "status": "Published",
+            "price": "1999.99",
+            "inventoryCount": "8",
+            "viewCount": "800",
+            "description": "Powerful and versatile laptop designed for professional users with exceptional performance and stunning display."
+        },
+        {
+            "product": "Adidas Ultraboost",
+            "status": "Published",
+            "price": "149.99",
+            "inventoryCount": "15",
+            "viewCount": "1200",
+            "description": "Popular running shoes with responsive cushioning and a stylish, modern design."
+        },
+        {
+            "product": "Amazon Echo Dot",
+            "status": "Draft",
+            "price": "49.99",
+            "inventoryCount": "3",
+            "viewCount": "300",
+            "description": "A compact smart speaker with Alexa voice assistant for convenient voice control and smart home integration."
+        },
+        {
+            "product": "GoPro Hero 9",
+            "status": "Published",
+            "price": "399.99",
+            "inventoryCount": "7",
+            "viewCount": "600",
+            "description": "A versatile action camera with high-quality video recording and advanced stabilization features."
+        },
+        {
+            "product": "Nike Dri-FIT T-Shirt",
+            "status": "Published",
+            "price": "29.99",
+            "inventoryCount": "25",
+            "viewCount": "1800",
+            "description": "A comfortable and moisture-wicking athletic shirt for active individuals."
+        },
+        {
+            "product": "PlayStation 5 Controller",
+            "status": "Published",
+            "price": "69.99",
+            "inventoryCount": "4",
+            "viewCount": "400",
+            "description": "Official controller for the PlayStation 5 gaming console, providing precise control and immersive gaming experiences."
+        }
+    ]
+}

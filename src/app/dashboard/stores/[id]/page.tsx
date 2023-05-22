@@ -14,7 +14,13 @@ import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ProductSearch } from "../components/ProductSearch";
-import { Tab } from "@headlessui/react";
+import { Tab, Transition } from "@headlessui/react";
+
+//dummy data
+import products from "@data/products.json";
+import { ProductsTableView } from "../components/ProductsTableView";
+import { Product } from "../typing";
+import { ProductsGridView } from "../components/ProductsGridView";
 
 //todo add correct from API categories
 const categories = [
@@ -93,18 +99,29 @@ export default function Store() {
         }
     ]).current;
 
-    const togglePresentationViews = React.useCallback(
-        () =>
-            setPresentationMode((mode) =>
-                mode === PRESENTATION_MODES.GRID_VIEW
-                    ? PRESENTATION_MODES.LIST_VIEW
-                    : PRESENTATION_MODES.GRID_VIEW
-            ),
-        []
+    const productsView = (
+        <>
+            <Transition
+                leave="transition ease-in duration-100"
+                leaveFrom="translate-x-[0%]"
+                leaveTo="translate-x-[100%]"
+                show={presentationMode === PRESENTATION_MODES.LIST_VIEW}
+            >
+                <ProductsTableView products={products.products as Product[]} />
+            </Transition>
+            <Transition
+                leave="transition ease-in duration-100"
+                leaveFrom="translate-x-[100%]"
+                leaveTo="translate-x-[0%]"
+                show={presentationMode === PRESENTATION_MODES.GRID_VIEW}
+            >
+                <ProductsGridView products={products.products as Product[]} />
+            </Transition>
+        </>
     );
 
     return (
-        <section className="p-6 flex flex-col w-full h-full">
+        <section className="p-6 flex flex-col w-full h-full dashboard-screen-height overflow-auto">
             <div className="flex flex-col pb-6 border-b border-slate-200 w-full">
                 <Breadcrumb crumbs={crumbs} />
                 <div className="flex flex-col md:flex-row items-center justify-between mt-6">
@@ -134,49 +151,56 @@ export default function Store() {
             <div className="mt-8">
                 <Tab.Group>
                     <Tab.List>
-                        <div className="flex items-center">
-                            <Tab as={Fragment}>
-                                {({ selected }) => (
-                                    <button
-                                        className={`${
-                                            selected
-                                                ? "bg-gray-100 text-black"
-                                                : "bg-transparent text-gray-600"
-                                        } mr-6 flex items-center justify-center focus:outline-none focus:ring-0 cursor-pointer h-10 w-auto rounded-md px-3 py-0.5`}
-                                    >
-                                        All
-                                    </button>
-                                )}
-                            </Tab>
-                            <Tab as={Fragment}>
-                                {({ selected }) => (
-                                    <button
-                                        className={`${
-                                            selected
-                                                ? "bg-gray-100 text-black"
-                                                : "bg-transparent text-gray-600"
-                                        } mr-6 flex items-center transition ease-in-out justify-center cursor-pointer h-10 w-auto focus:outline-none focus:ring-0 rounded-md px-3 py-0.5`}
-                                    >
-                                        Published
-                                    </button>
-                                )}
-                            </Tab>
-                            <Tab as={Fragment}>
-                                {({ selected }) => (
-                                    <button
-                                        className={`${
-                                            selected
-                                                ? "bg-gray-100 text-black"
-                                                : "bg-transparent text-gray-600"
-                                        } flex items-center justify-center transition ease-in-out cursor-pointer h-10 w-auto focus:outline-none focus:ring-0 rounded-md px-3 py-0.5`}
-                                    >
-                                        Draft
-                                    </button>
-                                )}
-                            </Tab>
-                            <div className="ml-auto flex items-center">
+                        <div className="flex flex-col md:flex-row items-center md:items-start">
+                            <div className="flex">
+                                <Tab as={Fragment}>
+                                    {({ selected }) => (
+                                        <button
+                                            className={`${
+                                                selected
+                                                    ? "bg-gray-100 text-black"
+                                                    : "bg-transparent text-gray-600"
+                                            } mr-6 flex items-center justify-center focus:outline-none focus:ring-0 cursor-pointer h-10 w-auto rounded-md px-3 py-0.5`}
+                                        >
+                                            All
+                                        </button>
+                                    )}
+                                </Tab>
+                                <Tab as={Fragment}>
+                                    {({ selected }) => (
+                                        <button
+                                            className={`${
+                                                selected
+                                                    ? "bg-gray-100 text-black"
+                                                    : "bg-transparent text-gray-600"
+                                            } mr-6 flex items-center transition ease-in-out justify-center cursor-pointer h-10 w-auto focus:outline-none focus:ring-0 rounded-md px-3 py-0.5`}
+                                        >
+                                            Published
+                                        </button>
+                                    )}
+                                </Tab>
+                                <Tab as={Fragment}>
+                                    {({ selected }) => (
+                                        <button
+                                            className={`${
+                                                selected
+                                                    ? "bg-gray-100 text-black"
+                                                    : "bg-transparent text-gray-600"
+                                            } flex items-center justify-center transition ease-in-out cursor-pointer h-10 w-auto focus:outline-none focus:ring-0 rounded-md px-3 py-0.5`}
+                                        >
+                                            Draft
+                                        </button>
+                                    )}
+                                </Tab>
+                            </div>
+
+                            <div className="md:ml-auto mt-4 md:mt-0 flex items-center">
                                 <button
-                                    onClick={togglePresentationViews}
+                                    onClick={() =>
+                                        setPresentationMode(
+                                            PRESENTATION_MODES.LIST_VIEW
+                                        )
+                                    }
                                     className={`${
                                         presentationMode ===
                                         PRESENTATION_MODES.LIST_VIEW
@@ -187,7 +211,11 @@ export default function Store() {
                                     <ListBulletIcon className="h-6 w-6" />
                                 </button>
                                 <button
-                                    onClick={togglePresentationViews}
+                                    onClick={() =>
+                                        setPresentationMode(
+                                            PRESENTATION_MODES.GRID_VIEW
+                                        )
+                                    }
                                     className={`${
                                         presentationMode ===
                                         PRESENTATION_MODES.GRID_VIEW
@@ -201,9 +229,9 @@ export default function Store() {
                         </div>
                     </Tab.List>
                     <Tab.Panels className="mt-6">
-                        <Tab.Panel>Content 1</Tab.Panel>
-                        <Tab.Panel>Content 2</Tab.Panel>
-                        <Tab.Panel>Content 3</Tab.Panel>
+                        <Tab.Panel>{productsView}</Tab.Panel>
+                        <Tab.Panel>{productsView}</Tab.Panel>
+                        <Tab.Panel>{productsView}</Tab.Panel>
                     </Tab.Panels>
                 </Tab.Group>
             </div>

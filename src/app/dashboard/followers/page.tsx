@@ -5,12 +5,12 @@ import Dropdown from "@components/Menudrown";
 import { Table } from "@components/Table/Table";
 import {
     BuildingStorefrontIcon,
-    EyeSlashIcon,
+    EyeSlashIcon
 } from "@heroicons/react/24/outline";
 import {
     formatNumberWithSuffix,
     generateAvatarBg,
-    generateAvatarInitials,
+    generateAvatarInitials
 } from "@lib/format-utils";
 
 //image
@@ -25,7 +25,7 @@ import { RegularAvatar } from "@components/Avatar/RegularAvatar";
 const rows = [
     {
         name: (
-            <div className="flex flex-row items-center ">
+            <div className="flex items-center ">
                 <RegularAvatar name="Emmanuel Bolanle" />
                 <p className="ml-4 truncate">Emmanuel Bolanle</p>
             </div>
@@ -33,14 +33,14 @@ const rows = [
         product: "Face cream",
         email: "test1@yahoo.com",
         phone: "+23484345736",
-        date: "20-02-2023",
+        date: "20-02-2023"
     },
     {
         name: (
-            <div className="flex flex-row items-center ">
+            <div className="flex items-center ">
                 <div
                     style={{
-                        backgroundColor: generateAvatarBg(),
+                        backgroundColor: generateAvatarBg()
                     }}
                     className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
                 >
@@ -54,14 +54,14 @@ const rows = [
         product: "Face cream",
         email: <Image src={blurredImage} alt="blurred" className="h-5" />,
         phone: "Nil",
-        date: "20-02-2023",
+        date: "20-02-2023"
     },
     {
         name: (
-            <div className="flex flex-row items-center ">
+            <div className="flex items-center ">
                 <div
                     style={{
-                        backgroundColor: generateAvatarBg(),
+                        backgroundColor: generateAvatarBg()
                     }}
                     className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
                 >
@@ -75,14 +75,14 @@ const rows = [
         product: "Face cream",
         email: "test1@yahoo.com",
         phone: "+23484345736",
-        date: "20-02-2023",
+        date: "20-02-2023"
     },
     {
         name: (
-            <div className="flex flex-row items-center ">
+            <div className="flex items-center ">
                 <div
                     style={{
-                        backgroundColor: generateAvatarBg(),
+                        backgroundColor: generateAvatarBg()
                     }}
                     className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
                 >
@@ -96,14 +96,14 @@ const rows = [
         product: "Face cream",
         email: "test1@yahoo.com",
         phone: "+23484345736",
-        date: "20-02-2023",
+        date: "20-02-2023"
     },
     {
         name: (
-            <div className="flex flex-row items-center ">
+            <div className="flex items-center ">
                 <div
                     style={{
-                        backgroundColor: generateAvatarBg(),
+                        backgroundColor: generateAvatarBg()
                     }}
                     className="uppercase flex flex-col items-center justify-center w-12 h-12 rounded-full"
                 >
@@ -117,14 +117,14 @@ const rows = [
         product: "Face cream",
         email: "test1@yahoo.com",
         phone: "+23484345736",
-        date: "20-02-2023",
-    },
+        date: "20-02-2023"
+    }
 ];
 
 const pagination = {
     finalPage: 50,
     totalItemsCount: 500,
-    pageItemCount: 10,
+    pageItemCount: 10
 };
 
 const stores = [{ label: "Shiol" }, { label: "Wakaious" }]; //todo replace with real data
@@ -148,10 +148,10 @@ export default function Followers() {
                         onClick={() => setIsModalOpen(true)}
                     />
                 </div>
-            ),
+            )
         },
         { id: "phone", label: "Phone" },
-        { id: "date", label: "Date" },
+        { id: "date", label: "Date" }
     ];
 
     const toggleViewContactModal = React.useCallback(() => {

@@ -8,11 +8,11 @@ import {
     FolderIcon,
     PencilIcon,
     PhotoIcon,
-    TrashIcon,
+    TrashIcon
 } from "@heroicons/react/24/outline";
 import { copyToClipboard, generateShopAlias } from "@lib/common.utils";
 import MultiSelectInput, {
-    MultiSelectProps,
+    MultiSelectProps
 } from "@components/Input/MultiSelectInput";
 import FileWidget, { FileWithPreview } from "@components/FileWidget";
 
@@ -54,25 +54,25 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     const editFormCrumbs = [
         {
             name: "Stores",
-            link: "/dashboard/stores",
+            link: "/dashboard/stores"
         },
         {
             name: storePath.split("-").join(" "),
-            link: `dashboard/stores/${storePath}`,
+            link: `dashboard/stores/${storePath}`
         },
         {
-            name: "Edit",
-        },
+            name: "Edit"
+        }
     ];
 
     const createFormCrumbs = [
         {
             name: "Stores",
-            link: "/dashboard/stores",
+            link: "/dashboard/stores"
         },
         {
-            name: "New Store",
-        },
+            name: "New Store"
+        }
     ];
 
     React.useEffect(() => {
@@ -113,7 +113,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                                         number,
                                         FileWithPreview
                                     ]
-                            ),
+                            )
                     ])
             );
         },
@@ -125,7 +125,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
         (label: string) => {
             const newCategory = {
                 label,
-                id: `${categories.length + 1}`,
+                id: `${categories.length + 1}`
             };
             setCategories((prev) => [...prev, newCategory]);
             return newCategory;
@@ -155,7 +155,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     );
 
     return (
-        <div className="p-6 flex flex-col w-full">
+        <div className="p-6 flex flex-col w-full dashboard-screen-height overflow-auto">
             <div className="flex flex-col pb-6 border-b border-slate-200 w-full">
                 <Breadcrumb
                     crumbs={isEditForm ? editFormCrumbs : createFormCrumbs}
@@ -188,7 +188,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         </div>
                         <MultiSelectInput
                             items={currencies.current}
-                            onSelect={() => { }}
+                            onSelect={() => {}}
                             multiple={false}
                         />
                     </div>
@@ -300,7 +300,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         </p>
                         <MultiSelectInput
                             items={categories}
-                            onSelect={() => { }}
+                            onSelect={() => {}}
                             createNewItem={handleCreateNewItem}
                         />
                     </div>

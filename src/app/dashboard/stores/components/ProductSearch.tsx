@@ -112,7 +112,7 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
                 leaveTo="opacity-0"
                 show={showFilter}
             >
-                <div className="bg-white w-full shadow-md rounded-md p-3 absolute top-16">
+                <div className="bg-white w-full shadow-md rounded-md p-3 absolute top-16 z-10">
                     <div className="my-2 flex items-center justify-between">
                         <div className="flex items-center">
                             <FunnelIcon className="h-5 w-5 mr-1 text-slate-600" />
