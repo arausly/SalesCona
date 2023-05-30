@@ -347,7 +347,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         />
                     </div>
                 </div>
-                <div className="flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto border-0 md:border-l md:border-slate-100">
+                <div className="flex-none md:flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto border-0 md:border-l md:border-slate-100">
                     <div className="flex flex-col">
                         {/** slider and dropbox */}
                         <div className="flex relative h-80">

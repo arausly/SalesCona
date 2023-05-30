@@ -11,6 +11,9 @@ import Link from "next/link";
 //images
 import shirt from "@assets/images/shirts.webp";
 
+//styles
+import styles from "../styles/product-card.module.css";
+
 const ProductCard = ({ product }: { product: Product }) => {
     const pathname = usePathname();
 
@@ -58,7 +61,7 @@ export const ProductsGridView = ({
     products: Array<Product>;
 }) => {
     return (
-        <div className="flex justify-between flex-wrap">
+        <div className="flex justify-center gap-4 flex-wrap">
             {products.map((product) => (
                 <ProductCard product={product} />
             ))}
