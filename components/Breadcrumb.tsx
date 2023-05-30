@@ -15,12 +15,12 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ crumbs }) => {
                     {crumb.link ? (
                         <Link
                             href={crumb.link}
-                            className="capitalize text-gray-700 text-sm font-medium hover:text-[#6d67e4]"
+                            className="capitalize text-gray-700 text-sm font-medium hover:text-[#6d67e4] text-ellipsis overflow-hidden"
                         >
                             {crumb.name}
                         </Link>
                     ) : (
-                        <p className="capitalize text-gray-400 text-sm font-normal">
+                        <p className="capitalize text-gray-400 text-sm font-normal text-ellipsis overflow-hidden">
                             {crumb.name}
                         </p>
                     )}

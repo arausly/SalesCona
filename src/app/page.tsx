@@ -6,5 +6,5 @@ const inter = Inter({ subsets: ["latin"] });
 
 /** This would be dashboard, but later changed to shopping home screen for all shops */
 export default function Home() {
-    return <></>;
+    return <>Landing page</>;
 }
