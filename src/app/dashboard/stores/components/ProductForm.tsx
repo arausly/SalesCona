@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Breadcrumb } from "@components/Breadcrumb";
-import { Switch } from "@headlessui/react";
+import { Switch, Transition } from "@headlessui/react";
 import {
     CheckIcon,
     PencilIcon,
@@ -20,6 +20,8 @@ interface ProductFormProps {
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
+    const [deliveryAvailable, setDeliveryAvailable] =
+        React.useState<boolean>(false);
     const [onlineStoreOnly, setOnlineStoreOnly] = React.useState(false);
     const [inStoreOnly, setInStoreOnly] = React.useState<boolean>(false);
     const [variantOptions, setVariantOptions] = React.useState<
@@ -273,9 +275,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 <CategorySelectInput onSelect={() => {}} />
                             </div>
                             <div className="flex w-full justify-between items-center mb-6">
-                                <p className="mr-1 text-xs text-gray-600">
-                                    Product variants
-                                </p>
+                                <div className="flex flex-col">
+                                    <p className="mr-1 text-xs text-gray-600 mb-1">
+                                        Product variants
+                                    </p>
+                                    <p className="text-xs font-light">
+                                        What other possible type of this product
+                                        do you have? e.g color, size, gender etc
+                                    </p>
+                                </div>
+
                                 <div
                                     className="flex items-center text-xs cursor-pointer"
                                     onClick={handleAddVariant}
@@ -300,6 +309,91 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                     </div>
                 </div>
                 <div className="flex-none md:flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto">
+                    <div className="flex flex-col w-full mb-6">
+                        <p className="mb-2">Delivery</p>
+                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                            <div className="flex items-center text-sm mb-4">
+                                <Switch
+                                    onChange={() =>
+                                        setDeliveryAvailable((c) => !c)
+                                    }
+                                    className={`${
+                                        deliveryAvailable
+                                            ? "bg-[#6d67e4]"
+                                            : "bg-gray-200"
+                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                >
+                                    <span className="sr-only">
+                                        Delivery Available
+                                    </span>
+                                    <span
+                                        className={`${
+                                            deliveryAvailable
+                                                ? "translate-x-6"
+                                                : "translate-x-1"
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                    />
+                                </Switch>
+                                <p className="ml-4">Delivery available</p>
+                            </div>
+                            <Transition
+                                leave="transition ease-in duration-100"
+                                leaveFrom="translate-y-[-100%]"
+                                leaveTo="translate-y-[0%]"
+                                show={deliveryAvailable}
+                            >
+                                <div className="flex items-center mb-4">
+                                    <div className="flex-1 mr-8">
+                                        <p className="text-xs mb-2 text-gray-600">
+                                            Additional Charge (Optional)
+                                        </p>
+                                        <div className="w-full relative">
+                                            <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
+                                                $
+                                            </span>
+                                            <input
+                                                placeholder="200"
+                                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 mr-8">
+                                        <p className="text-xs mb-2 text-gray-600">
+                                            Location Restriction (Optional)
+                                        </p>
+                                        <input
+                                            placeholder="Only Lagos"
+                                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                        />
+                                    </div>
+                                </div>
+                            </Transition>
+                            <div className="flex items-center text-sm mb-4">
+                                <Switch
+                                    onChange={() =>
+                                        setDeliveryAvailable((c) => !c)
+                                    }
+                                    className={`${
+                                        !deliveryAvailable
+                                            ? "bg-[#6d67e4]"
+                                            : "bg-gray-200"
+                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                >
+                                    <span className="sr-only">
+                                        Pick-up from store
+                                    </span>
+                                    <span
+                                        className={`${
+                                            !deliveryAvailable
+                                                ? "translate-x-6"
+                                                : "translate-x-1"
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                    />
+                                </Switch>
+                                <p className="ml-4">Pick-up from store</p>
+                            </div>
+                        </div>
+                    </div>
                     <ImagePicker
                         maxFiles={8}
                         description="Upload your images in a widely supported format like JPEG, PNG, or GIF. 
