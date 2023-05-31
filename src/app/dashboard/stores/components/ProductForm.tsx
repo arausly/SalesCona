@@ -11,7 +11,6 @@ import {
 import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import { usePathname } from "next/navigation";
 import { ImagePicker } from "./ImagePicker";
-import MultiSelectInput from "@components/Input/MultiSelectInput";
 import { CategorySelectInput } from "./CategorySelectInput";
 import { ProductVariantForm } from "./ProductVariantForm";
 
