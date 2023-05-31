@@ -2,12 +2,7 @@
 import React from "react";
 import { Breadcrumb } from "@components/Breadcrumb";
 import { Switch, Transition } from "@headlessui/react";
-import {
-    CheckIcon,
-    PencilIcon,
-    PlusIcon,
-    TrashIcon
-} from "@heroicons/react/24/outline";
+import { CheckIcon, PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import { usePathname } from "next/navigation";
 import { ImagePicker } from "./ImagePicker";
@@ -232,39 +227,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         </div>
                     </div>
                     <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Pricing</p>
-                        <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
-                            <div className="flex-1 mr-8">
-                                <p className="text-xs mb-2 text-gray-600">
-                                    Price
-                                </p>
-                                <div className="w-full relative">
-                                    <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
-                                        $
-                                    </span>
-                                    <input
-                                        placeholder="200"
-                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex-1 relative">
-                                <p className="text-xs mb-2 text-gray-600">
-                                    Discount (Optional)
-                                </p>
-                                <div className="w-full relative">
-                                    <span className="inline-block rounded-r-md absolute text-gray-700 flex items-center justify-center right-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
-                                        %
-                                    </span>
-                                    <input
-                                        placeholder="10"
-                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex flex-col w-full mb-6">
                         <p className="mb-2">Category</p>
                         <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
                             <div className="mb-6">
@@ -303,6 +265,39 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         />
                                     )
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex flex-col w-full mb-6">
+                        <p className="mb-2">Pricing</p>
+                        <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
+                            <div className="flex-1 mr-8">
+                                <p className="text-xs mb-2 text-gray-600">
+                                    Price
+                                </p>
+                                <div className="w-full relative">
+                                    <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
+                                        $
+                                    </span>
+                                    <input
+                                        placeholder="200"
+                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex-1 relative">
+                                <p className="text-xs mb-2 text-gray-600">
+                                    Discount (Optional)
+                                </p>
+                                <div className="w-full relative">
+                                    <span className="inline-block rounded-r-md absolute text-gray-700 flex items-center justify-center right-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
+                                        %
+                                    </span>
+                                    <input
+                                        placeholder="10"
+                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
