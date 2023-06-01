@@ -8,16 +8,28 @@ import { usePathname } from "next/navigation";
 import { ImagePicker } from "./ImagePicker";
 import { CategorySelectInput } from "./CategorySelectInput";
 import { ProductVariantForm } from "./ProductVariantForm";
+import MultiSelectInput from "@components/Input/MultiSelectInput";
 
 interface ProductFormProps {
     isEditForm: boolean;
 }
+
+const warrantyPeriods = [
+    { label: "Less than a year", id: "<1" },
+    { label: "1 year", id: "1" },
+    { label: "2 years", id: "2" },
+    { label: "3 years", id: "3" },
+    { label: "4 years", id: "4" },
+    { label: "5 years", id: "5" },
+    { label: "Greater than 5 years", id: ">5" }
+];
 
 export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const [deliveryAvailable, setDeliveryAvailable] =
         React.useState<boolean>(false);
     const [onlineStoreOnly, setOnlineStoreOnly] = React.useState(false);
     const [inStoreOnly, setInStoreOnly] = React.useState<boolean>(false);
+    const [hasWarranty, setHasWarranty] = React.useState<boolean>(false);
     const [variantOptions, setVariantOptions] = React.useState<
         Map<number, string>
     >(new Map());
@@ -386,6 +398,81 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 </Switch>
                                 <p className="ml-4">Pick-up from store</p>
                             </div>
+                            <Transition
+                                leave="transition ease-in duration-100"
+                                leaveFrom="translate-y-[-100%]"
+                                leaveTo="translate-y-[0%]"
+                                show={!deliveryAvailable}
+                            >
+                                <div className="flex-1 mr-8">
+                                    <div className="flex flex-col mb-2">
+                                        <p className="mr-1 text-xs text-gray-600 mb-1">
+                                            Store Address
+                                        </p>
+                                        <p className="text-xs font-light">
+                                            The physical location of your shop,
+                                            so your customers can come pick up
+                                            their orders.
+                                        </p>
+                                    </div>
+                                    <input
+                                        placeholder="123 Maple Street, Anytown, USA, Zip Code: 98765"
+                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                    />
+                                </div>
+                            </Transition>
+                        </div>
+                    </div>
+                    <div className="flex flex-col w-full mb-6">
+                        <p className="mb-2">Warranty</p>
+                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                            <div className="flex items-center text-sm">
+                                <Switch
+                                    onChange={setHasWarranty}
+                                    className={`${
+                                        hasWarranty
+                                            ? "bg-[#6d67e4]"
+                                            : "bg-gray-200"
+                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                >
+                                    <span className="sr-only">
+                                        Has Warranty
+                                    </span>
+                                    <span
+                                        className={`${
+                                            hasWarranty
+                                                ? "translate-x-6"
+                                                : "translate-x-1"
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                    />
+                                </Switch>
+                                <p className="ml-4">Has Warranty</p>
+                            </div>
+                            <Transition
+                                leave="transition ease-in duration-100"
+                                leaveFrom="translate-y-[-100%]"
+                                leaveTo="translate-y-[0%]"
+                                show={hasWarranty}
+                            >
+                                <div className="flex-1 mr-8 mt-4">
+                                    <div className="flex flex-col mb-2">
+                                        <p className="mr-1 text-xs text-gray-600 mb-1">
+                                            Warranty period
+                                        </p>
+                                        <p className="text-xs font-light">
+                                            How long would you be able to
+                                            provide free-subsidized repair and
+                                            adjustment services in case of any
+                                            malfunction?
+                                        </p>
+                                    </div>
+                                    <MultiSelectInput
+                                        items={warrantyPeriods}
+                                        onSelect={() => {}}
+                                        multiple={false}
+                                    />
+                                </div>
+                            </Transition>
                         </div>
                     </div>
                     <ImagePicker
