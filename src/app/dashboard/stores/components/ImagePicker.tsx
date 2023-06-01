@@ -19,6 +19,7 @@ interface ImagePickerProps {
     title: string;
     description?: string;
     dimensionInfo?: string;
+    logo?: FileWithPreview;
 }
 
 export const ImagePicker: React.FC<ImagePickerProps> = ({
@@ -26,7 +27,8 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
     handleFileChange,
     title,
     description,
-    dimensionInfo
+    dimensionInfo,
+    logo
 }) => {
     const [aboveFoldBanners, setAboveFoldBanners] = React.useState<
         Map<number, FileWithPreview>
@@ -111,6 +113,17 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
                         handleFiles={handleBannerInputChange}
                         className="w-full relative h-full border flex flex-col justify-center items-center border-slate-200 border-dashed rounded-md cursor-pointer"
                     >
+                        {(logo && (
+                            <div className="z-20 absolute top-2 left-2 h-12 w-20">
+                                <Image
+                                    src={logo.preview}
+                                    alt="brand logo"
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
+                        )) ||
+                            null}
                         <div className="z-20 absolute rounded-l-lg right-0 top-0 bg-gray-800 flex items-center justify-center h-6 w-14 shadow-md">
                             <p className="text-white">
                                 {currentAboveFoldBannerIndex + 1} of {maxFiles}

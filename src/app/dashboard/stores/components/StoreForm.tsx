@@ -16,7 +16,7 @@ import { ImagePicker } from "./ImagePicker";
 import { CategorySelectInput } from "./CategorySelectInput";
 
 const imagePickerBannerDesc =
-    "Customize your page by adding beautiful banner slides that makes your page unique. you can add up to 4 slides that describe your product offerings, promo, discounts, new stock etc";
+    "Customize your page by adding beautiful banner slides that makes your page unique. you can add up to 4 slides that describe your product offerings, promo, discounts, new stock etc. Make sure the logo and the background banners contrast well for appealing aesthetics";
 
 interface StoreFormProps {
     isEditForm: boolean; //todo change to correct type
@@ -280,6 +280,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         maxFiles={4}
                         dimensionInfo="rec. 1200 * 1000px"
                         handleFileChange={() => {}}
+                        logo={shopLogo}
                     />
                 </div>
             </div>
