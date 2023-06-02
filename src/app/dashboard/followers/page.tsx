@@ -17,6 +17,7 @@ import {
 import blurredImage from "@assets/images/blurred-image.png";
 import { Modal } from "@components/Dialog/Dialog";
 import { RegularAvatar } from "@components/Avatar/RegularAvatar";
+import { BottomTooltip } from "@components/BottomTooltip";
 
 /**
  * if paid user, you can see the email and phone number of your subscribers
@@ -32,7 +33,6 @@ const rows = [
         ),
         product: "Face cream",
         email: "test1@yahoo.com",
-        phone: "+23484345736",
         date: "20-02-2023"
     },
     {
@@ -53,7 +53,6 @@ const rows = [
         ),
         product: "Face cream",
         email: <Image src={blurredImage} alt="blurred" className="h-5" />,
-        phone: "Nil",
         date: "20-02-2023"
     },
     {
@@ -74,7 +73,6 @@ const rows = [
         ),
         product: "Face cream",
         email: "test1@yahoo.com",
-        phone: "+23484345736",
         date: "20-02-2023"
     },
     {
@@ -95,7 +93,6 @@ const rows = [
         ),
         product: "Face cream",
         email: "test1@yahoo.com",
-        phone: "+23484345736",
         date: "20-02-2023"
     },
     {
@@ -116,7 +113,6 @@ const rows = [
         ),
         product: "Face cream",
         email: "test1@yahoo.com",
-        phone: "+23484345736",
         date: "20-02-2023"
     }
 ];
@@ -143,14 +139,15 @@ export default function Followers() {
             label: (
                 <div className="flex flex-row items-center">
                     <p className="mr-2">Email</p>
-                    <EyeSlashIcon
-                        className="w-5 h-5 cursor-pointer"
-                        onClick={() => setIsModalOpen(true)}
-                    />
+                    <BottomTooltip message="View contact information">
+                        <EyeSlashIcon
+                            className="w-5 h-5 cursor-pointer"
+                            onClick={() => setIsModalOpen(true)}
+                        />
+                    </BottomTooltip>
                 </div>
             )
         },
-        { id: "phone", label: "Phone" },
         { id: "date", label: "Date" }
     ];
 

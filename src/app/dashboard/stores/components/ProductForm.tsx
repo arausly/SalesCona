@@ -461,9 +461,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         </p>
                                         <p className="text-xs font-light">
                                             How long would you be able to
-                                            provide free-subsidized repair and
-                                            adjustment services in case of any
-                                            malfunction?
+                                            provide free to subsidized repair
+                                            and adjustment services in case of
+                                            any malfunction?
                                         </p>
                                     </div>
                                     <MultiSelectInput

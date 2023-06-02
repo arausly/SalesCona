@@ -7,10 +7,6 @@ import slider1 from "@assets/images/slider1.jpeg";
 import slider2 from "@assets/images/slider2.jpeg";
 import slider3 from "@assets/images/slider3.jpeg";
 import slider4 from "@assets/images/slider4.jpeg";
-import logo from "@assets/images/kolony-logo.webp";
-
-//test images
-import testLogo from "@assets/images/grok-png.png";
 
 import {
     ArrowLongLeftIcon,
@@ -67,14 +63,6 @@ export const Slider = () => {
                 fill
                 className="object-cover"
             />
-            <div className="absolute z-10 top-4 left-8 h-12 w-20">
-                <Image
-                    src={testLogo}
-                    alt="brand logo"
-                    fill
-                    className="object-contain"
-                />
-            </div>
         </div>
     );
 };
