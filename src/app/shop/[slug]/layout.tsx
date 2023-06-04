@@ -8,7 +8,7 @@ export default function ShopLayout({
     children: React.ReactNode;
 }) {
     return (
-        <section className="w-full h-full relative">
+        <section className="w-full h-full relative overflow-x-hidden">
             <Navbar />
             <Slider />
             {children}

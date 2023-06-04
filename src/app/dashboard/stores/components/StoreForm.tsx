@@ -116,6 +116,10 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                             <p className="mr-1">Currency</p>
                             <span className="text-[#6d67e4]">*</span>
                         </div>
+                        <p className="text-xs font-light mb-0.5">
+                            What currencies would you like your products to be
+                            displayed in?
+                        </p>
                         <MultiSelectInput
                             items={currencies.current}
                             onSelect={() => {}}
