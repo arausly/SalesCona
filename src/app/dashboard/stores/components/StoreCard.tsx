@@ -6,6 +6,7 @@ import styles from "../styles/store-card.module.css";
 import { StoreCardMenuDropdown } from "./StoreCardMenuDropdown";
 import Link from "next/link";
 import { generateShopAlias } from "@lib/common.utils";
+import { ProductStatus } from "./ProductStatus";
 
 interface StoreCardProps {
     store: any;
@@ -27,9 +28,29 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store, img }) => {
                 <StoreCardMenuDropdown name={store.name} />
             </div>
             <div className="flex flex-col p-3">
-                <p className="font-normal text-base text-ellipsis">
-                    {store.name}
-                </p>
+                <div className="flex items-center justify-between">
+                    <p className="flex-1 whitespace-nowrap font-normal text-base text-ellipsis overflow-hidden">
+                        {store.name}
+                    </p>
+                    <div
+                        className={` ${
+                            store.status === "draft"
+                                ? "bg-gray-200"
+                                : "bg-green-200"
+                        }  w-fit h-4 flex p-2 justify-center rounded-md items-center`}
+                    >
+                        <p
+                            className={`text-xs ${
+                                store.status === "draft"
+                                    ? "text-gray-800"
+                                    : "text-green-800"
+                            } `}
+                        >
+                            {store.status}
+                        </p>
+                    </div>
+                </div>
+
                 <p className="font-medium text-xs text-ellipsis mt-1">
                     {truncateString(store.description, 60)}
                 </p>

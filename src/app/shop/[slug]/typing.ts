@@ -1,8 +1,10 @@
-export interface Product {
+export interface CustomerProduct {
     product: string;
     description: string;
-    status: "published" | "draft";
     price: string;
     inventoryCount: string;
     viewCount: string;
+    discount?: number;
+    variants?: string[];
+    urlPath?: string;
 }

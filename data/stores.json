@@ -15,7 +15,8 @@
                 "Electronics",
                 "Clothes",
                 "Men's wear"
-            ]
+            ],
+            "status": "published"
         },
         {
             "name": "The Witcher",
@@ -25,7 +26,8 @@
                 "https://occ-0-2219-1723.1.nflxso.net/art/98a6e/7c82aa0026f1517b1f838c2fc95e7b9e6398a6e.jpg"
             ],
             "description": "The Witcher is a dark fantasy series based on the book series of the same name by Andrzej Sapkowski. It follows the adventures of Geralt of Rivia, a monster hunter who roams the land in search of his destiny, encountering various dangerous creatures and people along the way.",
-            "tags": ["Fabrics", "Shoes"]
+            "tags": ["Fabrics", "Shoes"],
+            "status": "draft"
         },
         {
             "name": "The Mandalorian",
@@ -35,7 +37,8 @@
                 "https://lumiere-a.akamaihd.net/v1/images/p_mulan2020_disney_17524_8bb6a65c.jpeg?region=0,0,2048,1000"
             ],
             "description": "The Mandalorian is a space western series set in the Star Wars universe. It follows the adventures of a lone bounty hunter, known only as the Mandalorian, as he travels across the galaxy, taking on various missions and encounters a mysterious creature known as The Child.",
-            "tags": ["Drinks", "Soda"]
+            "tags": ["Drinks", "Soda"],
+            "status": "draft"
         },
         {
             "name": "The Lord of the Rings",
@@ -45,7 +48,8 @@
                 "https://www.lordoftherings.net/wp-content/uploads/2018/11/The-Two-Towers-Banner-2001x1024.jpg"
             ],
             "description": "The Lord of the Rings is a fantasy epic about a hobbit named Frodo Baggins who is tasked with destroying the One Ring, a powerful artifact that could bring about the end of the world. He sets out on a perilous journey with a group of companions to destroy the ring in the fires of Mount Doom.",
-            "tags": ["Gaming", "Entertainment"]
+            "tags": ["Gaming", "Entertainment"],
+            "status": "published"
         },
         {
             "name": "The Witcher",
@@ -55,7 +59,8 @@
                 "https://occ-0-2219-1723.1.nflxso.net/art/98a6e/7c82aa0026f1517b1f838c2fc95e7b9e6398a6e.jpg"
             ],
             "description": "The Witcher is a dark fantasy series based on the book series of the same name by Andrzej Sapkowski. It follows the adventures of Geralt of Rivia, a monster hunter who roams the land in search of his destiny, encountering various dangerous creatures and people along the way.",
-            "tags": ["Vehicles", "spare parts"]
+            "tags": ["Vehicles", "spare parts"],
+            "status": "published"
         },
         {
             "name": "The Mandalorian",
@@ -65,7 +70,8 @@
                 "https://lumiere-a.akamaihd.net/v1/images/p_mulan2020_disney_17524_8bb6a65c.jpeg?region=0,0,2048,1000"
             ],
             "description": "The Mandalorian is a space western series set in the Star Wars universe. It follows the adventures of a lone bounty hunter, known only as the Mandalorian, as he travels across the galaxy, taking on various missions and encounters a mysterious creature known as The Child.",
-            "tags": ["Jewelry", "Watches"]
+            "tags": ["Jewelry", "Watches"],
+            "status": "draft"
         }
     ]
 }

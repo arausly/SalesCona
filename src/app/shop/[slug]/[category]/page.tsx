@@ -1,3 +1,3 @@
 export default function ProductsByCategory() {
-    return <></>;
+    return <div></div>;
 }

@@ -2,97 +2,106 @@
     "products": [
         {
             "product": "iPhone 13 Pro Max",
-            "status": "Published",
+            "status": "published",
             "price": "1299.99",
             "inventoryCount": "10",
             "viewCount": "1000",
             "description": "The latest flagship iPhone with an advanced camera system and powerful performance.",
             "variants": ["Teal", "128gb"],
-            "urlPath": "/gadgets/iphone-13-pro-max"
+            "urlPath": "/gadgets/iphone-13-pro-max",
+            "discount": 22
         },
         {
             "product": "Samsung Galaxy S21 Ultra",
-            "status": "Draft",
+            "status": "draft",
             "price": "1199.99",
             "inventoryCount": "5",
             "viewCount": "500",
             "description": "A premium Android smartphone with a high-resolution display and versatile camera capabilities.",
             "variants": ["1TB", "black"],
-            "urlPath": "/gadgets/samsung-galaxy-s21-ultra"
+            "urlPath": "/gadgets/samsung-galaxy-s21-ultra",
+            "discount": 50
         },
         {
             "product": "Nike Air Max 90",
-            "status": "Published",
+            "status": "published",
             "price": "99.99",
             "inventoryCount": "20",
             "viewCount": "1500",
             "description": "Iconic Nike sneakers known for their comfortable cushioning and stylish design.",
             "variants": ["white", "EU 43"],
-            "urlPath": "/shoes/nike-air-max-90"
+            "urlPath": "/shoes/nike-air-max-90",
+            "discount": 10
         },
         {
             "product": "Sony PlayStation 5",
-            "status": "Published",
+            "status": "published",
             "price": "499.99",
             "inventoryCount": "2",
             "viewCount": "2000",
             "description": "The next-generation gaming console with stunning graphics and immersive gameplay experiences.",
             "variants": ["Disc edition"],
-            "urlPath": "/electronics/sony-playstation-5"
+            "urlPath": "/electronics/sony-playstation-5",
+            "discount": 5
         },
         {
             "product": "MacBook Pro 2021",
-            "status": "Published",
+            "status": "published",
             "price": "1999.99",
             "inventoryCount": "8",
             "viewCount": "800",
             "description": "Powerful and versatile laptop designed for professional users with exceptional performance and stunning display.",
             "variants": ["M2", "silver"],
-            "urlPath": "/gadgets/macbook-pro-2021"
+            "urlPath": "/gadgets/macbook-pro-2021",
+            "discount": 20
         },
         {
             "product": "Adidas Ultraboost",
-            "status": "Published",
+            "status": "published",
             "price": "149.99",
             "inventoryCount": "15",
             "viewCount": "1200",
             "description": "Popular running shoes with responsive cushioning and a stylish, modern design.",
             "variants": ["white"],
-            "urlPath": "/shoes/adidas-ultraboost"
+            "urlPath": "/shoes/adidas-ultraboost",
+            "discount": 12
         },
         {
             "product": "Amazon Echo Dot",
-            "status": "Draft",
+            "status": "draft",
             "price": "49.99",
             "inventoryCount": "3",
             "viewCount": "300",
             "description": "A compact smart speaker with Alexa voice assistant for convenient voice control and smart home integration.",
             "variants": ["black"],
-            "urlPath": "/gadgets/amazon-echo-dot"
+            "urlPath": "/gadgets/amazon-echo-dot",
+            "discount": 15
         },
         {
             "product": "GoPro Hero 9",
-            "status": "Published",
+            "status": "published",
             "price": "399.99",
             "inventoryCount": "7",
             "viewCount": "600",
             "description": "A versatile action camera with high-quality video recording and advanced stabilization features.",
             "variants": ["professional"],
-            "urlPath": "/electronics/gopro-hero-9"
+            "urlPath": "/electronics/gopro-hero-9",
+            "discount": 18
         },
         {
             "product": "Nike Dri-FIT T-Shirt",
-            "status": "Published",
+            "status": "published",
             "price": "29.99",
             "inventoryCount": "25",
             "viewCount": "1800",
             "description": "A comfortable and moisture-wicking athletic shirt for active individuals.",
             "variants": ["white"],
-            "urlPath": "/shirts/nike-dri-fit-t-shirt"
+            "urlPath": "/shirts/nike-dri-fit-t-shirt",
+            "discount": 25
         },
         {
             "product": "PlayStation 5 Controller",
-            "status": "Published",
+            "status": "published",
             "price": "69.99",
             "inventoryCount": "4",
             "viewCount": "400",

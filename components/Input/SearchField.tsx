@@ -17,6 +17,7 @@ export const SearchField: React.FC<SearchFieldProps> = ({
             <input
                 type="text"
                 id="table-search"
+                placeholder=""
                 className={`block p-2 pl-10 text-sm text-black border border-gray-50 w-full ${inputClassName}`}
                 {...props}
             />

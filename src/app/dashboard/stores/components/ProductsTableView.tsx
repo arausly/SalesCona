@@ -38,7 +38,7 @@ export const ProductsTableView: React.FC<ProductsTableViewProps> = ({
 
     const rows = products.map((product) => ({
         ...product,
-        status: <ProductStatus product={product} />,
+        status: <ProductStatus status={product.status} />,
         viewCount: (
             <p className="text-gray-600">
                 {formatNumberWithSuffix(Number(product.viewCount))}

@@ -36,7 +36,7 @@ export const generateAvatarBg = () => {
         "#B0A4A4",
         "#B9EDDD",
         "#FFABAB",
-        "#A2A378",
+        "#A2A378"
     ];
     const randomIndex = Math.floor(Math.random() * bgColors.length);
     return bgColors[randomIndex].toLowerCase();
@@ -58,40 +58,41 @@ export const convertPathToSpaceSeparatedStr = (path: string) => {
     return { lastPath, fmt };
 };
 
+export const spaceSeparatedStrToPath = (str: string) =>
+    str.split(" ").join("-").toLowerCase();
+
 export const getCurrencies = () => {
     const rawCurrencies = currencies.getAll("en_US");
     return Object.values(rawCurrencies).map((curr) => ({
         id: curr.code,
-        label: `${curr.name} (${curr.symbol})`,
+        label: `${curr.name} (${curr.symbol})`
     }));
 };
-
 
 export const formatTimeAgo = (timestamp: number): string => {
     const currentDate = Date.now();
     const timeDifference = currentDate - timestamp;
-  
+
     const seconds = Math.floor(timeDifference / 1000);
     if (seconds < 60) {
-      return `${seconds} ${seconds !== 1 ? 'secs' : 'sec'} ago`;
+        return `${seconds} ${seconds !== 1 ? "secs" : "sec"} ago`;
     }
-  
+
     const minutes = Math.floor(timeDifference / (1000 * 60));
     if (minutes < 60) {
-      return `${minutes} ${minutes !== 1 ? 'mins' : 'min'} ago`;
+        return `${minutes} ${minutes !== 1 ? "mins" : "min"} ago`;
     }
-  
+
     const hours = Math.floor(timeDifference / (1000 * 60 * 60));
     if (hours < 24) {
-      return `${hours} ${hours !== 1 ? 'hrs' : 'hr'} ago`;
+        return `${hours} ${hours !== 1 ? "hrs" : "hr"} ago`;
     }
-  
+
     const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
     if (days < 365) {
-      return `${days} ${days !== 1 ? 'days' : 'day'} ago`;
+        return `${days} ${days !== 1 ? "days" : "day"} ago`;
     }
-  
+
     const years = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 365));
-    return `${years} ${years !== 1 ? 'yrs' : 'yr'} ago`;
-  }
-  
+    return `${years} ${years !== 1 ? "yrs" : "yr"} ago`;
+};

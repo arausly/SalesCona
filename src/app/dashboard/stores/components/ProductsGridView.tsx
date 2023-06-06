@@ -11,9 +11,6 @@ import Link from "next/link";
 //images
 import shirt from "@assets/images/shirts.webp";
 
-//styles
-import styles from "../styles/product-card.module.css";
-
 const ProductCard = ({ product }: { product: Product }) => {
     const pathname = usePathname();
 
@@ -31,7 +28,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                 <Image src={shirt} className="object-cover" alt="shirt" />
             </div>
             <div className="px-8 py-4">
-                <ProductStatus product={product} />
+                <ProductStatus status={product.status} />
                 <p className="mt-2">{product.product}</p>
                 <span className="inline-block h-0.5 w-full bg-slate-100" />
                 <div className="flex items-center justify-between">
