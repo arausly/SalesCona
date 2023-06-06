@@ -13,7 +13,11 @@ export const ChatSidePane: React.FC<ChatSidePaneProps> = ({
 }) => {
     const [email, setEmail] = React.useState<string>(""); //todo change to API data
     return (
-        <div className="absolute top-0 right-0 bottom-0 left-0">
+        <div
+            className={`absolute ${
+                isOpen ? "w-full h-full opacity-100" : "w-0 h-0 opacity-0"
+            }`}
+        >
             {/**backdrop*/}
             <span
                 onClick={closeChatPane}

@@ -39,7 +39,7 @@ export const Slider = () => {
 
     return (
         <div className="h-2/5 w-screen relative">
-            <div className="absolute z-10 top-0 left-0 bottom-0 right-0 bg-black opacity-20" />
+            <div className="absolute z-10 top-0 left-0 bottom-0 right-0 bg-black opacity-30" />
             {currentAboveFoldBannerIndex !== 0 ? (
                 <div
                     className="absolute z-10 cursor-pointer top-1/2 left-8 w-12 h-12 flex items-center justify-center text-white primary-bg rounded-full shadow-sm shadow-[#6d67e4]"

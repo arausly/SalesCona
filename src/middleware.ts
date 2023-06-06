@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     const {
-        data: { session },
+        data: { session }
     } = await supabase.auth.getSession();
 
     if (
@@ -27,7 +27,8 @@ export async function middleware(req: NextRequest) {
             pathname.startsWith("/static") ||
             pathname.startsWith("/login") ||
             pathname.startsWith("/register") ||
-            pathname.startsWith("/verify"))
+            pathname.startsWith("/verify") ||
+            pathname.startsWith("/shop"))
     ) {
         return NextResponse.next();
     }
