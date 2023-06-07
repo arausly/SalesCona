@@ -6,5 +6,9 @@ export interface CustomerProduct {
     viewCount: string;
     discount?: number;
     variants?: string[];
-    urlPath?: string;
+    category: string;
+    review?: {
+        score: number;
+        count: number;
+    };
 }

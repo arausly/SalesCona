@@ -34,7 +34,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-gray-600">Price</p>
-                        <p>{product.price}</p>
+                        <p>${product.price}</p>
                     </div>
                     <div>
                         <p className="text-gray-600">Inventory</p>

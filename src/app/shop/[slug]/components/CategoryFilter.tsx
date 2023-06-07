@@ -18,6 +18,7 @@ export const CategoryFilter = () => {
             <div className="flex flex-col">
                 {categories.entries.map((cat) => (
                     <Link
+                        key={cat.id}
                         href={`/shop/${shopName}/${spaceSeparatedStrToPath(
                             cat.label
                         )}`}

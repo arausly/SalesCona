@@ -9,7 +9,12 @@
             "description": "The latest flagship iPhone with an advanced camera system and powerful performance.",
             "variants": ["Teal", "128gb"],
             "urlPath": "/gadgets/iphone-13-pro-max",
-            "discount": 22
+            "discount": 22,
+            "category": "gadgets",
+            "review": {
+                "score": 3,
+                "count": 13
+            }
         },
         {
             "product": "Samsung Galaxy S21 Ultra",
@@ -20,18 +25,24 @@
             "description": "A premium Android smartphone with a high-resolution display and versatile camera capabilities.",
             "variants": ["1TB", "black"],
             "urlPath": "/gadgets/samsung-galaxy-s21-ultra",
-            "discount": 50
+            "discount": 50,
+            "category": "gadgets",
+            "review": {
+                "score": 4,
+                "count": 23
+            }
         },
         {
             "product": "Nike Air Max 90",
             "status": "published",
             "price": "99.99",
-            "inventoryCount": "20",
+            "inventoryCount": "0",
             "viewCount": "1500",
             "description": "Iconic Nike sneakers known for their comfortable cushioning and stylish design.",
             "variants": ["white", "EU 43"],
             "urlPath": "/shoes/nike-air-max-90",
-            "discount": 10
+            "discount": 10,
+            "category": "shoes"
         },
         {
             "product": "Sony PlayStation 5",
@@ -42,7 +53,12 @@
             "description": "The next-generation gaming console with stunning graphics and immersive gameplay experiences.",
             "variants": ["Disc edition"],
             "urlPath": "/electronics/sony-playstation-5",
-            "discount": 5
+            "discount": 5,
+            "category": "electronics",
+            "review": {
+                "score": 1.5,
+                "count": 45
+            }
         },
         {
             "product": "MacBook Pro 2021",
@@ -53,7 +69,12 @@
             "description": "Powerful and versatile laptop designed for professional users with exceptional performance and stunning display.",
             "variants": ["M2", "silver"],
             "urlPath": "/gadgets/macbook-pro-2021",
-            "discount": 20
+            "discount": 20,
+            "category": "gadgets",
+            "review": {
+                "score": 2,
+                "count": 29
+            }
         },
         {
             "product": "Adidas Ultraboost",
@@ -64,7 +85,12 @@
             "description": "Popular running shoes with responsive cushioning and a stylish, modern design.",
             "variants": ["white"],
             "urlPath": "/shoes/adidas-ultraboost",
-            "discount": 12
+            "discount": 12,
+            "category": "shoes",
+            "review": {
+                "score": 5,
+                "count": 49
+            }
         },
         {
             "product": "Amazon Echo Dot",
@@ -75,7 +101,12 @@
             "description": "A compact smart speaker with Alexa voice assistant for convenient voice control and smart home integration.",
             "variants": ["black"],
             "urlPath": "/gadgets/amazon-echo-dot",
-            "discount": 15
+            "discount": 15,
+            "category": "gadgets",
+            "review": {
+                "score": 5,
+                "count": 44
+            }
         },
         {
             "product": "GoPro Hero 9",
@@ -86,7 +117,12 @@
             "description": "A versatile action camera with high-quality video recording and advanced stabilization features.",
             "variants": ["professional"],
             "urlPath": "/electronics/gopro-hero-9",
-            "discount": 18
+            "discount": 18,
+            "category": "electronics",
+            "review": {
+                "score": 3,
+                "count": 38
+            }
         },
         {
             "product": "Nike Dri-FIT T-Shirt",
@@ -97,7 +133,8 @@
             "description": "A comfortable and moisture-wicking athletic shirt for active individuals.",
             "variants": ["white"],
             "urlPath": "/shirts/nike-dri-fit-t-shirt",
-            "discount": 25
+            "discount": 25,
+            "category": "shirts"
         },
         {
             "product": "PlayStation 5 Controller",
@@ -107,7 +144,12 @@
             "viewCount": "400",
             "description": "Official controller for the PlayStation 5 gaming console, providing precise control and immersive gaming experiences.",
             "variants": ["No disc edition"],
-            "urlPath": "/electronics/playstation-5-controller"
+            "urlPath": "/electronics/playstation-5-controller",
+            "category": "electronics",
+            "review": {
+                "score": 5,
+                "count": 64
+            }
         }
     ]
 }

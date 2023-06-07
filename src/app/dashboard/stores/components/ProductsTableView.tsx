@@ -38,6 +38,7 @@ export const ProductsTableView: React.FC<ProductsTableViewProps> = ({
 
     const rows = products.map((product) => ({
         ...product,
+        price: <p>${product.price}</p>,
         status: <ProductStatus status={product.status} />,
         viewCount: (
             <p className="text-gray-600">

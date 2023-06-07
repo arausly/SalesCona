@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import logo from "@assets/images/grok-png.png";
 import { BellIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
-import { BottomTooltip } from "@components/BottomTooltip";
+import { Tooltip } from "@components/BottomTooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CustomerAlertForm } from "./CustomerAlertForm";
@@ -46,9 +46,9 @@ export const Navbar = () => {
                         className="flex items-center justify-center mr-6 mt-1 cursor-pointer group transition ease-in-out"
                         onClick={toggleForm}
                     >
-                        <BottomTooltip message="Exclusive deals">
+                        <Tooltip message="Exclusive deals">
                             <BellIcon className="h-6 w-6 text-gray-200 transition group-hover:font-bold group-hover:scale-125" />
-                        </BottomTooltip>
+                        </Tooltip>
                     </div>
                     <div
                         className="flex items-center justify-center cursor-pointer  hover:scale-125 group transition ease-in-out"
