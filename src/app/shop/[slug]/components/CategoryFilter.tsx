@@ -3,8 +3,13 @@
 import categories from "@data/categories.json";
 import { useGetLastPathname } from "@hooks/useGetLastPathname";
 import { useGetShopName } from "@hooks/useGetShopName";
-import { spaceSeparatedStrToPath } from "@lib/format-utils";
+import {
+    convertPathToSpaceSeparatedStr,
+    spaceSeparatedStrToPath
+} from "@lib/format-utils";
 import Link from "next/link";
+
+//todo use getStaticParams because categories can only be a certain amount
 
 export const CategoryFilter = () => {
     const shopName = useGetShopName();
@@ -16,6 +21,16 @@ export const CategoryFilter = () => {
                 Product <br /> Categories
             </p>
             <div className="flex flex-col">
+                <Link
+                    href={`/shop/${shopName}`}
+                    className={`mb-2 text-base hover:text-[#6d67e4] transition ease-in-out ${
+                        category === shopName
+                            ? "font-semibold text-[#6d67e4]"
+                            : "text-black font-light"
+                    } `}
+                >
+                    All
+                </Link>
                 {categories.entries.map((cat) => (
                     <Link
                         key={cat.id}
@@ -23,7 +38,8 @@ export const CategoryFilter = () => {
                             cat.label
                         )}`}
                         className={`mb-2 text-base hover:text-[#6d67e4] transition ease-in-out ${
-                            category === cat.label
+                            convertPathToSpaceSeparatedStr(category).fmt ===
+                            cat.label.toLowerCase()
                                 ? "font-semibold text-[#6d67e4]"
                                 : "text-black font-light"
                         }`}

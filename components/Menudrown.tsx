@@ -66,7 +66,6 @@ export default function Dropdown(props: DropdownProps) {
                 ) : (
                     props.menuButton
                 )}
-
                 <Transition
                     as={Fragment}
                     enter="transition ease-out duration-100"
