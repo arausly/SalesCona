@@ -7,7 +7,7 @@ import { CustomerProduct } from "../typing";
 import shirt from "@assets/images/shirts.webp";
 import Link from "next/link";
 import { useGetShopName } from "@hooks/useGetShopName";
-import { spaceSeparatedStrToPath } from "@lib/format-utils";
+import { formattedPriceInfo, spaceSeparatedStrToPath } from "@lib/format-utils";
 import { Rating } from "@components/Rating";
 import { Tooltip } from "@components/BottomTooltip";
 import { BellIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
@@ -19,6 +19,10 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const shopName = useGetShopName();
     const [loading, setLoading] = React.useState<boolean>(false);
+    const { price, discountedPrice } = formattedPriceInfo(
+        product.price,
+        product.discount
+    );
     return (
         <div className="flex flex-col h-80 w-60 rounded-md shadow-md overflow-hidden">
             {/** product image box */}
@@ -97,29 +101,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
                 <div className="flex items-center">
                     <p className="mr-2">
-                        {product.discount
-                            ? (
-                                  Number(product.price) -
-                                  (Number(product.discount) / 100) *
-                                      Number(product.price)
-                              ).toLocaleString("en-US", {
-                                  style: "currency",
-                                  currency: "USD",
-                                  minimumFractionDigits: 2
-                              })
-                            : Number(product.price).toLocaleString("en-US", {
-                                  style: "currency",
-                                  currency: "USD",
-                                  minimumFractionDigits: 2
-                              })}
+                        {product.discount ? discountedPrice : price}
                     </p>
                     {product.discount && (
                         <p className="text-xs text-gray-400 line-through">
-                            {Number(product.price).toLocaleString("en-US", {
-                                style: "currency",
-                                currency: "USD",
-                                minimumFractionDigits: 2
-                            })}
+                            {price}
                         </p>
                     )}
                 </div>

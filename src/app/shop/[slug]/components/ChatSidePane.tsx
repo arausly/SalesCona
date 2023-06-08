@@ -14,7 +14,7 @@ export const ChatSidePane: React.FC<ChatSidePaneProps> = ({
     const [email, setEmail] = React.useState<string>(""); //todo change to API data
     return (
         <div
-            className={`absolute ${
+            className={`absolute top-0 bottom-0 ${
                 isOpen ? "w-full h-full opacity-100" : "w-0 h-0 opacity-0"
             }`}
         >

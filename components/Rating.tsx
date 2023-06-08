@@ -10,7 +10,7 @@ export const Rating = ({
     size = "normal"
 }: {
     rating: number;
-    size: "small" | "normal";
+    size?: "small" | "normal";
 }) => {
     return (
         <div className="flex flex-row items-center">

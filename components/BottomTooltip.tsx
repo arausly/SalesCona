@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 const posStyles = {
-    bottom: "group-hover:translate-y-[2.5rem] bottom-0 left-1/2 translate-y-[3rem] translate-x-[-50%]",
+    bottom: "group-hover:translate-y-[2rem] bottom-0 left-1/2 translate-y-[3rem] translate-x-[-50%]",
     left: "left-0 top-[-5%] group-hover:translate-x-[-105%] translate-x-[-140%]"
 };
 

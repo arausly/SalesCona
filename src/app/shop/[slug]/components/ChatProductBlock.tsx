@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ProductQuantityInput } from "./ProductQuantityInput";
 
 //shop/the-lord-of-the-rings/{category}/${product}
 export const ChatProductBlock = () => {
@@ -57,52 +58,7 @@ export const ChatProductBlock = () => {
                             </div>
                             <p className="text-sm">$25.00</p>
                         </div>
-                        <div className="flex h-9 flex-row">
-                            <button
-                                aria-label="Remove cart item"
-                                className="ease flex min-w-[36px] max-w-[36px] items-center justify-center border px-2 transition-all duration-200 hover:border-gray-800 hover:bg-gray-100"
-                            >
-                                <XMarkIcon className="hover:text-accent-3 mx-[1px] h-4 w-4" />
-                            </button>
-                            <p className="ml-2 flex w-full items-center justify-center border">
-                                <span className="w-full px-2">1</span>
-                            </p>
-                            <button
-                                aria-label="Reduce item quantity"
-                                className="ease flex min-w-[36px] max-w-[36px] items-center justify-center border px-2 transition-all duration-200 hover:border-gray-800 hover:bg-gray-100 ml-auto"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    shapeRendering="geometricPrecision"
-                                    className="h-4 w-4"
-                                >
-                                    <path d="M5 12H19"></path>
-                                </svg>
-                            </button>
-                            <button
-                                aria-label="Increase item quantity"
-                                className="ease flex min-w-[36px] max-w-[36px] items-center justify-center border px-2 transition-all duration-200 hover:border-gray-800 hover:bg-gray-100"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    shapeRendering="geometricPrecision"
-                                    className="h-4 w-4"
-                                >
-                                    <path d="M12 5V19"></path>
-                                    <path d="M5 12H19"></path>
-                                </svg>
-                            </button>
-                        </div>
+                        <ProductQuantityInput />
                     </div>
                 ))}
             </div>

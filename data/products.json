@@ -8,13 +8,22 @@
             "viewCount": "1000",
             "description": "The latest flagship iPhone with an advanced camera system and powerful performance.",
             "variants": ["Teal", "128gb"],
+            "variations": {
+                "color": ["Graphite", "Silver", "Gold", "Pacific Blue"],
+                "storage": ["128GB", "256GB", "512GB", "1TB"]
+            },
             "urlPath": "/gadgets/iphone-13-pro-max",
             "discount": 22,
             "category": "gadgets",
             "review": {
                 "score": 3,
                 "count": 13
-            }
+            },
+            "delivery": {
+                "free": true,
+                "cost": 0
+            },
+            "address": "876 Birch Ln, Woodville, GA 56789"
         },
         {
             "product": "Samsung Galaxy S21 Ultra",
@@ -27,10 +36,26 @@
             "urlPath": "/gadgets/samsung-galaxy-s21-ultra",
             "discount": 50,
             "category": "gadgets",
+            "variations": {
+                "color": [
+                    "Phantom Black",
+                    "Phantom Silver",
+                    "Phantom Titanium",
+                    "Phantom Navy",
+                    "Phantom Brown"
+                ],
+                "storage": ["128GB", "256GB", "512GB"],
+                "ram": ["12GB", "16GB"]
+            },
             "review": {
                 "score": 4,
                 "count": 23
-            }
+            },
+            "delivery": {
+                "free": false,
+                "cost": 20
+            },
+            "address": "321 Maple Ln, Countryside, FL 54321"
         },
         {
             "product": "Nike Air Max 90",
@@ -42,7 +67,33 @@
             "variants": ["white", "EU 43"],
             "urlPath": "/shoes/nike-air-max-90",
             "discount": 10,
-            "category": "shoes"
+            "variations": {
+                "color": [
+                    "White",
+                    "Black",
+                    "Grey",
+                    "Red",
+                    "Blue",
+                    "Green",
+                    "Yellow"
+                ],
+                "size": [
+                    "US 7",
+                    "US 7.5",
+                    "US 8",
+                    "US 8.5",
+                    "US 9",
+                    "US 9.5",
+                    "US 10",
+                    "US 10.5",
+                    "US 11"
+                ]
+            },
+            "category": "shoes",
+            "delivery": {
+                "free": false,
+                "cost": 30
+            }
         },
         {
             "product": "Sony PlayStation 5",
@@ -55,9 +106,18 @@
             "urlPath": "/electronics/sony-playstation-5",
             "discount": 5,
             "category": "electronics",
+            "variations": {
+                "edition": ["Standard Edition", "Digital Edition"],
+                "color": ["White"],
+                "storage": ["825GB"]
+            },
             "review": {
                 "score": 1.5,
                 "count": 45
+            },
+            "delivery": {
+                "free": true,
+                "cost": 0
             }
         },
         {
@@ -71,9 +131,25 @@
             "urlPath": "/gadgets/macbook-pro-2021",
             "discount": 20,
             "category": "gadgets",
+            "variations": {
+                "screen_size": ["13-inch", "16-inch"],
+                "color": ["Silver", "Space Gray"],
+                "processor": [
+                    "Apple M1",
+                    "Intel Core i5",
+                    "Intel Core i7",
+                    "Intel Core i9"
+                ],
+                "memory": ["8GB", "16GB", "32GB", "64GB"],
+                "storage": ["256GB", "512GB", "1TB", "2TB", "4TB"]
+            },
             "review": {
                 "score": 2,
                 "count": 29
+            },
+            "delivery": {
+                "free": false,
+                "cost": 10
             }
         },
         {
@@ -87,9 +163,45 @@
             "urlPath": "/shoes/adidas-ultraboost",
             "discount": 12,
             "category": "shoes",
+            "variations": {
+                "color": [
+                    "Black",
+                    "White",
+                    "Grey",
+                    "Blue",
+                    "Red",
+                    "Green",
+                    "Yellow",
+                    "Pink",
+                    "Orange",
+                    "Purple"
+                ],
+                "size": [
+                    "US 6",
+                    "US 6.5",
+                    "US 7",
+                    "US 7.5",
+                    "US 8",
+                    "US 8.5",
+                    "US 9",
+                    "US 9.5",
+                    "US 10",
+                    "US 10.5",
+                    "US 11",
+                    "US 11.5",
+                    "US 12",
+                    "US 12.5",
+                    "US 13"
+                ],
+                "width": ["Regular", "Wide"]
+            },
             "review": {
                 "score": 5,
                 "count": 49
+            },
+            "delivery": {
+                "free": false,
+                "cost": 10
             }
         },
         {
@@ -103,9 +215,17 @@
             "urlPath": "/gadgets/amazon-echo-dot",
             "discount": 15,
             "category": "gadgets",
+            "variations": {
+                "generation": ["3rd Generation", "4th Generation"],
+                "color": ["Charcoal", "Glacier White", "Twilight Blue", "Plum"]
+            },
             "review": {
                 "score": 5,
                 "count": 44
+            },
+            "delivery": {
+                "free": false,
+                "cost": 10
             }
         },
         {
@@ -119,10 +239,21 @@
             "urlPath": "/electronics/gopro-hero-9",
             "discount": 18,
             "category": "electronics",
+            "variations": {
+                "color": ["Black"],
+                "resolution": ["5K", "4K"],
+                "frame_rate": ["30fps", "60fps", "120fps"],
+                "storage": ["64GB", "128GB", "256GB"]
+            },
             "review": {
                 "score": 3,
                 "count": 38
-            }
+            },
+            "delivery": {
+                "free": true,
+                "cost": 0
+            },
+            "address": "789 Oak Ave, Cityville, TX 98765"
         },
         {
             "product": "Nike Dri-FIT T-Shirt",
@@ -132,9 +263,29 @@
             "viewCount": "1800",
             "description": "A comfortable and moisture-wicking athletic shirt for active individuals.",
             "variants": ["white"],
+            "variations": {
+                "color": [
+                    "Black",
+                    "White",
+                    "Grey",
+                    "Blue",
+                    "Red",
+                    "Green",
+                    "Yellow",
+                    "Pink",
+                    "Orange",
+                    "Purple"
+                ],
+                "size": ["XS", "S", "M", "L", "XL", "XXL"],
+                "gender": ["Men", "Women", "Unisex"]
+            },
             "urlPath": "/shirts/nike-dri-fit-t-shirt",
             "discount": 25,
-            "category": "shirts"
+            "category": "shirts",
+            "delivery": {
+                "free": false,
+                "cost": 10
+            }
         },
         {
             "product": "PlayStation 5 Controller",
@@ -149,7 +300,20 @@
             "review": {
                 "score": 5,
                 "count": 64
-            }
+            },
+            "variations": {
+                "color": [
+                    "Midnight Black",
+                    "Cosmic Red",
+                    "Glacier Blue",
+                    "DualSense White"
+                ]
+            },
+            "delivery": {
+                "free": false,
+                "cost": 32.4
+            },
+            "address": "543 Willow Dr, Beachside, NC 09876"
         }
     ]
 }

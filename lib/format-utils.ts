@@ -69,6 +69,25 @@ export const getCurrencies = () => {
     }));
 };
 
+export const formattedPriceInfo = (
+    price: number | string,
+    discount?: number | string
+) => ({
+    price: Number(price).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2
+    }),
+    discountedPrice: (
+        Number(price) -
+        (Number(discount) / 100) * Number(price)
+    ).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2
+    })
+});
+
 export const formatTimeAgo = (timestamp: number): string => {
     const currentDate = Date.now();
     const timeDifference = currentDate - timestamp;
