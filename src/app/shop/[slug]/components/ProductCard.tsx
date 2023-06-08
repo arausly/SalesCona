@@ -97,18 +97,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
                 <div className="flex items-center">
                     <p className="mr-2">
-                        $
                         {product.discount
                             ? (
                                   Number(product.price) -
                                   (Number(product.discount) / 100) *
                                       Number(product.price)
-                              ).toFixed(2)
-                            : product.price}
+                              ).toLocaleString("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                  minimumFractionDigits: 2
+                              })
+                            : Number(product.price).toLocaleString("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                  minimumFractionDigits: 2
+                              })}
                     </p>
                     {product.discount && (
                         <p className="text-xs text-gray-400 line-through">
-                            {product.price}
+                            {Number(product.price).toLocaleString("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                                minimumFractionDigits: 2
+                            })}
                         </p>
                     )}
                 </div>
