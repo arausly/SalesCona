@@ -5,12 +5,12 @@ import logo from "@assets/images/grok-png.png";
 import { BellIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@components/BottomTooltip";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { CustomerAlertForm } from "./CustomerAlertForm";
 import { ChatSidePane } from "./ChatSidePane";
+import { useGetShopName } from "@hooks/useGetShopName";
 
 export const Navbar = () => {
-    const pathname = usePathname();
+    const shopName = useGetShopName();
     const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false);
     const [chatSideModalOpen, setChatSideModalOpen] =
         React.useState<boolean>(false);
@@ -34,7 +34,10 @@ export const Navbar = () => {
                 closeChatPane={toggleChatPane}
             />
             <div className="w-full absolute top-0 left-0 z-20 h-24 flex items-center justify-between p-6">
-                <Link href={pathname} className="h-12 w-20 flex items-center">
+                <Link
+                    href={`/shop/${shopName}`}
+                    className="h-12 w-20 flex items-center"
+                >
                     <Image
                         src={logo}
                         alt="brand logo"

@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "rc-tooltip/assets/bootstrap_white.css";
-
 :root {
     --foreground-rgb: 0, 0, 0;
     --background-rgb: 255, 255, 255;

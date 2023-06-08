@@ -348,24 +348,38 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 leaveTo="translate-y-[0%]"
                                 show={deliveryAvailable}
                             >
-                                <div className="flex items-center mb-4">
+                                <div className="flex items-end mb-4">
                                     <div className="flex-1 mr-8">
-                                        <p className="text-xs mb-2 text-gray-600">
+                                        <p className="text-xs mb-1 text-gray-600">
                                             Additional Charge (Optional)
+                                        </p>
+                                        <p className="text-xs font-light mb-2">
+                                            Delivery charges will likely vary
+                                            per customer's location. The price
+                                            here should be the base price for
+                                            the possible closest location your
+                                            customer can be.
                                         </p>
                                         <div className="w-full relative">
                                             <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
                                                 $
                                             </span>
                                             <input
-                                                placeholder="200"
+                                                placeholder="15"
                                                 className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                             />
                                         </div>
                                     </div>
                                     <div className="flex-1 mr-8">
-                                        <p className="text-xs mb-2 text-gray-600">
+                                        <p className="text-xs mb-1 text-gray-600">
                                             Location Restriction (Optional)
+                                        </p>
+                                        <p className="text-xs font-light mb-2">
+                                            Specify the places you can deliver
+                                            to, regions, provinces, state etc.
+                                            Or if delivery is{" "}
+                                            <strong>worldwide</strong>, you can
+                                            specify worldwide for short
                                         </p>
                                         <input
                                             placeholder="Only Lagos"
