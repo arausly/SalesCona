@@ -28,7 +28,7 @@ export const SortBy = () => {
     );
 
     return (
-        <div className="flex flex-col bg-white py-6 px-12">
+        <div className="flex flex-col bg-white py-6 px-12 shadow-sm">
             <p className="uppercase font-normal tracking-wider mb-4">Sort by</p>
             <div className="flex flex-col">
                 {/**by view count */}

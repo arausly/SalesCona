@@ -45,10 +45,10 @@ export const VariationBox: React.FC<VariationProps> = ({
                               selectedOption === option
                                   ? "border-black"
                                   : "border-gray-200"
-                          }  border relative h-12 w-12 rounded-full shadow-sm flex justify-center items-center transition ease-in-out mr-2 cursor-pointer`}
+                          }  border relative h-8 w-8 rounded-full shadow-sm flex justify-center items-center transition ease-in-out mr-2 cursor-pointer`}
                       >
                           <div
-                              className="rounded-full h-8 w-8"
+                              className="rounded-full h-6 w-6"
                               style={{
                                   backgroundColor: option
                                       .split(" ")

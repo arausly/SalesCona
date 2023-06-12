@@ -1,0 +1,40 @@
+{
+    "reviews": [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "rating": 4,
+            "comment": "I absolutely love this product! It exceeded my expectations and has been a game-changer for me. Highly recommended!",
+            "date": "2023-06-01"
+        },
+        {
+            "id": 2,
+            "name": "Jane Smith",
+            "rating": 2,
+            "comment": "I'm disappointed with the quality of this product. It didn't live up to the advertised features and stopped working after a short period of use. Not recommended.",
+            "date": "2023-05-28"
+        },
+        {
+            "id": 3,
+            "name": "Mike Johnson",
+            "rating": 3,
+            "comment": "The performance of this product is average. It works as expected but doesn't stand out compared to similar options in the market.",
+            "date": "2023-05-30"
+        },
+        {
+            "id": 4,
+            "name": "Sarah Adams",
+            "rating": 5,
+            "comment": "The customer service provided by the company is outstanding! They were prompt in addressing my concerns and went above and beyond to ensure my satisfaction.",
+            "date": "2023-06-02"
+        },
+        {
+            "id": 5,
+            "name": "David Wilson",
+            "rating": 1,
+            "comment": "My experience with this product was terrible. It arrived damaged, and despite contacting customer support multiple times, I didn't receive any assistance. Avoid this product!",
+            "date": "2023-05-29"
+        }
+    ],
+    "overallRating": 3.2
+}

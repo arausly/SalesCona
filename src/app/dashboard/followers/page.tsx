@@ -17,7 +17,7 @@ import {
 import blurredImage from "@assets/images/blurred-image.png";
 import { Modal } from "@components/Dialog/Dialog";
 import { RegularAvatar } from "@components/Avatar/RegularAvatar";
-import { BottomTooltip } from "@components/BottomTooltip";
+import { Tooltip } from "@components/BottomTooltip";
 
 /**
  * if paid user, you can see the email and phone number of your subscribers
@@ -139,12 +139,12 @@ export default function Followers() {
             label: (
                 <div className="flex flex-row items-center">
                     <p className="mr-2">Email</p>
-                    <BottomTooltip message="View contact information">
+                    <Tooltip message="View contact information">
                         <EyeSlashIcon
                             className="w-5 h-5 cursor-pointer"
                             onClick={() => setIsModalOpen(true)}
                         />
-                    </BottomTooltip>
+                    </Tooltip>
                 </div>
             )
         },

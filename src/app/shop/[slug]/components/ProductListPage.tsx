@@ -15,7 +15,7 @@ export const ProductListPage: React.FC<ProductListProps> = ({ products }) => {
                 <CategoryFilter />
             </div>
             <div className="flex-1 flex flex-col items-center">
-                <div className="w-2/5">
+                <div className="w-2/5 shadow-sm">
                     <SearchField placeholder="Search products..." />
                 </div>
                 <div className="mt-8 flex gap-4 justify-center flex-wrap">
