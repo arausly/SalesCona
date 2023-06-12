@@ -16,7 +16,7 @@ export const VariationBox: React.FC<VariationProps> = ({
     onSelect
 }) => {
     return (
-        <div className="overflow-x-auto mb-3 flex overflow-y-hidden">
+        <div className="overflow-x-auto no-scrollbar mb-3 flex overflow-y-hidden">
             {type !== "color"
                 ? options.map((option) => (
                       <div
@@ -25,7 +25,7 @@ export const VariationBox: React.FC<VariationProps> = ({
                               selectedOption === option
                                   ? "bg-black"
                                   : "bg-zinc-200"
-                          } flex text-sm items-center justify-center rounded-md shadow-sm transition ease-in-out mr-2 py-1 px-2 cursor-pointer`}
+                          } flex text-sm items-center min-w-max justify-center rounded-md shadow-sm transition ease-in-out mr-2 py-1 px-2 cursor-pointer`}
                       >
                           <p
                               className={`${
