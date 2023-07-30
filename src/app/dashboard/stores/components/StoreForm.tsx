@@ -15,7 +15,7 @@ import FileWidget, { FileWithPreview } from "@components/FileWidget";
 
 //styles
 import { getCurrencies, spaceSeparatedStrToPath } from "@lib/format-utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Breadcrumb } from "@components/Breadcrumb";
 import { ImagePicker } from "./ImagePicker";
 
@@ -81,6 +81,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     const [selectedCurrency, setSelectedCurrency] = React.useState<Currency>();
     const timeoutId = React.useRef<ReturnType<typeof setTimeout> | undefined>();
     const currencies = React.useRef<MultiSelectProps["items"]>(getCurrencies());
+    const router = useRouter();
     const user = useGetUser();
     const { productCategories, createNewProductCategory } =
         useGetProductCategories();
@@ -90,8 +91,6 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     const [storePath] = pathname.split("/").slice(-2);
 
     const shopUrl = `${baseURL}/shop/${generateShopAlias(storeName)}`;
-
-    console.log({ savedStore });
 
     //get existing store
     React.useEffect(() => {
@@ -430,9 +429,17 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         shop_logo
                     })
                     .eq("id", newStore.id);
+
+                router.push("/dashboard/stores");
+                toast(<p className="text-sm">Successfully registered</p>, {
+                    type: "success"
+                });
             }
         } catch (err) {
-            console.error("UPSERT_ERROR ==>", err);
+            console.error("UPSERT_ERROR ==>", err); //todo remove in prod
+            toast(<p className="text-sm">Failed to create store</p>, {
+                type: "error"
+            });
         } finally {
             setSaving(false);
             setPublishing(false);
@@ -492,7 +499,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                                 <CheckIcon className="h-5 w-5 text-white mr-2" />
                             }
                             textClassNames="text-white"
-                            className="w-32 h-10 rounded-full primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                            className="text-white w-32 h-10 rounded-full primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
                         />
                     </div>
                 </div>
