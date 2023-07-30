@@ -10,9 +10,11 @@ import {
 import { StoreContext } from "./StoreList";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
 import { generateShopAlias } from "@lib/common.utils";
+import { Store } from "../typing";
+import { baseURL } from "@lib/constants";
 
 interface StoreCardMenuProps {
-    name: string;
+    store: Store;
 }
 
 const actions = [
@@ -22,29 +24,31 @@ const actions = [
 ];
 
 export const StoreCardMenuDropdown: React.FC<StoreCardMenuProps> = (props) => {
-    const { toggleDeleteModal, toggleRenameModal } =
+    const { toggleDeleteModal, toggleRenameModal, handleStoreSelection } =
         React.useContext(StoreContext);
 
     const handleDropdownSelection = React.useCallback(
         (item: string) => {
             switch (item) {
                 case "Rename":
+                    handleStoreSelection(props.store);
                     toggleRenameModal();
                     break;
                 case "Delete":
+                    handleStoreSelection(props.store);
                     toggleDeleteModal();
                     break;
                 case "Open shop page":
                     window.open(
-                        `${window.location.origin}/shop/${generateShopAlias(
-                            props.name
+                        `${baseURL}/shop/${generateShopAlias(
+                            props.store.name
                         )}`,
                         "_blank",
                         "noreferrer"
                     );
             }
         },
-        [props.name, toggleDeleteModal, toggleRenameModal]
+        [props.store, toggleDeleteModal, toggleRenameModal]
     );
 
     return (

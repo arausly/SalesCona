@@ -1,16 +1,22 @@
 import React, { ReactNode } from "react";
-//test data
-import stores from "@data/stores.json";
+
 import { StoreCard } from "./StoreCard";
 import { useGetStoreImage } from "../hooks/useGetStoreImage";
 import { RenameModal } from "./modals/RenameModal";
 import { DeleteModal } from "./modals/DeleteModal";
+import { Store } from "../typing";
+import { useGetStores } from "@hooks/useGetStores";
 
 interface StoreContextType {
     renameModalIsOpen: boolean;
     deleteModalIsOpen: boolean;
     toggleRenameModal: () => void;
     toggleDeleteModal: () => void;
+    currentStore?: Store;
+    stores: Store[];
+    refreshStores: () => void;
+    searchStores: (query: string) => void;
+    handleStoreSelection: (store: Store) => void;
 }
 
 const NOP = () => {};
@@ -20,13 +26,19 @@ export const StoreContext = React.createContext<StoreContextType>({
     deleteModalIsOpen: false,
     toggleDeleteModal: NOP,
     toggleRenameModal: NOP,
+    stores: [],
+    refreshStores: NOP,
+    searchStores: NOP,
+    handleStoreSelection: NOP
 });
 
-const StoreProvider = ({ children }: { children: ReactNode }) => {
+export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const [renameModalIsOpen, setRenameModalOpen] =
         React.useState<boolean>(false);
     const [deleteModalIsOpen, setDeleteModalOpen] =
         React.useState<boolean>(false);
+    const [currentStore, setCurrentStore] = React.useState<Store>();
+    const { stores, refreshStores, searchStores } = useGetStores();
 
     const toggleRenameModal = React.useCallback(() => {
         setRenameModalOpen((s) => !s);
@@ -36,11 +48,23 @@ const StoreProvider = ({ children }: { children: ReactNode }) => {
         setDeleteModalOpen((s) => !s);
     }, []);
 
+    const handleStoreSelection = React.useCallback(
+        (campaign: any = undefined) => {
+            setCurrentStore(campaign);
+        },
+        []
+    );
+
     const value = {
         renameModalIsOpen,
         deleteModalIsOpen,
         toggleRenameModal,
         toggleDeleteModal,
+        handleStoreSelection,
+        currentStore,
+        stores,
+        refreshStores,
+        searchStores
     };
 
     return (
@@ -59,17 +83,18 @@ const StoreProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const StoreList = () => {
-    const storeCoverImages = useGetStoreImage(stores.entries.length);
+    const { stores } = React.useContext(StoreContext);
+    const storeCoverImages = useGetStoreImage(stores.length);
 
     return (
-        <StoreProvider>
-            {stores.entries.map((store, i) => (
+        <>
+            {stores.map((store, i) => (
                 <StoreCard
-                    key={store.url + i}
+                    key={store.id}
                     store={store}
                     img={(storeCoverImages ?? [])[i]}
                 />
             ))}
-        </StoreProvider>
+        </>
     );
 };

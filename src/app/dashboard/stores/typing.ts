@@ -28,4 +28,10 @@ export interface Store {
     }>;
     currency: string;
     isPublished: boolean;
+    categories?: Array<{
+        id: number;
+        created_at: string;
+        category: ProductCategory;
+        store: string;
+    }>;
 }

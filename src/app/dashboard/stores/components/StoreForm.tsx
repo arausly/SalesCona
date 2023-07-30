@@ -375,6 +375,15 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
             if (data?.length && !error) {
                 const newStore = data[0] as Store;
+                await supabase
+                    .from(supabaseTables.store_categories)
+                    .upsert(
+                        storeCategories?.map((cat) => ({
+                            category: cat.id,
+                            store: newStore.id
+                        }))
+                    )
+                    .select();
                 setSavedStore(newStore);
                 let shop_logo,
                     bannerUrls: (string | undefined)[] = [];
