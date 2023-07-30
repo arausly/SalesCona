@@ -6,7 +6,6 @@ import { CheckIcon, PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import { usePathname } from "next/navigation";
 import { ImagePicker } from "./ImagePicker";
-import { CategorySelectInput } from "./CategorySelectInput";
 import { ProductVariantForm } from "./ProductVariantForm";
 import MultiSelectInput from "@components/Input/MultiSelectInput";
 
@@ -245,7 +244,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 <p className="mr-1 text-xs text-gray-600">
                                     Product Category
                                 </p>
-                                <CategorySelectInput onSelect={() => {}} />
+                                {/* <CategorySelectInput onSelect={() => {}} /> */}
                             </div>
                             <div className="flex w-full justify-between items-center mb-6">
                                 <div className="flex flex-col">

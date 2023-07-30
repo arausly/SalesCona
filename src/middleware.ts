@@ -28,6 +28,7 @@ export async function middleware(req: NextRequest) {
             pathname.startsWith("/login") ||
             pathname.startsWith("/register") ||
             pathname.startsWith("/verify") ||
+            pathname.startsWith("/favicon.ico") ||
             pathname.startsWith("/shop"))
     ) {
         return NextResponse.next();

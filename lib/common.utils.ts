@@ -22,3 +22,32 @@ export const copyToClipboard = (text: string) => {
         document.body.removeChild(textarea);
     }
 };
+
+export function debounce<T extends (...args: any[]) => void>(
+    func: T,
+    delay: number
+) {
+    let timerId: NodeJS.Timeout | null;
+
+    return function (this: any, ...args: Parameters<T>) {
+        if (timerId) {
+            clearTimeout(timerId);
+        }
+
+        timerId = setTimeout(() => {
+            func.apply(this, args);
+            timerId = null;
+        }, delay);
+    };
+}
+
+export function extractCurrencyInBracket(input: string): string | null {
+    const regex = /\((.*?)\)/; // Regular expression to match text inside parentheses
+    const match = regex.exec(input);
+
+    if (match && match.length > 1) {
+        return match[1]; // Return the content inside the first set of parentheses
+    } else {
+        return null; // Return null if no match is found
+    }
+}

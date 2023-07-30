@@ -4,10 +4,12 @@ import Image from "next/image";
 import logo from "@assets/images/kolony-logo.webp";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
 import { inputClasses } from "../../../../components/Input/input";
 import { useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { baseURL } from "@lib/constants";
+import { Button } from "@components/Button";
+import { toast } from "react-toastify";
 
 interface RegisterFormValues {
     email: string;
@@ -35,7 +37,7 @@ export default function Register() {
                     const { data, error } = await supabase.auth.signUp({
                         ...values,
                         options: {
-                            emailRedirectTo: `${window.location.protocol}//${window.location.hostname}:3000/verify`,
+                            emailRedirectTo: `${baseURL}/verify`,
                             data: {
                                 firstname: values.firstname,
                                 lastname: values.lastname
@@ -43,10 +45,14 @@ export default function Register() {
                         }
                     });
                     if (error) throw error;
-                    toast.success("Successfully registered");
+                    toast(<p className="text-sm">Successfully registered</p>, {
+                        type: "success"
+                    });
                     router.replace("/verify");
                 } catch (err) {
-                    toast.error("Failed to register");
+                    toast(<p className="text-sm">Failed to register</p>, {
+                        type: "error"
+                    });
                 } finally {
                     setLoading(false);
                 }
@@ -183,23 +189,14 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <button
-                            disabled={loading}
+                        <Button
+                            loading={loading}
+                            loadingText="Registering"
+                            text="Register"
                             type="submit"
+                            disabled={loading}
                             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                        >
-                            {loading ? (
-                                <>
-                                    <svg
-                                        className="animate-spin h-5 w-5 mr-3 text-white"
-                                        viewBox="0 0 24 24"
-                                    ></svg>
-                                    Registering...
-                                </>
-                            ) : (
-                                "Register"
-                            )}
-                        </button>
+                        />
                     </div>
                 </form>
 

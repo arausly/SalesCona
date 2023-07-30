@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "@assets/images/kolony-logo.webp";
 import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
 import { inputClasses } from "../../../../components/Input/input";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useRouter } from "next/navigation";
+import { Button } from "@components/Button";
+import { toast } from "react-toastify";
 
 interface LoginFormValues {
     email: string;
@@ -33,10 +34,14 @@ export default function Login() {
                     const { data, error } =
                         await supabase.auth.signInWithPassword(values);
                     if (error) throw error;
-                    toast.success("Successful login");
+                    toast(<p className="text-sm">Successful login</p>, {
+                        type: "success"
+                    });
                     router.replace("/dashboard");
                 } catch (err) {
-                    toast.error("Failed to login");
+                    toast(<p className="text-sm">Failed to login</p>, {
+                        type: "error"
+                    });
                 } finally {
                     setLoading(false);
                 }
@@ -115,25 +120,15 @@ export default function Login() {
                             />
                         </div>
                     </div>
-
                     <div>
-                        <button
-                            disabled={loading}
+                        <Button
+                            loading={loading}
+                            loadingText="Signing in"
+                            text="Login"
                             type="submit"
+                            disabled={loading}
                             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                        >
-                            {loading ? (
-                                <>
-                                    <svg
-                                        className="animate-spin h-5 w-5 mr-3 text-white"
-                                        viewBox="0 0 24 24"
-                                    ></svg>
-                                    Signing in...
-                                </>
-                            ) : (
-                                "Login"
-                            )}
-                        </button>
+                        />
                     </div>
                 </form>
 

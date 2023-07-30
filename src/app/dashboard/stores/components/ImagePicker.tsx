@@ -190,7 +190,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
                             </p>
                         </div>
                         <div
-                            className="flex ml-auto flex-col items-center justify-center w-8 h-8 hover:bg-red-100"
+                            className="flex ml-auto rounded-sm flex-col items-center justify-center w-8 h-8 hover:bg-red-100"
                             onClick={() => handleRemoveBannerSlide(index)}
                         >
                             <TrashIcon className="w-5 h-5 text-red-500 cursor-pointer" />

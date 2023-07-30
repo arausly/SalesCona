@@ -1,19 +1,20 @@
 "use client";
-//todo replace categories dummy data with API data
-import categories from "@data/categories.json";
+import Link from "next/link";
+
 import { useGetLastPathname } from "@hooks/useGetLastPathname";
+import { useGetProductCategories } from "@hooks/useGetProductCategories";
 import { useGetShopName } from "@hooks/useGetShopName";
 import {
     convertPathToSpaceSeparatedStr,
     spaceSeparatedStrToPath
 } from "@lib/format-utils";
-import Link from "next/link";
 
 //todo use getStaticParams because categories can only be a certain amount
 
 export const CategoryFilter = () => {
     const shopName = useGetShopName();
     const category = useGetLastPathname();
+    const { productCategories } = useGetProductCategories();
 
     return (
         <div className="flex flex-col bg-white py-6 px-12 shadow-sm">
@@ -31,7 +32,8 @@ export const CategoryFilter = () => {
                 >
                     All
                 </Link>
-                {categories.entries.map((cat) => (
+                {/** //todo this should be the shop's product categories not the general one  */}
+                {productCategories.map((cat) => (
                     <Link
                         key={cat.id}
                         href={`/shop/${shopName}/${spaceSeparatedStrToPath(
