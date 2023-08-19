@@ -339,6 +339,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                 })
             )
                 return;
+            isDraft ? setSaving(true) : setPublishing(true);
 
             async function updateOrCreateStore(storeSlug: string) {
                 const createdStore = await supabase
@@ -357,7 +358,6 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                     .eq("id", existingStore?.id ?? savedStore?.id)
                     .eq("user_id", user?.id)
                     .select();
-                isDraft ? setSaving(true) : setPublishing(true);
                 setSavedStore(
                     createdStore?.data
                         ? (createdStore?.data[0] as Store)
@@ -496,7 +496,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         <Button
                             loading={saving}
                             loadingText="Saving"
-                            disabled={saving}
+                            disabled={publishing || saving}
                             onClick={async () => await upsertStore(true)}
                             leftIcon={
                                 <PencilIcon className="h-4 w-4 mr-2 text-gray-700" />
@@ -507,6 +507,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         <Button
                             loading={publishing}
                             loadingText="Publishing"
+                            disabled={publishing || saving}
                             text="Publish"
                             onClick={async () => await upsertStore(false)}
                             leftIcon={
