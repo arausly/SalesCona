@@ -1,21 +1,51 @@
 import React from "react";
 import { Modal } from "@components/Dialog/Dialog";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { SUPPORT_EMAIL } from "@lib/constants";
+import { SUPPORT_EMAIL, supabaseTables } from "@lib/constants";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { useGetUser } from "@hooks/useGetUser";
+import { StoreContext } from "../StoreList";
+import { toast } from "react-toastify";
+import { Button } from "@components/Button";
 
 interface DeleteModalProps {
     isOpen: boolean;
     toggleModal: () => void;
 }
 
-const textToConfirm = "placeholder-store-name";
-
 export const DeleteModal: React.FC<DeleteModalProps> = ({
     isOpen,
-    toggleModal,
+    toggleModal
 }) => {
+    const [loading, setLoading] = React.useState(false);
+    const { supabase } = useBrowserSupabase();
+    const user = useGetUser();
+    const { currentStore, refreshStores } = React.useContext(StoreContext);
     const [confirmedText, setConfirmedText] = React.useState<string>("");
-    const isDisabled = confirmedText !== textToConfirm;
+    const isDisabled = confirmedText !== currentStore?.name?.toLowerCase();
+
+    const handleRemoveStore = React.useCallback(async () => {
+        if (!user || !currentStore) return;
+        try {
+            setLoading(true);
+            const { error } = await supabase
+                .from(supabaseTables.stores)
+                .update({ is_soft_deleted: true })
+                .eq("user_id", user.id)
+                .eq("id", currentStore.id);
+            if (!error) {
+                refreshStores();
+                toggleModal();
+                toast(<p className="text-sm">Successfully deleted store</p>, {
+                    type: "success"
+                });
+            }
+        } catch (err) {
+        } finally {
+            setLoading(false);
+        }
+    }, [user, currentStore, refreshStores, supabase, toggleModal]);
+
     return (
         <Modal title="Delete Store" isOpen={isOpen} toggleModal={toggleModal}>
             <div className="borer-t border-slate-100 mt-4">
@@ -42,7 +72,11 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
                 </div>
             </div>
             <div className="w-full mt-4">
-                <label className="text-sm mb-3 select-none">{`To confirm, type "${textToConfirm}" in the box below`}</label>
+                <label className="text-sm mb-3 select-none">
+                    To confirm, type{" "}
+                    <strong>{currentStore?.name?.toLowerCase()}</strong> in the
+                    box below
+                </label>
                 <input
                     type="text"
                     id="table-search"
@@ -54,20 +88,21 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
                             : "border-gray-400"
                     }`}
                 />
-                <button
-                    type="button"
+
+                <Button
+                    loading={loading}
+                    text="Delete campaign"
+                    loadingText="Deleting..."
+                    onClick={handleRemoveStore}
                     disabled={isDisabled}
                     className={`mt-4 w-full inline-flex justify-center rounded-md border border-transparent
-                     px-4 py-2 text-sm font-medium text-white  focus:outline-none 
-                     ease-in-out focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-                         isDisabled
-                             ? "bg-red-200 cursor-not-allowed"
-                             : " bg-red-600 cursor-pointer hover:bg-red-700"
-                     }`}
-                    onClick={toggleModal}
-                >
-                    Delete store
-                </button>
+                    px-4 py-2 text-sm font-medium text-white  focus:outline-none 
+                    ease-in-out focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                        isDisabled
+                            ? "bg-red-200 cursor-not-allowed"
+                            : " bg-red-600 cursor-pointer hover:bg-red-700"
+                    }`}
+                />
             </div>
         </Modal>
     );
