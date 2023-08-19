@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Pacifico } from "next/font/google";
 
 //images
@@ -15,44 +15,64 @@ import {
     BuildingStorefrontIcon,
     ChatBubbleBottomCenterTextIcon,
     HomeModernIcon,
-    UsersIcon,
+    UsersIcon
 } from "@heroicons/react/24/outline";
+import { storageKeys } from "@lib/constants";
+import { toast } from "react-toastify";
+import { Spinner } from "@components/Spinner";
 
 const links = [
     {
         pathname: "/dashboard",
         title: "Home",
-        icon: HomeModernIcon,
+        icon: HomeModernIcon
     },
     {
         pathname: "/dashboard/stores",
         title: "Stores",
-        icon: BuildingStorefrontIcon,
+        icon: BuildingStorefrontIcon
     },
     {
         pathname: "/dashboard/followers",
         title: "Followers",
-        icon: UsersIcon,
+        icon: UsersIcon
     },
     {
         pathname: "/dashboard/messages",
         icon: ChatBubbleBottomCenterTextIcon,
-        title: "Messages",
-    },
+        title: "Messages"
+    }
 ];
 
 const pacifico = Pacifico({
     weight: "400",
-    subsets: ["latin"],
+    subsets: ["latin"]
 });
 
 export default function Sidebar() {
     const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
     const pathname = usePathname();
     const { supabase } = useBrowserSupabase();
+    const [signingOut, setSigningOut] = React.useState<boolean>(false);
+    const router = useRouter();
 
     const handleSignOut = React.useCallback(async () => {
-        await supabase.auth.signOut();
+        try {
+            setSigningOut(true);
+            const { error } = await supabase.auth.signOut();
+            localStorage.removeItem(storageKeys.user);
+            if (!error) {
+                router.push("/login");
+            } else {
+                toast("Couldn't logout, check your internet connection", {
+                    type: "warning"
+                });
+            }
+        } catch (err) {
+            toast("Something went wrong", { type: "error" });
+        } finally {
+            setSigningOut(false);
+        }
     }, [supabase.auth]);
 
     const handleNavToggle = React.useCallback(() => {
@@ -110,10 +130,14 @@ export default function Sidebar() {
                     </Link>
                 ))}
                 <div
-                    className={styles.sidebarNavLinkItem}
+                    className={`${styles.sidebarNavLinkItem} items-center flex `}
                     onClick={handleSignOut}
                 >
-                    <ArrowLeftOnRectangleIcon className="h-6 w-6" />
+                    {signingOut ? (
+                        <Spinner size="tiny" />
+                    ) : (
+                        <ArrowLeftOnRectangleIcon className="h-6 w-6" />
+                    )}
                     <p className="text-sm md:text-lg">Logout</p>
                 </div>
             </div>
