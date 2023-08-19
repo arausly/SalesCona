@@ -1,8 +1,8 @@
 import React from "react";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { useGetUser } from "./useGetUser";
+import { useGetUser } from "../../../../../hooks/useGetUser";
 import { supabaseTables } from "@lib/constants";
-import { Store } from "../src/app/dashboard/stores/typing";
+import { Store } from "../typing";
 import { debounce } from "@lib/common.utils";
 
 export const useGetStores = () => {
@@ -29,6 +29,7 @@ export const useGetStores = () => {
                 }
             } catch (err) {
             } finally {
+                setLoading(false);
             }
         })();
     }, [user, refreshCounter]);
@@ -65,7 +66,7 @@ export const useGetStores = () => {
                 await Promise.all(
                     stores.map(async (store) => {
                         const { data: storeCategories, error } = await supabase
-                            .from(supabaseTables.store_categories)
+                            .from(supabaseTables.store_product_categories)
                             .select("category(*)")
                             .eq("store", store.id);
 
@@ -80,5 +81,5 @@ export const useGetStores = () => {
         []
     );
 
-    return { stores, loading, searchStores, refreshStores };
+    return { stores, storeLoading: loading, searchStores, refreshStores };
 };

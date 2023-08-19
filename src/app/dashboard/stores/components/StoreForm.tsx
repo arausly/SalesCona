@@ -306,6 +306,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
      * create or update store if it exist
      */
     const upsertStore = React.useCallback(async () => {
+        const storeSlug = spaceSeparatedStrToPath(storeName?.trim());
         if (!user) {
             toast(<p className="text-sm">User information invalid</p>, {
                 type: "error"
@@ -368,20 +369,20 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
         }
 
         try {
-            //create
-            const storeSlug = spaceSeparatedStrToPath(storeName?.trim());
-
             const { data, error } = await updateOrCreateStore(storeSlug);
-
             if (data?.length && !error) {
                 const newStore = data[0] as Store;
                 await supabase
-                    .from(supabaseTables.store_categories)
+                    .from(supabaseTables.store_product_categories)
                     .upsert(
                         storeCategories?.map((cat) => ({
                             category: cat.id,
-                            store: newStore.id
-                        }))
+                            store: newStore.id,
+                            secondary_key: `${cat.id}-${newStore.id}` //:)
+                        })),
+                        {
+                            ignoreDuplicates: true
+                        }
                     )
                     .select();
                 setSavedStore(newStore);

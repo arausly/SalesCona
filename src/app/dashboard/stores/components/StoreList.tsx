@@ -5,7 +5,7 @@ import { useGetStoreImage } from "../hooks/useGetStoreImage";
 import { RenameModal } from "./modals/RenameModal";
 import { DeleteModal } from "./modals/DeleteModal";
 import { Store } from "../typing";
-import { useGetStores } from "@hooks/useGetStores";
+import { useGetStores } from "../hooks/useGetStores";
 
 interface StoreContextType {
     renameModalIsOpen: boolean;
@@ -17,6 +17,7 @@ interface StoreContextType {
     refreshStores: () => void;
     searchStores: (query: string) => void;
     handleStoreSelection: (store: Store) => void;
+    storeLoading: boolean;
 }
 
 const NOP = () => {};
@@ -29,7 +30,8 @@ export const StoreContext = React.createContext<StoreContextType>({
     stores: [],
     refreshStores: NOP,
     searchStores: NOP,
-    handleStoreSelection: NOP
+    handleStoreSelection: NOP,
+    storeLoading: false
 });
 
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
@@ -38,7 +40,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const [deleteModalIsOpen, setDeleteModalOpen] =
         React.useState<boolean>(false);
     const [currentStore, setCurrentStore] = React.useState<Store>();
-    const { stores, refreshStores, searchStores } = useGetStores();
+    const { stores, refreshStores, searchStores, storeLoading } =
+        useGetStores();
 
     const toggleRenameModal = React.useCallback(() => {
         setRenameModalOpen((s) => !s);
@@ -64,7 +67,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         currentStore,
         stores,
         refreshStores,
-        searchStores
+        searchStores,
+        storeLoading
     };
 
     return (
