@@ -1,10 +1,11 @@
+import { baseURL } from "@lib/constants";
 import { createMiddlewareSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse, NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next();
     const supabase = createMiddlewareSupabaseClient({ req, res });
-    const { pathname } = req.nextUrl;
+    const { pathname, href } = req.nextUrl;
 
     const {
         data: { session }
@@ -29,7 +30,9 @@ export async function middleware(req: NextRequest) {
             pathname.startsWith("/register") ||
             pathname.startsWith("/verify") ||
             pathname.startsWith("/favicon.ico") ||
-            pathname.startsWith("/shop"))
+            pathname.startsWith("/forgot-password") ||
+            pathname.startsWith("/shop") ||
+            href === `${baseURL}/`)
     ) {
         return NextResponse.next();
     }

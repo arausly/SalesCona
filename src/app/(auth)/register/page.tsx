@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { baseURL } from "@lib/constants";
 import { Button } from "@components/Button";
-import { toast } from "react-toastify";
 
 interface RegisterFormValues {
     email: string;
@@ -93,6 +92,7 @@ export default function Register() {
                                 id="email"
                                 type="email"
                                 autoComplete="email"
+                                placeholder="john-doe@mail.com"
                                 required
                                 {...register("email", { required: true })}
                                 className={inputClasses({
@@ -113,6 +113,7 @@ export default function Register() {
                                 id="firstname"
                                 type="text"
                                 autoComplete="firstname"
+                                placeholder="John"
                                 required
                                 {...register("firstname", { required: true })}
                                 className={inputClasses({
@@ -133,6 +134,7 @@ export default function Register() {
                                 id="lastname"
                                 type="text"
                                 autoComplete="lastname"
+                                placeholder="Doe"
                                 required
                                 {...register("lastname", { required: true })}
                                 className={inputClasses({
@@ -150,20 +152,13 @@ export default function Register() {
                             >
                                 Password
                             </label>
-                            <div className="text-sm">
-                                <a
-                                    href="#"
-                                    className="font-semibold text-indigo-600 hover:text-indigo-500"
-                                >
-                                    Forgot password?
-                                </a>
-                            </div>
                         </div>
                         <div className="mt-2">
                             <input
                                 id="password"
                                 type="password"
                                 autoComplete="current-password"
+                                placeholder="supersecret"
                                 required
                                 {...register("password", {
                                     required: true,
@@ -196,7 +191,7 @@ export default function Register() {
                             text="Register"
                             type="submit"
                             disabled={loading}
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="flex w-full justify-center rounded-md primary-bg px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         />
                     </div>
                 </form>

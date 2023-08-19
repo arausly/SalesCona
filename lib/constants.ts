@@ -14,3 +14,7 @@ export const supabaseTables = {
 export const supabaseBuckets = {
     shop: "shop"
 };
+
+export const storageKeys = {
+    user: "__tk__"
+};

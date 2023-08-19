@@ -1,14 +1,16 @@
 "use client";
 import React, { FormEvent } from "react";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@assets/images/kolony-logo.webp";
-import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
 import { inputClasses } from "../../../../components/Input/input";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { useRouter } from "next/navigation";
 import { Button } from "@components/Button";
-import { toast } from "react-toastify";
+
+//images
+import logo from "@assets/images/kolony-logo.webp";
 
 interface LoginFormValues {
     email: string;
@@ -84,6 +86,7 @@ export default function Login() {
                                 id="email"
                                 type="email"
                                 autoComplete="email"
+                                placeholder="john-doe@mail.com"
                                 required
                                 className={inputClasses({
                                     mode: errors.email ? "error" : "default"
@@ -102,12 +105,12 @@ export default function Login() {
                                 Password
                             </label>
                             <div className="text-sm">
-                                <a
-                                    href="#"
+                                <Link
+                                    href="/forgot-password"
                                     className="font-semibold text-indigo-600 hover:text-indigo-500"
                                 >
                                     Forgot password?
-                                </a>
+                                </Link>
                             </div>
                         </div>
                         <div className="mt-2">
@@ -115,6 +118,7 @@ export default function Login() {
                                 id="password"
                                 type="password"
                                 autoComplete="current-password"
+                                placeholder="supersecret"
                                 required
                                 className={inputClasses({
                                     mode: errors.password ? "error" : "default"
@@ -131,7 +135,7 @@ export default function Login() {
                             text="Login"
                             type="submit"
                             disabled={loading}
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="flex w-full justify-center rounded-md primary-bg px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         />
                     </div>
                 </form>
