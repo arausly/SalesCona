@@ -22,6 +22,7 @@ export default function Login() {
         formState: { errors }
     } = useForm<LoginFormValues>();
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [errMsg, setErrMsg] = React.useState<string>("");
     const { supabase } = useBrowserSupabase();
     const router = useRouter();
 
@@ -33,15 +34,17 @@ export default function Login() {
                     setLoading(true);
                     const { data, error } =
                         await supabase.auth.signInWithPassword(values);
-                    if (error) throw error;
-                    toast(<p className="text-sm">Successful login</p>, {
-                        type: "success"
-                    });
+                    if (!error && data) {
+                        router.replace("/dashboard");
+                    } else {
+                        setErrMsg(
+                            error?.status === 400
+                                ? "You have entered either the wrong email or password"
+                                : "Something unexpected happened"
+                        );
+                    }
                     router.replace("/dashboard");
                 } catch (err) {
-                    toast(<p className="text-sm">Failed to login</p>, {
-                        type: "error"
-                    });
                 } finally {
                     setLoading(false);
                 }
@@ -120,6 +123,7 @@ export default function Login() {
                             />
                         </div>
                     </div>
+                    <p className="text-sm my-2 text-red-500">{errMsg}</p>
                     <div>
                         <Button
                             loading={loading}
@@ -142,8 +146,7 @@ export default function Login() {
                     </Link>
                 </p>
             </div>
-
-            <div className="flex items-center mb-4 mt-8">
+            {/* <div className="flex items-center mb-4 mt-8">
                 <div className="flex-grow border-t border-gray-300"></div>
                 <div className="mx-4 text-black text-sm">Continue with</div>
                 <div className="flex-grow border-t border-gray-300"></div>
@@ -155,7 +158,7 @@ export default function Login() {
                 <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded">
                     Google
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 }
