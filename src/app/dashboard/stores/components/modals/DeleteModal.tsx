@@ -91,7 +91,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 
                 <Button
                     loading={loading}
-                    text="Delete campaign"
+                    text="Delete store"
                     loadingText="Deleting..."
                     onClick={handleRemoveStore}
                     disabled={isDisabled}

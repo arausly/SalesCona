@@ -26,6 +26,7 @@ import { useGetProductCategories } from "@hooks/useGetProductCategories";
 import { Button } from "@components/Button";
 import { useGetUser } from "@hooks/useGetUser";
 import { toast } from "react-toastify";
+import { SavingPrompt } from "./modals/SavingPrompt";
 
 const imagePickerBannerDesc =
     "Customize your page by adding beautiful banner slides that makes your page unique. you can add up to 4 slides that describe your product offerings, promo, discounts, new stock etc. Make sure the logo and the background banners contrast well for appealing aesthetics";
@@ -91,6 +92,19 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     const [storePath] = pathname.split("/").slice(-2);
 
     const shopUrl = `${baseURL}/shop/${generateShopAlias(storeName)}`;
+
+    React.useEffect(() => {
+        const handleWindowClose = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+            const event = e || window.event;
+            return (event.returnValue = "Are you sure you want to leave?");
+        };
+
+        window.addEventListener("beforeunload", handleWindowClose);
+        return () => {
+            window.removeEventListener("beforeunload", handleWindowClose);
+        };
+    }, []);
 
     //get existing store
     React.useEffect(() => {
@@ -305,32 +319,31 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     /**
      * create or update store if it exist
      */
-    const upsertStore = React.useCallback(async () => {
-        const storeSlug = spaceSeparatedStrToPath(storeName?.trim());
-        if (!user) {
-            toast(<p className="text-sm">User information invalid</p>, {
-                type: "error"
-            });
-            return;
-        }
-        if (
-            formHasErrors({
-                banners,
-                selectedCurrency,
-                storeAlreadyExist: storeNameAlreadyExist,
-                storeCategories,
-                storeName,
-                description
-            })
-        )
-            return;
+    const upsertStore = React.useCallback(
+        async (isDraft = true) => {
+            const storeSlug = spaceSeparatedStrToPath(storeName?.trim());
+            if (!user) {
+                toast(<p className="text-sm">User information invalid</p>, {
+                    type: "error"
+                });
+                return;
+            }
+            if (
+                formHasErrors({
+                    banners,
+                    selectedCurrency,
+                    storeAlreadyExist: storeNameAlreadyExist,
+                    storeCategories,
+                    storeName,
+                    description
+                })
+            )
+                return;
 
-        async function updateOrCreateStore(storeSlug: string) {
-            if (existingStore || savedStore) {
-                setPublishing(true);
-                return await supabase
+            async function updateOrCreateStore(storeSlug: string) {
+                const createdStore = await supabase
                     .from(supabaseTables.stores)
-                    .update({
+                    .upsert({
                         name: storeName?.trim(),
                         slug: storeSlug,
                         description: description?.trim(),
@@ -338,27 +351,13 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         instagram: instagramPage,
                         twitter: twitterPage,
                         currency: JSON.stringify(selectedCurrency),
-                        isPublished: true
+                        isPublished: !isDraft,
+                        user_id: user?.id
                     })
                     .eq("id", existingStore?.id ?? savedStore?.id)
                     .eq("user_id", user?.id)
                     .select();
-            } else {
-                setSaving(true);
-                const createdStore = await supabase
-                    .from(supabaseTables.stores)
-                    .insert({
-                        name: storeName?.trim(),
-                        slug: storeSlug,
-                        description: description?.trim(),
-                        facebook: facebookPage,
-                        instagram: instagramPage,
-                        twitter: twitterPage,
-                        currency: JSON.stringify(selectedCurrency),
-                        isPublished: false,
-                        user_id: user?.id
-                    })
-                    .select();
+                isDraft ? setSaving(true) : setPublishing(true);
                 setSavedStore(
                     createdStore?.data
                         ? (createdStore?.data[0] as Store)
@@ -366,106 +365,110 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                 );
                 return createdStore;
             }
-        }
 
-        try {
-            const { data, error } = await updateOrCreateStore(storeSlug);
-            if (data?.length && !error) {
-                const newStore = data[0] as Store;
-                await supabase
-                    .from(supabaseTables.store_product_categories)
-                    .upsert(
-                        storeCategories?.map((cat) => ({
-                            category: cat.id,
-                            store: newStore.id,
-                            secondary_key: `${cat.id}-${newStore.id}` //:)
-                        })),
-                        {
-                            ignoreDuplicates: true
-                        }
-                    )
-                    .select();
-                setSavedStore(newStore);
-                let shop_logo,
-                    bannerUrls: (string | undefined)[] = [];
+            try {
+                const { data, error } = await updateOrCreateStore(storeSlug);
+                if (data?.length && !error) {
+                    const newStore = data[0] as Store;
+                    await supabase
+                        .from(supabaseTables.store_product_categories)
+                        .upsert(
+                            storeCategories?.map((cat) => ({
+                                category: cat.id,
+                                store: newStore.id,
+                                secondary_key: `${cat.id}-${newStore.id}` //:)
+                            })),
+                            {
+                                ignoreDuplicates: true
+                            }
+                        )
+                        .select();
+                    setSavedStore(newStore);
+                    let shop_logo,
+                        bannerUrls: (string | undefined)[] = [];
 
-                if (shopLogo) {
-                    //upload to bucket
-                    const logoFileName = `${user.id}/${newStore.id}/logo/${storeSlug}`;
-                    const { data: logoData, error: logoErr } =
-                        await supabase.storage
-                            .from(supabaseBuckets.shop)
-                            .upload(logoFileName, shopLogo, {
-                                cacheControl: "3600",
-                                upsert: true
-                            });
-
-                    if (logoData && !logoErr) {
-                        //get public url from bucket
-                        const logoPublicStore = await supabase.storage
-                            .from(supabaseBuckets.shop)
-                            .getPublicUrl(logoFileName);
-
-                        shop_logo = logoPublicStore.data.publicUrl;
-                    }
-                }
-
-                if (banners?.length) {
-                    bannerUrls = await Promise.all(
-                        banners.map(async (banner, i) => {
-                            const storeFileName = `${user.id}/${newStore.id}/banners/${storeSlug}-${i}`;
-                            const { data, error } = await supabase.storage
+                    if (shopLogo) {
+                        //upload to bucket
+                        const logoFileName = `${user.id}/${newStore.id}/logo/${storeSlug}`;
+                        const { data: logoData, error: logoErr } =
+                            await supabase.storage
                                 .from(supabaseBuckets.shop)
-                                .upload(storeFileName, banner, {
+                                .upload(logoFileName, shopLogo, {
                                     cacheControl: "3600",
                                     upsert: true
                                 });
 
-                            if (data && !error) {
-                                //get public url from bucket
-                                const bannerPublicStore = await supabase.storage
+                        if (logoData && !logoErr) {
+                            //get public url from bucket
+                            const logoPublicStore = await supabase.storage
+                                .from(supabaseBuckets.shop)
+                                .getPublicUrl(logoFileName);
+
+                            shop_logo = logoPublicStore.data.publicUrl;
+                        }
+                    }
+
+                    if (banners?.length) {
+                        bannerUrls = await Promise.all(
+                            banners.map(async (banner, i) => {
+                                const storeFileName = `${user.id}/${newStore.id}/banners/${storeSlug}-${i}`;
+                                const { data, error } = await supabase.storage
                                     .from(supabaseBuckets.shop)
-                                    .getPublicUrl(storeFileName);
-                                return bannerPublicStore.data.publicUrl;
-                            }
+                                    .upload(storeFileName, banner, {
+                                        cacheControl: "3600",
+                                        upsert: true
+                                    });
+
+                                if (data && !error) {
+                                    //get public url from bucket
+                                    const bannerPublicStore =
+                                        await supabase.storage
+                                            .from(supabaseBuckets.shop)
+                                            .getPublicUrl(storeFileName);
+                                    return bannerPublicStore.data.publicUrl;
+                                }
+                            })
+                        );
+                    }
+
+                    await supabase
+                        .from(supabaseTables.stores)
+                        .update({
+                            banners: JSON.stringify(
+                                bannerUrls.filter((b) => !!b)
+                            ),
+                            shop_logo
                         })
-                    );
+                        .eq("id", newStore.id);
+
+                    router.push("/dashboard/stores");
+                    toast(<p className="text-sm">Successfully registered</p>, {
+                        type: "success"
+                    });
                 }
-
-                await supabase
-                    .from(supabaseTables.stores)
-                    .update({
-                        banners: JSON.stringify(bannerUrls.filter((b) => !!b)),
-                        shop_logo
-                    })
-                    .eq("id", newStore.id);
-
-                router.push("/dashboard/stores");
-                toast(<p className="text-sm">Successfully registered</p>, {
-                    type: "success"
+            } catch (err) {
+                console.error("UPSERT_ERROR ==>", err); //todo remove in prod
+                toast(<p className="text-sm">Failed to create store</p>, {
+                    type: "error"
                 });
+            } finally {
+                setSaving(false);
+                setPublishing(false);
             }
-        } catch (err) {
-            console.error("UPSERT_ERROR ==>", err); //todo remove in prod
-            toast(<p className="text-sm">Failed to create store</p>, {
-                type: "error"
-            });
-        } finally {
-            setSaving(false);
-            setPublishing(false);
-        }
-    }, [
-        savedStore,
-        existingStore,
-        banners,
-        selectedCurrency,
-        storeNameAlreadyExist,
-        storeCategories,
-        description,
-        storeName,
-        shopLogo,
-        user
-    ]);
+        },
+        [
+            savedStore,
+            existingStore,
+            banners,
+            selectedCurrency,
+            storeNameAlreadyExist,
+            storeCategories,
+            description,
+            storeName,
+            shopLogo,
+            user
+        ]
+    );
 
     const handleStoreCategoryChange = React.useCallback(
         (categories: MultiSelectProps["items"]) => {
@@ -477,6 +480,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
     return (
         <div className="p-6 flex flex-col w-full dashboard-screen-height overflow-auto">
+            <SavingPrompt isOpen={publishing || saving} />
             <div className="flex flex-col pb-6 border-b border-slate-200 w-full">
                 <Breadcrumb
                     crumbs={isEditForm ? editFormCrumbs : createFormCrumbs}
@@ -493,7 +497,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                             loading={saving}
                             loadingText="Saving"
                             disabled={saving}
-                            onClick={upsertStore}
+                            onClick={async () => await upsertStore(true)}
                             leftIcon={
                                 <PencilIcon className="h-4 w-4 mr-2 text-gray-700" />
                             }
@@ -504,7 +508,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                             loading={publishing}
                             loadingText="Publishing"
                             text="Publish"
-                            onClick={upsertStore}
+                            onClick={async () => await upsertStore(false)}
                             leftIcon={
                                 <CheckIcon className="h-5 w-5 text-white mr-2" />
                             }

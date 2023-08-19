@@ -26,6 +26,7 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store, img }) => {
 
             //padding + space plus circle delimiter
             const maxBoxes = Math.floor((tagBox.offsetWidth - 44) / 80);
+
             setStoreCategories(() =>
                 store?.categories?.slice(
                     0,

@@ -24,8 +24,8 @@ export const useGetStores = () => {
                     .eq("is_soft_deleted", false);
 
                 if (!error && data) {
-                    setStores(data as Store[]);
                     await populateWithCategories(data as Store[]);
+                    setStores(data as Store[]);
                 }
             } catch (err) {
             } finally {
@@ -49,8 +49,8 @@ export const useGetStores = () => {
                     .or(`name.ilike.%${query}%,description.ilike.%${query}%`);
 
                 if (!error && data) {
-                    setStores(data as Store[]);
                     await populateWithCategories(data as Store[]);
+                    setStores(data as Store[]);
                 }
             } catch (err) {
             } finally {
