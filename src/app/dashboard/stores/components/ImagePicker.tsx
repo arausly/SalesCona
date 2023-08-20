@@ -20,6 +20,7 @@ interface ImagePickerProps {
     description?: string;
     dimensionInfo?: string;
     logo?: FileWithPreview;
+    presetBanners?: Map<number, FileWithPreview>;
 }
 
 export const ImagePicker: React.FC<ImagePickerProps> = ({
@@ -28,11 +29,12 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
     title,
     description,
     dimensionInfo,
-    logo
+    logo,
+    presetBanners
 }) => {
     const [aboveFoldBanners, setAboveFoldBanners] = React.useState<
         Map<number, FileWithPreview>
-    >(new Map());
+    >(presetBanners ?? new Map());
     const [currentAboveFoldBannerIndex, setCurrentAboveFoldBannerIndex] =
         React.useState<number>(0);
 
@@ -185,9 +187,11 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
                             <p className="text-xs text-gray-800 mb-2 text-ellipsis overflow-hidden">
                                 {banner[1].name}
                             </p>
-                            <p className="text-xs text-gray-700">
-                                {formatByteToSize(banner[1].size)}
-                            </p>
+                            {banner[1].size ? (
+                                <p className="text-xs text-gray-700">
+                                    {formatByteToSize(banner[1].size)}
+                                </p>
+                            ) : null}
                         </div>
                         <div
                             className="flex ml-auto rounded-sm flex-col items-center justify-center w-8 h-8 hover:bg-red-100"

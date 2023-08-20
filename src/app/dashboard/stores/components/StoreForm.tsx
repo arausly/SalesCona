@@ -2,6 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import { CheckIcon, PencilIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import shortid from "shortid";
+
 import {
     copyToClipboard,
     debounce,
@@ -27,6 +29,7 @@ import { Button } from "@components/Button";
 import { useGetUser } from "@hooks/useGetUser";
 import { toast } from "react-toastify";
 import { SavingPrompt } from "./modals/SavingPrompt";
+import { Spinner } from "@components/Spinner";
 
 const imagePickerBannerDesc =
     "Customize your page by adding beautiful banner slides that makes your page unique. you can add up to 4 slides that describe your product offerings, promo, discounts, new stock etc. Make sure the logo and the background banners contrast well for appealing aesthetics";
@@ -79,9 +82,16 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     );
     const [shopLogo, setShopLogo] = React.useState<FileWithPreview>();
     const [banners, setBanners] = React.useState<Array<FileWithPreview>>([]);
-    const [selectedCurrency, setSelectedCurrency] = React.useState<Currency>();
+    const [selectedCurrency, setSelectedCurrency] = React.useState<Currency>({
+        id: "USD",
+        label: "US Dollar ($)",
+        currencySymbol: "$"
+    });
     const timeoutId = React.useRef<ReturnType<typeof setTimeout> | undefined>();
     const currencies = React.useRef<MultiSelectProps["items"]>(getCurrencies());
+    const [loadingStore, setLoadingStore] = React.useState<boolean>(false);
+    const [presetBanners, setPresetBanners] =
+        React.useState<Map<number, FileWithPreview>>();
     const router = useRouter();
     const user = useGetUser();
     const { productCategories, createNewProductCategory } =
@@ -92,6 +102,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     const [storePath] = pathname.split("/").slice(-2);
 
     const shopUrl = `${baseURL}/shop/${generateShopAlias(storeName)}`;
+    const slug = storePath.split("-").join(" ");
 
     React.useEffect(() => {
         const handleWindowClose = (e: BeforeUnloadEvent) => {
@@ -106,22 +117,81 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
         };
     }, []);
 
-    //get existing store
+    //get existing store and prefill form with info
     React.useEffect(() => {
         (async () => {
-            if (storePath !== "stores") {
+            if (isEditForm) {
                 try {
+                    setLoadingStore(true);
                     const { data, error } = await supabase
                         .from(supabaseTables.stores)
                         .select()
-                        .eq("slug", storePath);
+                        .eq("slug", storePath)
+                        .returns<Store[]>();
+
                     if (!error && data?.length) {
-                        setExistingStore(data[0] as Store);
+                        const store = data[0];
+
+                        const { data: fetchedStoreCategories, error: err } =
+                            await supabase
+                                .from(supabaseTables.store_product_categories)
+                                .select("*,category(*)")
+                                .eq("store", store.id)
+                                .returns<Store["categories"][][number]>();
+
+                        if (fetchedStoreCategories && !err) {
+                            setExistingStore(store);
+                            setSelectedCurrency(JSON.parse(store.currency));
+                            setInstagramPage(store.instagram);
+                            setFacebookPage(store.facebook);
+                            setTwitterPage(store.twitter);
+                            setStoreName(store.name);
+                            setDescription(store.description);
+                            setStoreCategories(() =>
+                                fetchedStoreCategories.map((cat) => ({
+                                    ...cat,
+                                    id: cat.category.id,
+                                    label: cat.category.label
+                                }))
+                            );
+
+                            setShopLogo(() =>
+                                store.shop_logo
+                                    ? ({
+                                          preview: store.shop_logo
+                                      } as FileWithPreview)
+                                    : undefined
+                            );
+                            const bannerList = JSON.parse(
+                                store.banners ?? "[]"
+                            ) as string[];
+                            setBanners(
+                                () =>
+                                    bannerList.map((b) => ({
+                                        preview: b
+                                    })) as FileWithPreview[]
+                            );
+                            setPresetBanners(
+                                () =>
+                                    new Map(
+                                        bannerList.map((b, i) => [
+                                            i,
+                                            {
+                                                preview: b,
+                                                name: `banner-image-${i + 1}`
+                                            } as FileWithPreview
+                                        ])
+                                    )
+                            );
+                        }
                     }
-                } catch (err) {}
+                } catch (err) {
+                } finally {
+                    setLoadingStore(false);
+                }
             }
         })();
-    }, [storePath]);
+    }, [slug, isEditForm, storePath]);
     /* input handlers */
 
     const checkIfStoreWithNameExists = React.useCallback(
@@ -188,13 +258,18 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
         []
     );
 
+    const handleBannerFilesChange = (files: FileWithPreview[]) => {
+        setBanners(files);
+        formHasErrors({ banners: files }, "banners");
+    };
+
     const editFormCrumbs = [
         {
             name: "Stores",
             link: "/dashboard/stores"
         },
         {
-            name: storePath.split("-").join(" "),
+            name: slug,
             link: `dashboard/stores/${storePath}`
         },
         {
@@ -344,17 +419,25 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
             async function updateOrCreateStore(storeSlug: string) {
                 const createdStore = await supabase
                     .from(supabaseTables.stores)
-                    .upsert({
-                        name: storeName?.trim(),
-                        slug: storeSlug,
-                        description: description?.trim(),
-                        facebook: facebookPage,
-                        instagram: instagramPage,
-                        twitter: twitterPage,
-                        currency: JSON.stringify(selectedCurrency),
-                        isPublished: !isDraft,
-                        user_id: user?.id
-                    })
+                    .upsert(
+                        {
+                            name: storeName?.trim(),
+                            slug: storeSlug,
+                            description: description?.trim(),
+                            facebook: facebookPage,
+                            instagram: instagramPage,
+                            twitter: twitterPage,
+                            currency: JSON.stringify(selectedCurrency),
+                            isPublished: !isDraft,
+                            user_id: user?.id,
+                            secondary_key:
+                                existingStore?.secondary_key ??
+                                shortid.generate()
+                        },
+                        {
+                            onConflict: "secondary_key"
+                        }
+                    )
                     .eq("id", existingStore?.id ?? savedStore?.id)
                     .eq("user_id", user?.id)
                     .select();
@@ -368,86 +451,81 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
             try {
                 const { data, error } = await updateOrCreateStore(storeSlug);
-                if (data?.length && !error) {
-                    const newStore = data[0] as Store;
-                    await supabase
-                        .from(supabaseTables.store_product_categories)
-                        .upsert(
-                            storeCategories?.map((cat) => ({
-                                category: cat.id,
-                                store: newStore.id,
-                                secondary_key: `${cat.id}-${newStore.id}` //:)
-                            })),
-                            {
-                                ignoreDuplicates: true
-                            }
-                        )
-                        .select();
-                    setSavedStore(newStore);
-                    let shop_logo,
-                        bannerUrls: (string | undefined)[] = [];
+                if (error) throw error;
+                const newStore = data[0] as Store;
+                await supabase
+                    .from(supabaseTables.store_product_categories)
+                    .upsert(
+                        storeCategories?.map((cat) => ({
+                            category: cat.id,
+                            store: newStore.id,
+                            secondary_key: `${cat.id}-${newStore.id}` //:)
+                        })),
+                        {
+                            onConflict: "secondary_key"
+                        }
+                    )
+                    .select();
+                setSavedStore(newStore);
+                let shop_logo,
+                    bannerUrls: (string | undefined)[] = [];
 
-                    if (shopLogo) {
-                        //upload to bucket
-                        const logoFileName = `${user.id}/${newStore.id}/logo/${storeSlug}`;
-                        const { data: logoData, error: logoErr } =
-                            await supabase.storage
+                if (shopLogo) {
+                    //upload to bucket
+                    const logoFileName = `${user.id}/${newStore.id}/logo/${storeSlug}`;
+                    const { data: logoData, error: logoErr } =
+                        await supabase.storage
+                            .from(supabaseBuckets.shop)
+                            .upload(logoFileName, shopLogo, {
+                                cacheControl: "3600",
+                                upsert: true
+                            });
+
+                    if (logoData && !logoErr) {
+                        //get public url from bucket
+                        const logoPublicStore = await supabase.storage
+                            .from(supabaseBuckets.shop)
+                            .getPublicUrl(logoFileName);
+
+                        shop_logo = logoPublicStore.data.publicUrl;
+                    }
+                }
+
+                if (banners?.length) {
+                    bannerUrls = await Promise.all(
+                        banners.map(async (banner, i) => {
+                            const storeFileName = `${user.id}/${newStore.id}/banners/${storeSlug}-${i}`;
+                            const { data, error } = await supabase.storage
                                 .from(supabaseBuckets.shop)
-                                .upload(logoFileName, shopLogo, {
+                                .upload(storeFileName, banner, {
                                     cacheControl: "3600",
                                     upsert: true
                                 });
 
-                        if (logoData && !logoErr) {
-                            //get public url from bucket
-                            const logoPublicStore = await supabase.storage
-                                .from(supabaseBuckets.shop)
-                                .getPublicUrl(logoFileName);
-
-                            shop_logo = logoPublicStore.data.publicUrl;
-                        }
-                    }
-
-                    if (banners?.length) {
-                        bannerUrls = await Promise.all(
-                            banners.map(async (banner, i) => {
-                                const storeFileName = `${user.id}/${newStore.id}/banners/${storeSlug}-${i}`;
-                                const { data, error } = await supabase.storage
+                            if (data && !error) {
+                                //get public url from bucket
+                                const bannerPublicStore = await supabase.storage
                                     .from(supabaseBuckets.shop)
-                                    .upload(storeFileName, banner, {
-                                        cacheControl: "3600",
-                                        upsert: true
-                                    });
-
-                                if (data && !error) {
-                                    //get public url from bucket
-                                    const bannerPublicStore =
-                                        await supabase.storage
-                                            .from(supabaseBuckets.shop)
-                                            .getPublicUrl(storeFileName);
-                                    return bannerPublicStore.data.publicUrl;
-                                }
-                            })
-                        );
-                    }
-
-                    await supabase
-                        .from(supabaseTables.stores)
-                        .update({
-                            banners: JSON.stringify(
-                                bannerUrls.filter((b) => !!b)
-                            ),
-                            shop_logo
+                                    .getPublicUrl(storeFileName);
+                                return bannerPublicStore.data.publicUrl;
+                            }
                         })
-                        .eq("id", newStore.id);
-
-                    router.push("/dashboard/stores");
-                    toast(<p className="text-sm">Successfully registered</p>, {
-                        type: "success"
-                    });
+                    );
                 }
+
+                await supabase
+                    .from(supabaseTables.stores)
+                    .update({
+                        banners: JSON.stringify(bannerUrls.filter((b) => !!b)),
+                        shop_logo
+                    })
+                    .eq("id", newStore.id);
+
+                router.push("/dashboard/stores");
+                toast(<p className="text-sm">Successfully registered</p>, {
+                    type: "success"
+                });
             } catch (err) {
-                console.error("UPSERT_ERROR ==>", err); //todo remove in prod
                 toast(<p className="text-sm">Failed to create store</p>, {
                     type: "error"
                 });
@@ -519,215 +597,232 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col md:flex-row w-full mt-6">
-                <div className="flex-1 order-last md:px-6 md:order-first h-full overflow-auto">
-                    <div className="flex flex-col mb-6">
-                        <div className="flex mb-1">
-                            <p className="mr-1">Currency</p>
-                            <span className="text-[#6d67e4]">*</span>
-                        </div>
-                        <p className="text-xs font-light mb-0.5">
-                            What currencies would you like your products to be
-                            displayed in?
-                        </p>
-                        <MultiSelectInput
-                            items={currencies.current}
-                            onSelect={handleCurrencySelection}
-                            multiple={false}
-                        />
-                        {formErrMsgs?.currency && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {formErrMsgs?.currency}
+            {loadingStore ? (
+                <div className="flex items-center justify-center my-4">
+                    <Spinner size="large" />
+                </div>
+            ) : (
+                <div className="flex flex-col md:flex-row w-full mt-6">
+                    <div className="flex-1 order-last md:px-6 md:order-first h-full overflow-auto">
+                        <div className="flex flex-col mb-6">
+                            <div className="flex mb-1">
+                                <p className="mr-1">Currency</p>
+                                <span className="text-[#6d67e4]">*</span>
+                            </div>
+                            <p className="text-xs font-light mb-0.5">
+                                What currencies would you like your products to
+                                be displayed in?
                             </p>
-                        )}
-                    </div>
-                    <div className="flex flex-col mb-6">
-                        <div className="flex mb-1">
-                            <p className="mr-1">Name</p>
-                            <span className="text-[#6d67e4]">*</span>
+                            <MultiSelectInput
+                                items={currencies.current}
+                                onSelect={handleCurrencySelection}
+                                multiple={false}
+                                initialItems={[selectedCurrency]}
+                            />
+                            {formErrMsgs?.currency && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {formErrMsgs?.currency}
+                                </p>
+                            )}
                         </div>
-                        <p className="text-xs font-light mb-1">
-                            30 characters max
-                        </p>
-                        <input
-                            type="text"
-                            id="table-search"
-                            value={storeName}
-                            onChange={handleStoreNameChange}
-                            placeholder="What would you call your new store?"
-                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                        />
-                        {formErrMsgs?.storeName && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {formErrMsgs?.storeName}
+                        <div className="flex flex-col mb-6">
+                            <div className="flex mb-1">
+                                <p className="mr-1">Name</p>
+                                <span className="text-[#6d67e4]">*</span>
+                            </div>
+                            <p className="text-xs font-light mb-1">
+                                30 characters max
                             </p>
-                        )}
-                    </div>
-                    <div className="flex flex-col mb-6">
-                        <p className="mr-1 mb-1">Shop website link</p>
-                        <p className="text-xs font-light mb-1">
-                            As soon as you publish your store this website link
-                            would be public and can be accessed by your
-                            customers immediately.
-                        </p>
-                        <div className="relative">
-                            <div
-                                onClick={handleCopy}
-                                className="absolute right-0 top-0 w-20 h-full border cursor-pointer border-gray-30 rounded-r-md flex items-center justify-center bg-slate-100"
+                            <input
+                                type="text"
+                                id="table-search"
+                                value={storeName}
+                                onChange={handleStoreNameChange}
+                                placeholder="What would you call your new store?"
+                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                            />
+                            {formErrMsgs?.storeName && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {formErrMsgs?.storeName}
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex flex-col mb-6">
+                            <p className="mr-1 mb-1">Shop website link</p>
+                            <p className="text-xs font-light mb-1">
+                                As soon as you publish your store this website
+                                link would be public and can be accessed by your
+                                customers immediately.
+                            </p>
+                            <div className="relative">
+                                <div
+                                    onClick={handleCopy}
+                                    className="absolute right-0 top-0 w-20 h-full border cursor-pointer border-gray-30 rounded-r-md flex items-center justify-center bg-slate-100"
+                                >
+                                    <p className="text-sm">{copyBtnText}</p>
+                                </div>
+                                <input
+                                    type="text"
+                                    disabled
+                                    value={shopUrl}
+                                    className="block p-2 pl-10 text-sm text-black bg-slate-50 border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col mb-6">
+                            <div className="flex mb-1">
+                                <p className="mr-1">Description</p>
+                                <span className="text-[#6d67e4]">*</span>
+                            </div>
+                            <textarea
+                                id="table-search"
+                                onChange={handleDescriptionChange}
+                                value={description}
+                                placeholder="The clearer and shorter the better"
+                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                            />
+                            {formErrMsgs?.description && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {formErrMsgs?.description}
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex flex-col mb-6">
+                            <p className="mr-1 mb-1">Shop logo</p>
+                            <p className="text-xs font-light mb-2">
+                                You can add a logo to stand out from the crowd
+                                and personalize your shop page to look very
+                                professional
+                            </p>
+                            <FileWidget
+                                handleFiles={handleLogoFileInputChange}
+                                maxFiles={1}
                             >
-                                <p className="text-sm">{copyBtnText}</p>
+                                <div className="border border-slate-200 border-dashed rounded-md p-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="h-12 w-12 flex items-center justify-center bg-slate-50 mr-4">
+                                                {shopLogo ? (
+                                                    <Image
+                                                        src={shopLogo.preview}
+                                                        alt="shop logo"
+                                                        width={48}
+                                                        height={48}
+                                                    />
+                                                ) : (
+                                                    <PhotoIcon className="h-5 w-5" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-slate-600">
+                                                    Upload a logo that makes
+                                                    your brand stand out
+                                                </p>
+                                                <p className="text-xs text-slate-400">
+                                                    SVG, PNG, JPG, or GIF (rec.
+                                                    700 * 430px)
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button className="bg-white border border-slate-100 rounded-full p-1 w-24 shadow-md text-slate-600">
+                                            {shopLogo ? "Change" : "Browse"}
+                                        </button>
+                                    </div>
+                                </div>
+                            </FileWidget>
+                        </div>
+                        <div className="mb-6">
+                            <div className="flex mb-1">
+                                <p className="mr-1">Categories</p>
+                                <span className="text-[#6d67e4]">*</span>
+                            </div>
+                            <p className="text-xs font-light mb-2">
+                                Basically, the products you sell, what category
+                                can you group them in for this store, you can
+                                select multiple categories as applicable. Note
+                                this might to certain degree influence your
+                                visibility ranking in the future.
+                            </p>
+                            <MultiSelectInput
+                                items={productCategories}
+                                onSelect={handleStoreCategoryChange}
+                                createNewItem={createNewProductCategory}
+                                initialItems={storeCategories}
+                            />
+                            {formErrMsgs?.storeCategories && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {formErrMsgs?.storeCategories}
+                                </p>
+                            )}
+                        </div>
+                        <div className="mb-6">
+                            <div className="flex flex-col mb-1">
+                                <p className="mr-1">Instagram page</p>
+                                <p className="text-xs font-light mb-1">
+                                    Please provide the instagram page for this
+                                    store if available
+                                </p>
                             </div>
                             <input
                                 type="text"
-                                disabled
-                                value={shopUrl}
-                                className="block p-2 pl-10 text-sm text-black bg-slate-50 border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
+                                value={instagramPage}
+                                onChange={(e) =>
+                                    setInstagramPage(e.target.value)
+                                }
+                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <div className="flex flex-col mb-1">
+                                <p className="mr-1">Facebook page</p>
+                                <p className="text-xs font-light mb-1">
+                                    Please provide the facebook page for this
+                                    store if available
+                                </p>
+                            </div>
+                            <input
+                                type="text"
+                                value={facebookPage}
+                                onChange={(e) =>
+                                    setFacebookPage(e.target.value)
+                                }
+                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <div className="flex flex-col mb-1">
+                                <p className="mr-1">Twitter page</p>
+                                <p className="text-xs font-light mb-1">
+                                    Please provide the twitter page for this
+                                    store if available
+                                </p>
+                            </div>
+                            <input
+                                type="text"
+                                value={twitterPage}
+                                onChange={(e) => setTwitterPage(e.target.value)}
+                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
                             />
                         </div>
                     </div>
-                    <div className="flex flex-col mb-6">
-                        <div className="flex mb-1">
-                            <p className="mr-1">Description</p>
-                            <span className="text-[#6d67e4]">*</span>
-                        </div>
-                        <textarea
-                            id="table-search"
-                            onChange={handleDescriptionChange}
-                            value={description}
-                            placeholder="The clearer and shorter the better"
-                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                        />
-                        {formErrMsgs?.description && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {formErrMsgs?.description}
+                    <div className="flex-none md:flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto border-0 md:border-l md:border-slate-100">
+                        {formErrMsgs?.banners && (
+                            <p className="text-red-500 text-xs my-1">
+                                {formErrMsgs?.banners}
                             </p>
                         )}
-                    </div>
-                    <div className="flex flex-col mb-6">
-                        <p className="mr-1 mb-1">Shop logo</p>
-                        <p className="text-xs font-light mb-2">
-                            You can add a logo to stand out from the crowd and
-                            personalize your shop page to look very professional
-                        </p>
-                        <FileWidget
-                            handleFiles={handleLogoFileInputChange}
-                            maxFiles={1}
-                        >
-                            <div className="border border-slate-200 border-dashed rounded-md p-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <div className="h-12 w-12 flex items-center justify-center bg-slate-50 mr-4">
-                                            {shopLogo ? (
-                                                <Image
-                                                    src={shopLogo.preview}
-                                                    alt="shop logo"
-                                                    width={48}
-                                                    height={48}
-                                                />
-                                            ) : (
-                                                <PhotoIcon className="h-5 w-5" />
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-slate-600">
-                                                Upload a logo that makes your
-                                                brand stand out
-                                            </p>
-                                            <p className="text-xs text-slate-400">
-                                                SVG, PNG, JPG, or GIF (rec. 700
-                                                * 430px)
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button className="bg-white border border-slate-100 rounded-full p-1 w-24 shadow-md text-slate-600">
-                                        {shopLogo ? "Change" : "Browse"}
-                                    </button>
-                                </div>
-                            </div>
-                        </FileWidget>
-                    </div>
-                    <div className="mb-6">
-                        <div className="flex mb-1">
-                            <p className="mr-1">Categories</p>
-                            <span className="text-[#6d67e4]">*</span>
-                        </div>
-                        <p className="text-xs font-light mb-2">
-                            Basically, the products you sell, what category can
-                            you group them in for this store, you can select
-                            multiple categories as applicable. Note this might
-                            to certain degree influence your visibility ranking
-                            in the future.
-                        </p>
-                        <MultiSelectInput
-                            items={productCategories}
-                            onSelect={handleStoreCategoryChange}
-                            createNewItem={createNewProductCategory}
-                        />
-                        {formErrMsgs?.storeCategories && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {formErrMsgs?.storeCategories}
-                            </p>
-                        )}
-                    </div>
-                    <div className="mb-6">
-                        <div className="flex flex-col mb-1">
-                            <p className="mr-1">Instagram page</p>
-                            <p className="text-xs font-light mb-1">
-                                Please provide the instagram page for this store
-                                if available
-                            </p>
-                        </div>
-                        <input
-                            type="text"
-                            onChange={(e) => setInstagramPage(e.target.value)}
-                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <div className="flex flex-col mb-1">
-                            <p className="mr-1">Facebook page</p>
-                            <p className="text-xs font-light mb-1">
-                                Please provide the facebook page for this store
-                                if available
-                            </p>
-                        </div>
-                        <input
-                            type="text"
-                            onChange={(e) => setFacebookPage(e.target.value)}
-                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <div className="flex flex-col mb-1">
-                            <p className="mr-1">Twitter page</p>
-                            <p className="text-xs font-light mb-1">
-                                Please provide the twitter page for this store
-                                if available
-                            </p>
-                        </div>
-                        <input
-                            type="text"
-                            onChange={(e) => setTwitterPage(e.target.value)}
-                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md overflow-hidden text-ellipsis"
+                        <ImagePicker
+                            description={imagePickerBannerDesc}
+                            title="Shop banner slides"
+                            maxFiles={4}
+                            dimensionInfo="rec. 1200 * 1000px"
+                            handleFileChange={handleBannerFilesChange}
+                            logo={shopLogo}
+                            presetBanners={presetBanners}
                         />
                     </div>
                 </div>
-                <div className="flex-none md:flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto border-0 md:border-l md:border-slate-100">
-                    {formErrMsgs?.banners && (
-                        <p className="text-red-500 text-xs my-1">
-                            {formErrMsgs?.banners}
-                        </p>
-                    )}
-                    <ImagePicker
-                        description={imagePickerBannerDesc}
-                        title="Shop banner slides"
-                        maxFiles={4}
-                        dimensionInfo="rec. 1200 * 1000px"
-                        handleFileChange={(files) => setBanners(files)}
-                        logo={shopLogo}
-                    />
-                </div>
-            </div>
+            )}
         </div>
     );
 };

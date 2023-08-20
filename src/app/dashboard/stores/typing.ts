@@ -23,11 +23,10 @@ export interface Store {
     facebook: string;
     instagram: string;
     twitter: string;
-    banner: Array<{
-        url: string;
-    }>;
+    banners: string;
     currency: string;
     isPublished: boolean;
+    secondary_key: string;
     categories?: Array<{
         id: number;
         created_at: string;

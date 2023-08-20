@@ -15,7 +15,7 @@ export const SavingPrompt: React.FC<PublishingPromptProps> = ({ isOpen }) => {
         >
             <div className="mt-4 flex items-center">
                 <p className="text-sm mr-2">
-                    Please do not close this page, publishing your store
+                    Please do not close this page, currently working
                 </p>
                 <svg
                     className="animate-spin h-5 w-5 mr-3"

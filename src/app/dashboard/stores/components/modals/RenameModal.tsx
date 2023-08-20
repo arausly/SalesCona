@@ -31,7 +31,10 @@ export const RenameModal: React.FC<RenameModalProps> = ({
             if (!user || !currentStore || !newName.length) return;
             const { error } = await supabase
                 .from(supabaseTables.stores)
-                .update({ name: newName })
+                .update({
+                    name: newName,
+                    slug: spaceSeparatedStrToPath(newName)
+                })
                 .eq("user_id", user.id)
                 .eq("id", currentStore.id);
             if (error) {
@@ -94,10 +97,14 @@ export const RenameModal: React.FC<RenameModalProps> = ({
                 <input
                     type="text"
                     id="table-search"
-                    placeholder="New store name"
+                    placeholder={currentStore?.name ?? "New store name"}
                     value={newName}
                     onChange={handleStoreNameChange}
-                    className="block p-2 pl-10 text-sm text-black border border-gray-200 w-full rounded-md"
+                    className={`${
+                        errorMsg
+                            ? "border border-red-500 outline-none"
+                            : "border border-gray-200"
+                    } block p-2 pl-10 text-sm text-black w-full rounded-md`}
                 />
                 {errorMsg && (
                     <p className="text-red-500 text-xs mt-1">{errorMsg}</p>

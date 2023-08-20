@@ -71,7 +71,7 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store, img }) => {
                     </div>
                 </div>
 
-                <p className="font-medium text-xs text-ellipsis mt-1">
+                <p className="font-medium text-xs whitespace-nowrap overflow-hidden text-ellipsis mt-1">
                     {truncateString(store.description, 60)}
                 </p>
             </div>
@@ -82,7 +82,7 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store, img }) => {
                 >
                     {storeCategories?.map((storeCategory, i) => (
                         <span
-                            key={storeCategory.id}
+                            key={storeCategory.category.id}
                             className="inline-flex bg-slate-50 border border-slate-200 rounded-full items-center justify-center mr-2 mb-1 h-5 w-20 p-1"
                         >
                             <p className="text-xs text-ellipsis font-light overflow-hidden whitespace-nowrap">

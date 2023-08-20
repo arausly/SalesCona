@@ -17,7 +17,7 @@ export interface MultiSelectProps {
         label: string
     ) => Promise<MultiSelectProps["items"][number] | undefined>;
     initialItems?: Array<{
-        id: number;
+        id: string | number;
         label: string;
     }>;
     multiple?: boolean;
@@ -128,11 +128,12 @@ export default function MultiSelectInput({
                     <Combobox.Input
                         className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
                         displayValue={(items: any) => {
-                            const displayVal = multiple
-                                ? items
-                                      .map((item: any) => item.label)
-                                      .join(", ")
-                                : items.label;
+                            const displayVal =
+                                multiple || Array.isArray(items)
+                                    ? items
+                                          .map((item: any) => item.label)
+                                          .join(", ")
+                                    : items.label;
                             handleSetDisplayValue(displayVal);
                             return displayVal;
                         }}
