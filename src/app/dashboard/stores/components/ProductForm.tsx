@@ -7,7 +7,12 @@ import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import { usePathname } from "next/navigation";
 import { ImagePicker } from "./ImagePicker";
 import { ProductVariantForm } from "./ProductVariantForm";
-import MultiSelectInput from "@components/Input/MultiSelectInput";
+import MultiSelectInput, {
+    MultiSelectProps
+} from "@components/Input/MultiSelectInput";
+import { Product } from "../typing";
+import shortid from "shortid";
+import { FileWithPreview } from "@components/FileWidget";
 
 interface ProductFormProps {
     isEditForm: boolean;
@@ -23,17 +28,32 @@ const warrantyPeriods = [
     { label: "Greater than 5 years", id: ">5" }
 ];
 
+type VariantType = Map<string, { name: string; values?: Map<string, string> }>;
+
 export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
-    const [deliveryAvailable, setDeliveryAvailable] =
-        React.useState<boolean>(false);
-    const [onlineStoreOnly, setOnlineStoreOnly] = React.useState(false);
-    const [inStoreOnly, setInStoreOnly] = React.useState<boolean>(false);
-    const [hasWarranty, setHasWarranty] = React.useState<boolean>(false);
-    const [variantOptions, setVariantOptions] = React.useState<
-        Map<number, string>
-    >(new Map());
+    const [variantOptions, setVariantOptions] = React.useState<VariantType>(
+        new Map()
+    );
+    const [formState, setFormState] =
+        React.useState<Partial<Omit<Product, "store">>>();
+    const [banners, setBanners] = React.useState<Array<FileWithPreview>>([]);
+    const [formErrMessages, setFormErrMessages] = React.useState();
     const pathname = usePathname();
     const [, , , storePath, , productPath] = pathname.split("/");
+
+    const transformBannerToMap = React.useCallback(
+        (banners: FileWithPreview[]) =>
+            new Map(
+                banners.map((b, i) => [
+                    i,
+                    {
+                        ...b,
+                        name: `product-banner-image-${i + 1}`
+                    } as FileWithPreview
+                ])
+            ),
+        []
+    );
 
     const editFormCrumbs = [
         {
@@ -63,15 +83,178 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         }
     ];
 
-    const handleAddVariant = React.useCallback(() => {
-        setVariantOptions((prev) => new Map([...prev, [prev.size, ""]]));
-    }, []);
+    const handleFormChange = React.useCallback(
+        (formKey: keyof Product, formValue: any) => {
+            setFormState((prevState) => ({
+                ...(prevState ?? {}),
+                [formKey]: formValue
+            }));
+        },
+        []
+    );
 
-    const removeValue = React.useCallback((optionIndex: number) => {
+    const handleVariantNameChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>, variantKey: string) => {
+            setVariantOptions((prev) => {
+                prev.set(variantKey, {
+                    name: e.target.value.trim()
+                });
+                return new Map([...prev]);
+            });
+        },
+        []
+    );
+
+    const handleEditVariantOption = React.useCallback(
+        (
+            e: React.ChangeEvent<HTMLInputElement>,
+            variantKey: string,
+            valueKey: string
+        ) => {
+            const variantValue = e.target.value;
+            setVariantOptions((prev) => {
+                prev.get(variantKey)?.values?.set(valueKey, variantValue);
+                return new Map([...prev]);
+            });
+        },
+        []
+    );
+
+    const removeVariantValue = React.useCallback(
+        (variantKey: string, valueKey: string) => {
+            setVariantOptions((prev) => {
+                prev.get(variantKey)?.values?.delete(valueKey);
+                return new Map([...prev]);
+            });
+        },
+        []
+    );
+
+    const handleAddValue = React.useCallback((variantKey: string) => {
+        const newVariantValKey = shortid.generate();
         setVariantOptions((prev) => {
-            prev.delete(optionIndex);
+            prev.get(variantKey)?.values?.set(newVariantValKey, "");
             return new Map([...prev]);
         });
+    }, []);
+
+    const handleAddVariant = React.useCallback(() => {
+        const newVariantKey = shortid.generate();
+        setVariantOptions((prev) => {
+            prev.set(newVariantKey, { name: "", values: new Map() });
+            return new Map([...prev]);
+        });
+    }, []);
+
+    const removeValue = React.useCallback((variantKey: string) => {
+        setVariantOptions((prev) => {
+            prev.delete(variantKey);
+            return new Map([...prev]);
+        });
+    }, []);
+
+    const handleNameChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("name", e.target.value);
+        },
+        []
+    );
+
+    const handleDescriptionChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            handleFormChange("description", e.target.value);
+        },
+        []
+    );
+
+    const handleInventoryCountChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("inventory_count", e.target.value);
+        },
+        []
+    );
+
+    const handleSKUChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("sku_code", e.target.value);
+        },
+        []
+    );
+
+    const generateSKUCode = React.useCallback(() => {
+        handleFormChange("sku_code", shortid.generate()); //add store name as prefix
+    }, []);
+
+    const handlePricingChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("pricing", parseFloat(e.target.value));
+        },
+        []
+    );
+
+    const handleDiscountChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("discount", parseFloat(e.target.value));
+        },
+        []
+    );
+
+    const handleFilesBannerChange = React.useCallback(
+        (files: FileWithPreview[]) => {
+            setBanners(files);
+        },
+        []
+    );
+
+    const handleWarrantyPeriodChange = React.useCallback(
+        (period: MultiSelectProps["items"]) => {
+            handleFormChange("warranty_period", period[0].id);
+        },
+        []
+    );
+
+    const inStoreOnly = formState?.selling_type === "in-store";
+    const onlineStoreOnly = formState?.selling_type === "online";
+    const bothOnlineAndInStore = formState?.selling_type === "both";
+
+    const handleSetInStoreOnly = React.useCallback((checked: boolean) => {
+        handleFormChange("selling_type", checked ? "in-store" : undefined);
+    }, []);
+
+    const handleSetOnlineSellingType = React.useCallback((checked: boolean) => {
+        handleFormChange("selling_type", checked ? "online" : undefined);
+    }, []);
+
+    const handleBothSellingTypeChange = React.useCallback(
+        (checked: boolean) => {
+            handleFormChange("selling_type", checked ? "both" : undefined);
+        },
+        []
+    );
+
+    const handleDeliveryCharge = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("delivery_charge", parseFloat(e.target.value));
+        },
+        []
+    );
+
+    const handleDeliveryLocationRestriction = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("delivery_location_restriction", e.target.value);
+        },
+        []
+    );
+
+    const handlePickUpStoreAddress = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            handleFormChange("pickup_store_address", e.target.value);
+        },
+        []
+    );
+
+    const handleHasWarrantyChange = React.useCallback((checked: boolean) => {
+        handleFormChange("has_warranty", checked);
     }, []);
 
     return (
@@ -119,8 +302,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 </p>
                                 <input
                                     type="text"
-                                    id="table-search"
                                     placeholder="What would you call this product"
+                                    onChange={handleNameChange}
+                                    value={formState?.name ?? ""}
                                     className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                 />
                             </div>
@@ -132,6 +316,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 <textarea
                                     id="table-search"
                                     placeholder="The clearer and shorter the better"
+                                    onChange={handleDescriptionChange}
+                                    value={formState?.description ?? ""}
                                     className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                 />
                             </div>
@@ -147,6 +333,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 <input
                                     type="number"
                                     placeholder="250"
+                                    onChange={handleInventoryCountChange}
+                                    value={formState?.inventory_count ?? ""}
                                     className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                 />
                             </div>
@@ -154,10 +342,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 <p className="text-xs mb-2 text-gray-600">
                                     SKU (Optional)
                                 </p>
-                                <input
-                                    placeholder="AQR-UT-PUT-09"
-                                    className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                />
+                                <div className="relative">
+                                    <div
+                                        onClick={generateSKUCode}
+                                        className="absolute right-0 top-0 w-20 h-full border cursor-pointer border-gray-30 rounded-r-md flex items-center justify-center bg-slate-100"
+                                    >
+                                        <p className="text-sm">Generate</p>
+                                    </div>
+                                    <input
+                                        placeholder="AQR-UT-PUT-09"
+                                        onChange={handleSKUChange}
+                                        value={formState?.sku_code ?? ""}
+                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -166,7 +364,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
                             <div className="flex items-center text-sm mb-4">
                                 <Switch
-                                    onChange={setOnlineStoreOnly}
+                                    onChange={handleSetOnlineSellingType}
                                     className={`${
                                         onlineStoreOnly
                                             ? "bg-[#6d67e4]"
@@ -188,7 +386,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                             </div>
                             <div className="flex items-center text-sm mb-4">
                                 <Switch
-                                    onChange={setInStoreOnly}
+                                    onChange={handleSetInStoreOnly}
                                     className={`${
                                         inStoreOnly
                                             ? "bg-[#6d67e4]"
@@ -210,12 +408,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                             </div>
                             <div className="flex items-center text-sm">
                                 <Switch
-                                    onChange={(checked) => {
-                                        setInStoreOnly(checked);
-                                        setOnlineStoreOnly(checked);
-                                    }}
+                                    onChange={handleBothSellingTypeChange}
                                     className={`${
-                                        onlineStoreOnly && inStoreOnly
+                                        bothOnlineAndInStore
                                             ? "bg-[#6d67e4]"
                                             : "bg-gray-200"
                                     } relative inline-flex h-6 w-11 items-center rounded-full`}
@@ -225,7 +420,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     </span>
                                     <span
                                         className={`${
-                                            onlineStoreOnly && inStoreOnly
+                                            bothOnlineAndInStore
                                                 ? "translate-x-6"
                                                 : "translate-x-1"
                                         } inline-block h-4 w-4 transform rounded-full bg-white transition`}
@@ -256,7 +451,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         do you have? e.g color, size, gender etc
                                     </p>
                                 </div>
-
                                 <div
                                     className="flex items-center text-xs cursor-pointer"
                                     onClick={handleAddVariant}
@@ -268,14 +462,31 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 </div>
                             </div>
                             <div>
-                                {Array.from(variantOptions.values()).map(
-                                    (optionVal, i) => (
-                                        <ProductVariantForm
-                                            key={i}
-                                            removeVariant={() => removeValue(i)}
-                                        />
-                                    )
-                                )}
+                                {(variantOptions.size &&
+                                    Array.from(variantOptions.entries()).map(
+                                        ([variantKey, option]) => (
+                                            <ProductVariantForm
+                                                key={variantKey}
+                                                removeVariant={removeValue}
+                                                handleEditVariantOption={
+                                                    handleEditVariantOption
+                                                }
+                                                handleVariantNameChange={
+                                                    handleVariantNameChange
+                                                }
+                                                removeVariantValue={
+                                                    removeVariantValue
+                                                }
+                                                handleAddValue={() =>
+                                                    handleAddValue(variantKey)
+                                                }
+                                                variantName={option.name}
+                                                variantKey={variantKey}
+                                                values={option.values}
+                                            />
+                                        )
+                                    )) ||
+                                    null}
                             </div>
                         </div>
                     </div>
@@ -291,6 +502,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         $
                                     </span>
                                     <input
+                                        value={formState?.pricing ?? ""}
+                                        onChange={handlePricingChange}
                                         placeholder="200"
                                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                     />
@@ -305,6 +518,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         %
                                     </span>
                                     <input
+                                        value={formState?.discount ?? ""}
+                                        onChange={handleDiscountChange}
                                         placeholder="10"
                                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                     />
@@ -319,11 +534,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
                             <div className="flex items-center text-sm mb-4">
                                 <Switch
-                                    onChange={() =>
-                                        setDeliveryAvailable((c) => !c)
-                                    }
+                                    onChange={handleSetOnlineSellingType}
                                     className={`${
-                                        deliveryAvailable
+                                        onlineStoreOnly || bothOnlineAndInStore
                                             ? "bg-[#6d67e4]"
                                             : "bg-gray-200"
                                     } relative inline-flex h-6 w-11 items-center rounded-full`}
@@ -333,7 +546,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     </span>
                                     <span
                                         className={`${
-                                            deliveryAvailable
+                                            onlineStoreOnly ||
+                                            bothOnlineAndInStore
                                                 ? "translate-x-6"
                                                 : "translate-x-1"
                                         } inline-block h-4 w-4 transform rounded-full bg-white transition`}
@@ -345,7 +559,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 leave="transition ease-in duration-100"
                                 leaveFrom="translate-y-[-100%]"
                                 leaveTo="translate-y-[0%]"
-                                show={deliveryAvailable}
+                                show={onlineStoreOnly || bothOnlineAndInStore}
                             >
                                 <div className="flex items-end mb-4">
                                     <div className="flex-1 mr-8">
@@ -364,6 +578,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                                 $
                                             </span>
                                             <input
+                                                type="number"
+                                                value={
+                                                    formState?.delivery_charge ??
+                                                    ""
+                                                }
+                                                onChange={handleDeliveryCharge}
                                                 placeholder="15"
                                                 className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                             />
@@ -381,6 +601,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                             specify worldwide for short
                                         </p>
                                         <input
+                                            value={
+                                                formState?.delivery_location_restriction ??
+                                                ""
+                                            }
+                                            onChange={
+                                                handleDeliveryLocationRestriction
+                                            }
                                             placeholder="Only Lagos"
                                             className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                         />
@@ -389,11 +616,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                             </Transition>
                             <div className="flex items-center text-sm mb-4">
                                 <Switch
-                                    onChange={() =>
-                                        setDeliveryAvailable((c) => !c)
-                                    }
+                                    onChange={handleSetInStoreOnly}
                                     className={`${
-                                        !deliveryAvailable
+                                        inStoreOnly || bothOnlineAndInStore
                                             ? "bg-[#6d67e4]"
                                             : "bg-gray-200"
                                     } relative inline-flex h-6 w-11 items-center rounded-full`}
@@ -403,7 +628,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     </span>
                                     <span
                                         className={`${
-                                            !deliveryAvailable
+                                            inStoreOnly || bothOnlineAndInStore
                                                 ? "translate-x-6"
                                                 : "translate-x-1"
                                         } inline-block h-4 w-4 transform rounded-full bg-white transition`}
@@ -415,7 +640,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 leave="transition ease-in duration-100"
                                 leaveFrom="translate-y-[-100%]"
                                 leaveTo="translate-y-[0%]"
-                                show={!deliveryAvailable}
+                                show={inStoreOnly || bothOnlineAndInStore}
                             >
                                 <div className="flex-1 mr-8">
                                     <div className="flex flex-col mb-2">
@@ -429,6 +654,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         </p>
                                     </div>
                                     <input
+                                        value={formState?.pickup_store_address}
+                                        onChange={handlePickUpStoreAddress}
                                         placeholder="123 Maple Street, Anytown, USA, Zip Code: 98765"
                                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                     />
@@ -441,9 +668,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
                             <div className="flex items-center text-sm">
                                 <Switch
-                                    onChange={setHasWarranty}
+                                    onChange={handleHasWarrantyChange}
                                     className={`${
-                                        hasWarranty
+                                        formState?.has_warranty
                                             ? "bg-[#6d67e4]"
                                             : "bg-gray-200"
                                     } relative inline-flex h-6 w-11 items-center rounded-full`}
@@ -453,7 +680,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     </span>
                                     <span
                                         className={`${
-                                            hasWarranty
+                                            formState?.has_warranty
                                                 ? "translate-x-6"
                                                 : "translate-x-1"
                                         } inline-block h-4 w-4 transform rounded-full bg-white transition`}
@@ -465,7 +692,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 leave="transition ease-in duration-100"
                                 leaveFrom="translate-y-[-100%]"
                                 leaveTo="translate-y-[0%]"
-                                show={hasWarranty}
+                                show={!!formState?.has_warranty}
                             >
                                 <div className="flex-1 mr-8 mt-4">
                                     <div className="flex flex-col mb-2">
@@ -481,7 +708,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     </div>
                                     <MultiSelectInput
                                         items={warrantyPeriods}
-                                        onSelect={() => {}}
+                                        onSelect={handleWarrantyPeriodChange}
                                         multiple={false}
                                     />
                                 </div>
@@ -493,9 +720,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         description="Upload your images in a widely supported format like JPEG, PNG, or GIF. 
                         Large image files can slow down page loading speed. Consider resizing your images to an appropriate size for online display without compromising quality. 
                         Arrange the images in a logical sequence to guide your customer's decision starting with main images followed by supplementary images."
-                        handleFileChange={() => {}}
+                        handleFileChange={handleFilesBannerChange}
                         title="Product Images"
                         dimensionInfo="rec. 400 * 850px"
+                        presetBanners={transformBannerToMap(banners)}
                     />
                 </div>
             </div>

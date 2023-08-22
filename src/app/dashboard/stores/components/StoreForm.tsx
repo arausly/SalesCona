@@ -478,7 +478,8 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                             .from(supabaseBuckets.shop)
                             .upload(logoFileName, shopLogo, {
                                 cacheControl: "3600",
-                                upsert: true
+                                upsert: true,
+                                contentType: shopLogo.type
                             });
 
                     if (logoData && !logoErr) {
@@ -499,7 +500,8 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                                 .from(supabaseBuckets.shop)
                                 .upload(storeFileName, banner, {
                                     cacheControl: "3600",
-                                    upsert: true
+                                    upsert: true,
+                                    contentType: banner.type
                                 });
 
                             if (data && !error) {
