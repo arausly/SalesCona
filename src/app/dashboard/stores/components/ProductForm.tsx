@@ -97,7 +97,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         (e: React.ChangeEvent<HTMLInputElement>, variantKey: string) => {
             setVariantOptions((prev) => {
                 prev.set(variantKey, {
-                    name: e.target.value.trim()
+                    name: e.target.value.trim(),
+                    values: prev.get(variantKey)?.values
                 });
                 return new Map([...prev]);
             });
