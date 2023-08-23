@@ -5,7 +5,7 @@ export interface ProductCategory {
 }
 
 export interface Store {
-    id: number;
+    id: string;
     created_at: string;
     name: string;
     slug: string;

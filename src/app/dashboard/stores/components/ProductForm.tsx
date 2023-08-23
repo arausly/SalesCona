@@ -10,13 +10,16 @@ import { ProductVariantForm } from "./ProductVariantForm";
 import MultiSelectInput, {
     MultiSelectProps
 } from "@components/Input/MultiSelectInput";
-import { Product } from "../typing";
+import { Product, Store } from "../typing";
 import shortid from "shortid";
 import { FileWithPreview } from "@components/FileWidget";
 import { debounce } from "@lib/common.utils";
 import { supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetProductCategories } from "@hooks/useGetProductCategories";
+import { useGetUser } from "@hooks/useGetUser";
+import { useGetStoreBySlug } from "../hooks/useGetStoreBySlug";
+import { Spinner } from "@components/Spinner";
 
 interface ProductFormProps {
     isEditForm: boolean;
@@ -46,6 +49,7 @@ type FormErrors = {
 };
 
 export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
+    //state
     const [variantOptions, setVariantOptions] = React.useState<VariantType>(
         new Map()
     );
@@ -59,12 +63,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const [formErrMessages, setFormErrMessages] =
         React.useState<Partial<FormErrors>>();
 
-    //get store for product
-    // upsert product
-
+    //hooks
     const { supabase } = useBrowserSupabase();
     const pathname = usePathname();
     const [, , , storePath, , productPath] = pathname.split("/");
+    const { loading, store } = useGetStoreBySlug(storePath);
 
     const transformBannerToMap = React.useCallback(
         (banners: FileWithPreview[]) =>
@@ -271,20 +274,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
             const newName = e.target.value;
             handleFormChange("name", newName);
             formHasErrors({ name: newName });
-            // checkIfProductWithNameExists(newName);
+            checkIfProductWithNameExists(newName);
         },
-        []
+        [store]
     );
 
     const checkIfProductWithNameExists = React.useCallback(
         debounce(async (name) => {
             try {
+                if (!store) return;
                 //same product name for the store
                 const { error, data } = await supabase
                     .from(supabaseTables.products)
                     .select()
                     .eq("name", name)
-                    .eq("store", "");
+                    .eq("store", store.id);
 
                 if (!error && data?.length) {
                     handleFormChange("productNameExists", true);
@@ -295,7 +299,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                 }
             } catch (err) {}
         }, 500),
-        []
+        [store]
     );
 
     const handleStoreCategoryChange = React.useCallback(
@@ -474,214 +478,231 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col md:flex-row w-full mt-6">
-                <div className="flex-1 order-last md:px-6 md:order-first h-full overflow-auto">
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Description</p>
-                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
-                            <div className="flex flex-col mb-6">
-                                <div className="flex mb-1">
-                                    <p className="mr-1">Name</p>
-                                    <span className="text-[#6d67e4]">*</span>
-                                </div>
-                                <p className="text-xs font-light mb-1">
-                                    20 characters max
-                                </p>
-                                <input
-                                    type="text"
-                                    placeholder="What would you call this product"
-                                    onChange={handleNameChange}
-                                    value={formState?.name ?? ""}
-                                    className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                />
-                                {formErrMessages?.name && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {formErrMessages?.name}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="flex flex-col">
-                                <div className="flex mb-1">
-                                    <p className="mr-1">Description</p>
-                                    <span className="text-[#6d67e4]">*</span>
-                                </div>
-                                <textarea
-                                    id="table-search"
-                                    placeholder="The clearer and shorter the better"
-                                    onChange={handleDescriptionChange}
-                                    value={formState?.description ?? ""}
-                                    className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                />
-                                {formErrMessages?.description && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {formErrMessages?.description}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Inventory</p>
-                        <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
-                            <div className="mr-8">
-                                <div className="flex">
-                                    <p className="text-xs mb-2 text-gray-600 mr-1">
-                                        Quantity
-                                    </p>
-                                    <span className="text-[#6d67e4]">*</span>
-                                </div>
-                                <input
-                                    type="number"
-                                    placeholder="250"
-                                    onChange={handleInventoryCountChange}
-                                    value={formState?.inventory_count ?? ""}
-                                    className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                />
-                                {formErrMessages?.inventory_count && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {formErrMessages?.inventory_count}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-xs mb-2 text-gray-600">
-                                    SKU (Optional)
-                                </p>
-                                <div className="relative">
-                                    <div
-                                        onClick={generateSKUCode}
-                                        className="absolute right-0 top-0 w-20 h-full border cursor-pointer border-gray-30 rounded-r-md flex items-center justify-center bg-slate-100"
-                                    >
-                                        <p className="text-sm">Generate</p>
+            {loading ? (
+                <div className="flex items-center justify-center my-4">
+                    <Spinner size="large" />
+                </div>
+            ) : (
+                <div className="flex flex-col md:flex-row w-full mt-6">
+                    <div className="flex-1 order-last md:px-6 md:order-first h-full overflow-auto">
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Description</p>
+                            <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                                <div className="flex flex-col mb-6">
+                                    <div className="flex mb-1">
+                                        <p className="mr-1">Name</p>
+                                        <span className="text-[#6d67e4]">
+                                            *
+                                        </span>
                                     </div>
+                                    <p className="text-xs font-light mb-1">
+                                        20 characters max
+                                    </p>
                                     <input
-                                        placeholder="AQR-UT-PUT-09"
-                                        onChange={handleSKUChange}
-                                        value={formState?.sku_code ?? ""}
+                                        type="text"
+                                        placeholder="What would you call this product"
+                                        onChange={handleNameChange}
+                                        value={formState?.name ?? ""}
                                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                     />
+                                    {formErrMessages?.name && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {formErrMessages?.name}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex flex-col">
+                                    <div className="flex mb-1">
+                                        <p className="mr-1">Description</p>
+                                        <span className="text-[#6d67e4]">
+                                            *
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        id="table-search"
+                                        placeholder="The clearer and shorter the better"
+                                        onChange={handleDescriptionChange}
+                                        value={formState?.description ?? ""}
+                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                    />
+                                    {formErrMessages?.description && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {formErrMessages?.description}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Selling Type</p>
-                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
-                            <div className="flex items-center text-sm mb-4">
-                                <Switch
-                                    onChange={handleSetOnlineSellingType}
-                                    className={`${
-                                        onlineStoreOnly
-                                            ? "bg-[#6d67e4]"
-                                            : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
-                                >
-                                    <span className="sr-only">
-                                        Selling online only
-                                    </span>
-                                    <span
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Inventory</p>
+                            <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
+                                <div className="mr-8">
+                                    <div className="flex">
+                                        <p className="text-xs mb-2 text-gray-600 mr-1">
+                                            Quantity
+                                        </p>
+                                        <span className="text-[#6d67e4]">
+                                            *
+                                        </span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        placeholder="250"
+                                        onChange={handleInventoryCountChange}
+                                        value={formState?.inventory_count ?? ""}
+                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                    />
+                                    {formErrMessages?.inventory_count && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {formErrMessages?.inventory_count}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs mb-2 text-gray-600">
+                                        SKU (Optional)
+                                    </p>
+                                    <div className="relative">
+                                        <div
+                                            onClick={generateSKUCode}
+                                            className="absolute right-0 top-0 w-20 h-full border cursor-pointer border-gray-30 rounded-r-md flex items-center justify-center bg-slate-100"
+                                        >
+                                            <p className="text-sm">Generate</p>
+                                        </div>
+                                        <input
+                                            placeholder="AQR-UT-PUT-09"
+                                            onChange={handleSKUChange}
+                                            value={formState?.sku_code ?? ""}
+                                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Selling Type</p>
+                            <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                                <div className="flex items-center text-sm mb-4">
+                                    <Switch
+                                        onChange={handleSetOnlineSellingType}
                                         className={`${
                                             onlineStoreOnly
-                                                ? "translate-x-6"
-                                                : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                    />
-                                </Switch>
-                                <p className="ml-4">Online selling only</p>
-                            </div>
-                            <div className="flex items-center text-sm mb-4">
-                                <Switch
-                                    onChange={handleSetInStoreOnly}
-                                    className={`${
-                                        inStoreOnly
-                                            ? "bg-[#6d67e4]"
-                                            : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
-                                >
-                                    <span className="sr-only">
-                                        In-store selling only
-                                    </span>
-                                    <span
+                                                ? "bg-[#6d67e4]"
+                                                : "bg-gray-200"
+                                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                    >
+                                        <span className="sr-only">
+                                            Selling online only
+                                        </span>
+                                        <span
+                                            className={`${
+                                                onlineStoreOnly
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                    <p className="ml-4">Online selling only</p>
+                                </div>
+                                <div className="flex items-center text-sm mb-4">
+                                    <Switch
+                                        onChange={handleSetInStoreOnly}
                                         className={`${
                                             inStoreOnly
-                                                ? "translate-x-6"
-                                                : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                    />
-                                </Switch>
-                                <p className="ml-4">In-store selling only</p>
-                            </div>
-                            <div className="flex items-center text-sm">
-                                <Switch
-                                    onChange={handleBothSellingTypeChange}
-                                    className={`${
-                                        bothOnlineAndInStore
-                                            ? "bg-[#6d67e4]"
-                                            : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
-                                >
-                                    <span className="sr-only">
-                                        Selling online only
-                                    </span>
-                                    <span
+                                                ? "bg-[#6d67e4]"
+                                                : "bg-gray-200"
+                                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                    >
+                                        <span className="sr-only">
+                                            In-store selling only
+                                        </span>
+                                        <span
+                                            className={`${
+                                                inStoreOnly
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                    <p className="ml-4">
+                                        In-store selling only
+                                    </p>
+                                </div>
+                                <div className="flex items-center text-sm">
+                                    <Switch
+                                        onChange={handleBothSellingTypeChange}
                                         className={`${
                                             bothOnlineAndInStore
-                                                ? "translate-x-6"
-                                                : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                    />
-                                </Switch>
-                                <p className="ml-4">
-                                    Available both in-store and online
-                                </p>
+                                                ? "bg-[#6d67e4]"
+                                                : "bg-gray-200"
+                                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                    >
+                                        <span className="sr-only">
+                                            Selling online only
+                                        </span>
+                                        <span
+                                            className={`${
+                                                bothOnlineAndInStore
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                    <p className="ml-4">
+                                        Available both in-store and online
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Category</p>
-                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
-                            <div className="mb-6">
-                                <div className="flex mb-1">
-                                    <p className="mr-1 text-xs text-gray-600">
-                                        Product Category
-                                    </p>
-                                    <span className="text-[#6d67e4]">*</span>
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Category</p>
+                            <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                                <div className="mb-6">
+                                    <div className="flex mb-1">
+                                        <p className="mr-1 text-xs text-gray-600">
+                                            Product Category
+                                        </p>
+                                        <span className="text-[#6d67e4]">
+                                            *
+                                        </span>
+                                    </div>
+                                    <MultiSelectInput
+                                        items={store?.categories ?? []}
+                                        onSelect={handleStoreCategoryChange}
+                                        createNewItem={createNewProductCategory}
+                                    />
+                                    {formErrMessages?.categories && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {formErrMessages?.categories}
+                                        </p>
+                                    )}
                                 </div>
-                                <MultiSelectInput
-                                    items={productCategories}
-                                    onSelect={handleStoreCategoryChange}
-                                    createNewItem={createNewProductCategory}
-                                />
-                                {formErrMessages?.categories && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {formErrMessages?.categories}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="flex w-full justify-between items-center mb-6">
-                                <div className="flex flex-col">
-                                    <p className="mr-1 text-xs text-gray-600 mb-1">
-                                        Product variants
-                                    </p>
-                                    <p className="text-xs font-light">
-                                        What other possible type of this product
-                                        do you have? e.g color, size, gender etc
-                                    </p>
+                                <div className="flex w-full justify-between items-center mb-6">
+                                    <div className="flex flex-col">
+                                        <p className="mr-1 text-xs text-gray-600 mb-1">
+                                            Product variants
+                                        </p>
+                                        <p className="text-xs font-light">
+                                            What other possible type of this
+                                            product do you have? e.g color,
+                                            size, gender etc
+                                        </p>
+                                    </div>
+                                    <div
+                                        className="flex items-center text-xs cursor-pointer"
+                                        onClick={handleAddVariant}
+                                    >
+                                        <PlusIcon className="h-4 w-4 text-[#6d67e4] mr-1" />
+                                        <p className="text-[#6d67e4]">
+                                            Add Variant
+                                        </p>
+                                    </div>
                                 </div>
-                                <div
-                                    className="flex items-center text-xs cursor-pointer"
-                                    onClick={handleAddVariant}
-                                >
-                                    <PlusIcon className="h-4 w-4 text-[#6d67e4] mr-1" />
-                                    <p className="text-[#6d67e4]">
-                                        Add Variant
-                                    </p>
-                                </div>
-                            </div>
-                            <div>
-                                {(variantOptions.size &&
-                                    Array.from(variantOptions.entries()).map(
-                                        ([variantKey, option]) => (
+                                <div>
+                                    {(variantOptions.size &&
+                                        Array.from(
+                                            variantOptions.entries()
+                                        ).map(([variantKey, option]) => (
                                             <ProductVariantForm
                                                 key={variantKey}
                                                 removeVariant={removeValue}
@@ -701,285 +722,298 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                                 variantKey={variantKey}
                                                 values={option.values}
                                             />
-                                        )
-                                    )) ||
-                                    null}
-                            </div>
-                            {formErrMessages?.variations && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {formErrMessages?.variations}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Pricing</p>
-                        <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
-                            <div className="flex-1 mr-8">
-                                <div className="flex">
-                                    <p className="text-xs mb-2 text-gray-600 mr-1">
-                                        Price
-                                    </p>
-                                    <span className="text-[#6d67e4]">*</span>
+                                        ))) ||
+                                        null}
                                 </div>
-                                <div className="w-full relative">
-                                    <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
-                                        $
-                                    </span>
-                                    <input
-                                        value={formState?.pricing ?? ""}
-                                        onChange={handlePricingChange}
-                                        type="number"
-                                        placeholder="200"
-                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                    />
-                                </div>
-                                {formErrMessages?.pricing && (
+                                {formErrMessages?.variations && (
                                     <p className="text-red-500 text-xs mt-1">
-                                        {formErrMessages?.pricing}
+                                        {formErrMessages?.variations}
                                     </p>
                                 )}
                             </div>
-                            <div className="flex-1 relative">
-                                <p className="text-xs mb-2 text-gray-600">
-                                    Discount (Optional)
-                                </p>
-                                <div className="w-full relative">
-                                    <span className="inline-block rounded-r-md absolute text-gray-700 flex items-center justify-center right-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
-                                        %
-                                    </span>
-                                    <input
-                                        value={formState?.discount ?? ""}
-                                        onChange={handleDiscountChange}
-                                        placeholder="10"
-                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                    />
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                </div>
-                <div className="flex-none md:flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto">
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Delivery</p>
-                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
-                            <div className="flex items-center text-sm mb-4">
-                                <Switch
-                                    onChange={handleSetOnlineSellingType}
-                                    className={`${
-                                        onlineStoreOnly || bothOnlineAndInStore
-                                            ? "bg-[#6d67e4]"
-                                            : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
-                                >
-                                    <span className="sr-only">
-                                        Delivery Available
-                                    </span>
-                                    <span
-                                        className={`${
-                                            onlineStoreOnly ||
-                                            bothOnlineAndInStore
-                                                ? "translate-x-6"
-                                                : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                    />
-                                </Switch>
-                                <p className="ml-4">Delivery available</p>
-                            </div>
-                            <Transition
-                                leave="transition ease-in duration-100"
-                                leaveFrom="translate-y-[-100%]"
-                                leaveTo="translate-y-[0%]"
-                                show={onlineStoreOnly || bothOnlineAndInStore}
-                            >
-                                <div className="flex items-end mb-4">
-                                    <div className="flex-1 mr-8">
-                                        <p className="text-xs mb-1 text-gray-600">
-                                            Additional Charge (Optional)
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Pricing</p>
+                            <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
+                                <div className="flex-1 mr-8">
+                                    <div className="flex">
+                                        <p className="text-xs mb-2 text-gray-600 mr-1">
+                                            Price
                                         </p>
-                                        <p className="text-xs font-light mb-2">
-                                            Delivery charges will likely vary
-                                            per customer's location. The price
-                                            here should be the base price for
-                                            the possible closest location your
-                                            customer can be.
-                                        </p>
-                                        <div className="w-full relative">
-                                            <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
-                                                $
-                                            </span>
-                                            <input
-                                                type="number"
-                                                value={
-                                                    formState?.delivery_charge ??
-                                                    ""
-                                                }
-                                                onChange={handleDeliveryCharge}
-                                                placeholder="15"
-                                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                            />
-                                        </div>
-                                        {formErrMessages?.delivery_charge && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {
-                                                    formErrMessages?.delivery_charge
-                                                }
-                                            </p>
-                                        )}
+                                        <span className="text-[#6d67e4]">
+                                            *
+                                        </span>
                                     </div>
-                                    <div className="flex-1 mr-8">
-                                        <p className="text-xs mb-1 text-gray-600">
-                                            Location Restriction (Optional)
-                                        </p>
-                                        <p className="text-xs font-light mb-2">
-                                            Specify the places you can deliver
-                                            to, regions, provinces, state etc.
-                                            Or if delivery is{" "}
-                                            <strong>worldwide</strong>, you can
-                                            specify worldwide for short
-                                        </p>
+                                    <div className="w-full relative">
+                                        <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
+                                            $
+                                        </span>
                                         <input
-                                            value={
-                                                formState?.delivery_location_restriction ??
-                                                ""
-                                            }
-                                            onChange={
-                                                handleDeliveryLocationRestriction
-                                            }
-                                            placeholder="Only Lagos"
+                                            value={formState?.pricing ?? ""}
+                                            onChange={handlePricingChange}
+                                            type="number"
+                                            placeholder="200"
+                                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                        />
+                                    </div>
+                                    {formErrMessages?.pricing && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {formErrMessages?.pricing}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex-1 relative">
+                                    <p className="text-xs mb-2 text-gray-600">
+                                        Discount (Optional)
+                                    </p>
+                                    <div className="w-full relative">
+                                        <span className="inline-block rounded-r-md absolute text-gray-700 flex items-center justify-center right-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
+                                            %
+                                        </span>
+                                        <input
+                                            value={formState?.discount ?? ""}
+                                            onChange={handleDiscountChange}
+                                            placeholder="10"
                                             className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                         />
                                     </div>
                                 </div>
-                            </Transition>
-                            <div className="flex items-center text-sm mb-4">
-                                <Switch
-                                    onChange={handleSetInStoreOnly}
-                                    className={`${
-                                        inStoreOnly || bothOnlineAndInStore
-                                            ? "bg-[#6d67e4]"
-                                            : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex-none md:flex-1 px-0 md:px-6 order-first mb-6 md:mb-0 md:order-last overflow-y-auto">
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Delivery</p>
+                            <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                                <div className="flex items-center text-sm mb-4">
+                                    <Switch
+                                        onChange={handleSetOnlineSellingType}
+                                        className={`${
+                                            onlineStoreOnly ||
+                                            bothOnlineAndInStore
+                                                ? "bg-[#6d67e4]"
+                                                : "bg-gray-200"
+                                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                    >
+                                        <span className="sr-only">
+                                            Delivery Available
+                                        </span>
+                                        <span
+                                            className={`${
+                                                onlineStoreOnly ||
+                                                bothOnlineAndInStore
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                    <p className="ml-4">Delivery available</p>
+                                </div>
+                                <Transition
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="translate-y-[-100%]"
+                                    leaveTo="translate-y-[0%]"
+                                    show={
+                                        onlineStoreOnly || bothOnlineAndInStore
+                                    }
                                 >
-                                    <span className="sr-only">
-                                        Pick-up from store
-                                    </span>
-                                    <span
+                                    <div className="flex items-end mb-4">
+                                        <div className="flex-1 mr-8">
+                                            <p className="text-xs mb-1 text-gray-600">
+                                                Additional Charge (Optional)
+                                            </p>
+                                            <p className="text-xs font-light mb-2">
+                                                Delivery charges will likely
+                                                vary per customer's location.
+                                                The price here should be the
+                                                base price for the possible
+                                                closest location your customer
+                                                can be.
+                                            </p>
+                                            <div className="w-full relative">
+                                                <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
+                                                    $
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    value={
+                                                        formState?.delivery_charge ??
+                                                        ""
+                                                    }
+                                                    onChange={
+                                                        handleDeliveryCharge
+                                                    }
+                                                    placeholder="15"
+                                                    className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                                />
+                                            </div>
+                                            {formErrMessages?.delivery_charge && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {
+                                                        formErrMessages?.delivery_charge
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 mr-8">
+                                            <p className="text-xs mb-1 text-gray-600">
+                                                Location Restriction (Optional)
+                                            </p>
+                                            <p className="text-xs font-light mb-2">
+                                                Specify the places you can
+                                                deliver to, regions, provinces,
+                                                state etc. Or if delivery is{" "}
+                                                <strong>worldwide</strong>, you
+                                                can specify worldwide for short
+                                            </p>
+                                            <input
+                                                value={
+                                                    formState?.delivery_location_restriction ??
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleDeliveryLocationRestriction
+                                                }
+                                                placeholder="Only Lagos"
+                                                className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                            />
+                                        </div>
+                                    </div>
+                                </Transition>
+                                <div className="flex items-center text-sm mb-4">
+                                    <Switch
+                                        onChange={handleSetInStoreOnly}
                                         className={`${
                                             inStoreOnly || bothOnlineAndInStore
-                                                ? "translate-x-6"
-                                                : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                    />
-                                </Switch>
-                                <p className="ml-4">Pick-up from store</p>
-                            </div>
-                            <Transition
-                                leave="transition ease-in duration-100"
-                                leaveFrom="translate-y-[-100%]"
-                                leaveTo="translate-y-[0%]"
-                                show={inStoreOnly || bothOnlineAndInStore}
-                            >
-                                <div className="flex-1 mr-8">
-                                    <div className="flex flex-col mb-2">
-                                        <p className="mr-1 text-xs text-gray-600 mb-1">
-                                            Store Address
-                                        </p>
-                                        <p className="text-xs font-light">
-                                            The physical location of your shop,
-                                            so your customers can come pick up
-                                            their orders.
-                                        </p>
-                                    </div>
-                                    <input
-                                        value={
-                                            formState?.pickup_store_address ??
-                                            ""
-                                        }
-                                        onChange={handlePickUpStoreAddress}
-                                        placeholder="123 Maple Street, Anytown, USA, Zip Code: 98765"
-                                        className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
-                                    />
+                                                ? "bg-[#6d67e4]"
+                                                : "bg-gray-200"
+                                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                    >
+                                        <span className="sr-only">
+                                            Pick-up from store
+                                        </span>
+                                        <span
+                                            className={`${
+                                                inStoreOnly ||
+                                                bothOnlineAndInStore
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                    <p className="ml-4">Pick-up from store</p>
                                 </div>
-                                {formErrMessages?.pickup_store_address && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {formErrMessages?.pickup_store_address}
-                                    </p>
-                                )}
-                            </Transition>
-                        </div>
-                    </div>
-                    <div className="flex flex-col w-full mb-6">
-                        <p className="mb-2">Warranty</p>
-                        <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
-                            <div className="flex items-center text-sm">
-                                <Switch
-                                    onChange={handleHasWarrantyChange}
-                                    className={`${
-                                        formState?.has_warranty
-                                            ? "bg-[#6d67e4]"
-                                            : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                <Transition
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="translate-y-[-100%]"
+                                    leaveTo="translate-y-[0%]"
+                                    show={inStoreOnly || bothOnlineAndInStore}
                                 >
-                                    <span className="sr-only">
-                                        Has Warranty
-                                    </span>
-                                    <span
+                                    <div className="flex-1 mr-8">
+                                        <div className="flex flex-col mb-2">
+                                            <p className="mr-1 text-xs text-gray-600 mb-1">
+                                                Store Address
+                                            </p>
+                                            <p className="text-xs font-light">
+                                                The physical location of your
+                                                shop, so your customers can come
+                                                pick up their orders.
+                                            </p>
+                                        </div>
+                                        <input
+                                            value={
+                                                formState?.pickup_store_address ??
+                                                ""
+                                            }
+                                            onChange={handlePickUpStoreAddress}
+                                            placeholder="123 Maple Street, Anytown, USA, Zip Code: 98765"
+                                            className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
+                                        />
+                                    </div>
+                                    {formErrMessages?.pickup_store_address && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {
+                                                formErrMessages?.pickup_store_address
+                                            }
+                                        </p>
+                                    )}
+                                </Transition>
+                            </div>
+                        </div>
+                        <div className="flex flex-col w-full mb-6">
+                            <p className="mb-2">Warranty</p>
+                            <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
+                                <div className="flex items-center text-sm">
+                                    <Switch
+                                        onChange={handleHasWarrantyChange}
                                         className={`${
                                             formState?.has_warranty
-                                                ? "translate-x-6"
-                                                : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                    />
-                                </Switch>
-                                <p className="ml-4">Has Warranty</p>
-                            </div>
-                            <Transition
-                                leave="transition ease-in duration-100"
-                                leaveFrom="translate-y-[-100%]"
-                                leaveTo="translate-y-[0%]"
-                                show={!!formState?.has_warranty}
-                            >
-                                <div className="flex-1 mr-8 mt-4">
-                                    <div className="flex flex-col mb-2">
-                                        <p className="mr-1 text-xs text-gray-600 mb-1">
-                                            Warranty period
-                                        </p>
-                                        <p className="text-xs font-light">
-                                            How long would you be able to
-                                            provide free to subsidized repair
-                                            and adjustment services in case of
-                                            any malfunction?
-                                        </p>
-                                    </div>
-                                    <MultiSelectInput
-                                        items={warrantyPeriods}
-                                        onSelect={handleWarrantyPeriodChange}
-                                        multiple={false}
-                                    />
+                                                ? "bg-[#6d67e4]"
+                                                : "bg-gray-200"
+                                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                                    >
+                                        <span className="sr-only">
+                                            Has Warranty
+                                        </span>
+                                        <span
+                                            className={`${
+                                                formState?.has_warranty
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                    <p className="ml-4">Has Warranty</p>
                                 </div>
-                            </Transition>
+                                <Transition
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="translate-y-[-100%]"
+                                    leaveTo="translate-y-[0%]"
+                                    show={!!formState?.has_warranty}
+                                >
+                                    <div className="flex-1 mr-8 mt-4">
+                                        <div className="flex flex-col mb-2">
+                                            <p className="mr-1 text-xs text-gray-600 mb-1">
+                                                Warranty period
+                                            </p>
+                                            <p className="text-xs font-light">
+                                                How long would you be able to
+                                                provide free to subsidized
+                                                repair and adjustment services
+                                                in case of any malfunction?
+                                            </p>
+                                        </div>
+                                        <MultiSelectInput
+                                            items={warrantyPeriods}
+                                            onSelect={
+                                                handleWarrantyPeriodChange
+                                            }
+                                            multiple={false}
+                                        />
+                                    </div>
+                                </Transition>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex flex-col">
-                        {formErrMessages?.product_images && (
-                            <p className="text-red-500 text-xs my-1">
-                                {formErrMessages?.product_images}
-                            </p>
-                        )}
-                        <ImagePicker
-                            maxFiles={8}
-                            description="Upload your images in a widely supported format like JPEG, PNG, or GIF. 
+                        <div className="flex flex-col">
+                            {formErrMessages?.product_images && (
+                                <p className="text-red-500 text-xs my-1">
+                                    {formErrMessages?.product_images}
+                                </p>
+                            )}
+                            <ImagePicker
+                                maxFiles={8}
+                                description="Upload your images in a widely supported format like JPEG, PNG, or GIF. 
                         Large image files can slow down page loading speed. Consider resizing your images to an appropriate size for online display without compromising quality. 
                         Arrange the images in a logical sequence to guide your customer's decision starting with main images followed by supplementary images."
-                            handleFileChange={handleFilesBannerChange}
-                            title="Product Images"
-                            dimensionInfo="rec. 400 * 850px"
-                            presetBanners={transformBannerToMap(banners)}
-                        />
+                                handleFileChange={handleFilesBannerChange}
+                                title="Product Images"
+                                dimensionInfo="rec. 400 * 850px"
+                                presetBanners={transformBannerToMap(banners)}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </section>
     );
 };
