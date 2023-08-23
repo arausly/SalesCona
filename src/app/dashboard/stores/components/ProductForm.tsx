@@ -3,23 +3,29 @@ import React from "react";
 import { Breadcrumb } from "@components/Breadcrumb";
 import { Switch, Transition } from "@headlessui/react";
 import { CheckIcon, PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
-import { usePathname } from "next/navigation";
+import { toast } from "react-toastify";
+import { usePathname, useRouter } from "next/navigation";
+
+import {
+    convertPathToSpaceSeparatedStr,
+    spaceSeparatedStrToPath
+} from "@lib/format-utils";
 import { ImagePicker } from "./ImagePicker";
 import { ProductVariantForm } from "./ProductVariantForm";
 import MultiSelectInput, {
     MultiSelectProps
 } from "@components/Input/MultiSelectInput";
-import { Product, Store } from "../typing";
+import { Product } from "../typing";
 import shortid from "shortid";
 import { FileWithPreview } from "@components/FileWidget";
-import { debounce } from "@lib/common.utils";
-import { supabaseTables } from "@lib/constants";
+import { debounce, excludeKeysFromObj } from "@lib/common.utils";
+import { supabaseBuckets, supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { useGetProductCategories } from "@hooks/useGetProductCategories";
 import { useGetUser } from "@hooks/useGetUser";
 import { useGetStoreBySlug } from "../hooks/useGetStoreBySlug";
 import { Spinner } from "@components/Spinner";
+import { Button } from "@components/Button";
+import { SavingPrompt } from "./modals/SavingPrompt";
 
 interface ProductFormProps {
     isEditForm: boolean;
@@ -58,14 +64,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
             Partial<Omit<Product, "store"> & { productNameExists: boolean }>
         >();
     const [banners, setBanners] = React.useState<Array<FileWithPreview>>([]);
-    const { productCategories, createNewProductCategory } =
-        useGetProductCategories();
     const [formErrMessages, setFormErrMessages] =
         React.useState<Partial<FormErrors>>();
+    const [saving, setSaving] = React.useState<boolean>(false);
+    const [publishing, setPublishing] = React.useState<boolean>(false);
+    const [loadingProduct, setLoadingProduct] = React.useState<boolean>(false);
 
     //hooks
     const { supabase } = useBrowserSupabase();
     const pathname = usePathname();
+    const user = useGetUser();
+    const router = useRouter();
     const [, , , storePath, , productPath] = pathname.split("/");
     const { loading, store } = useGetStoreBySlug(storePath);
 
@@ -165,8 +174,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
         if ("variations" in payload) {
             let inconsistentPairing = false; //option name exist with option values
-            Array.from(payload.variations?.values() ?? []).forEach((v: any) => {
-                if (v.name.length && !v?.values?.size) {
+            Array.from(payload.variations?.values() ?? []).forEach((v) => {
+                if (
+                    v.name.length &&
+                    !!Array.from(v?.values?.values() ?? []).filter(
+                        (v) => !v.length
+                    )?.length
+                ) {
                     inconsistentPairing = true;
                 }
             });
@@ -182,6 +196,170 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
             (formInputErr) => formInputErr !== undefined
         );
     };
+
+    //get existing store
+    React.useEffect(() => {
+        (async () => {
+            if (isEditForm && store && user) {
+                try {
+                    setLoadingProduct(true);
+                    const { data, error } = await supabase
+                        .from(supabaseTables.products)
+                        .select()
+                        .eq("user", user.id)
+                        .eq("store", store.id)
+                        .eq("slug", productPath)
+                        .returns<Product[]>();
+
+                    if (data?.length && !error) {
+                        const productFromDB = data[0];
+                        setBanners(() =>
+                            JSON.parse(productFromDB.product_images ?? "[]")
+                        );
+                        setVariantOptions(
+                            () =>
+                                new Map(
+                                    JSON.parse(productFromDB.variations ?? [])
+                                )
+                        );
+                        setFormState((prev) => ({ ...prev, ...productFromDB }));
+                    }
+                } catch (err) {
+                } finally {
+                    setLoadingProduct(false);
+                }
+            }
+        })();
+    }, [isEditForm, storePath, store, user, productPath]);
+
+    const upsertProduct = React.useCallback(
+        async (isDraft = true) => {
+            if (!user || !store) {
+                toast(<p className="text-sm">User information invalid</p>, {
+                    type: "error"
+                });
+                return;
+            }
+            if (!formState) {
+                toast(<p className="text-sm">Failed to create product</p>, {
+                    type: "error"
+                });
+                return;
+            }
+
+            if (
+                formHasErrors({
+                    ...excludeKeysFromObj(formState, [
+                        "sku_code",
+                        "variations",
+                        "product_images"
+                    ]),
+                    product_images: banners,
+                    variations: variantOptions
+                })
+            )
+                return;
+
+            const productSlug = spaceSeparatedStrToPath(
+                formState.name?.trim() ?? ""
+            );
+            isDraft ? setSaving(true) : setPublishing(true);
+            //variation options.
+            const variationsCopy = new Map(variantOptions);
+            Array.from(variationsCopy.entries()).forEach(([key, option]) => {
+                variationsCopy.set(key, {
+                    name: variationsCopy.get(key)?.name ?? "",
+                    values: JSON.stringify(
+                        Array.from(
+                            variationsCopy.get(key)?.values?.entries() ?? []
+                        )
+                    ) as any
+                });
+                option.values;
+            });
+            try {
+                const { data, error } = await supabase
+                    .from(supabaseTables.products)
+                    .upsert(
+                        {
+                            ...excludeKeysFromObj(formState, [
+                                "productNameExists"
+                            ]),
+                            variations: JSON.stringify(
+                                Array.from(variationsCopy.entries())
+                            ),
+                            user: user.id,
+                            store: store.id,
+                            slug: productSlug,
+                            isPublished: !isDraft,
+                            secondary_key:
+                                formState.secondary_key ?? shortid.generate()
+                        },
+                        { onConflict: "secondary_key" }
+                    )
+                    .select()
+                    .returns<Product[]>();
+
+                if (data?.length && !error) {
+                    const newProduct = data[0];
+                    let bannerURLs: (string | undefined)[] = [];
+                    if (banners.length) {
+                        //upload to bucket
+                        bannerURLs = await Promise.all(
+                            banners.map(async (banner, i) => {
+                                const productFileName = `${user.id}/${store.id}/${newProduct.id}/${productSlug}-${i}`;
+                                const { data: d, error: e } =
+                                    await supabase.storage
+                                        .from(supabaseBuckets.shop)
+                                        .upload(productFileName, banner, {
+                                            cacheControl: "3600",
+                                            upsert: true,
+                                            contentType: banner.type
+                                        });
+                                if (d && !e) {
+                                    const bannerPublicStore =
+                                        await supabase.storage
+                                            .from(supabaseBuckets.shop)
+                                            .getPublicUrl(productFileName);
+                                    return bannerPublicStore.data.publicUrl;
+                                }
+                            })
+                        );
+                    }
+
+                    const { data: finalUpdateForStore, error: finalErr } =
+                        await supabase
+                            .from(supabaseTables.stores)
+                            .update({
+                                product_images: JSON.stringify(
+                                    bannerURLs.filter((b) => !!b)
+                                )
+                            })
+                            .eq("id", newProduct.id)
+                            .select()
+                            .returns<Product[]>();
+
+                    if (finalUpdateForStore && !finalErr) {
+                        setFormState((prev) => ({
+                            ...prev,
+                            ...finalUpdateForStore[0]
+                        }));
+                    }
+
+                    toast(<p className="text-sm">Successfully registered</p>, {
+                        type: "success"
+                    });
+
+                    router.push(`/dashboard/stores/${store.slug}`);
+                }
+            } catch (err) {
+            } finally {
+                setSaving(false);
+                setPublishing(false);
+            }
+        },
+        [user, formState, banners, formErrMessages, variantOptions, store]
+    );
 
     const handleFormChange = React.useCallback(
         (
@@ -202,7 +380,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         (e: React.ChangeEvent<HTMLInputElement>, variantKey: string) => {
             setVariantOptions((prev) => {
                 prev.set(variantKey, {
-                    name: e.target.value.trim(),
+                    name: e.target.value,
                     values: prev.get(variantKey)?.values
                 });
                 const newVariantOptions = new Map([...prev]);
@@ -359,7 +537,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const handleFilesBannerChange = React.useCallback(
         (files: FileWithPreview[]) => {
             setBanners(files);
-            console.log({ files });
             formHasErrors({ product_images: files });
         },
         []
@@ -450,6 +627,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
     return (
         <section className="p-6 flex flex-col w-full h-full dashboard-screen-height overflow-auto">
+            <SavingPrompt isOpen={publishing || saving} />
             <div className="flex flex-col pb-6 border-b border-slate-200 w-full">
                 <Breadcrumb
                     crumbs={isEditForm ? editFormCrumbs : createFormCrumbs}
@@ -467,18 +645,33 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         </span>
                     </div>
                     <div className="flex items-center mt-4 md:mt-0">
-                        <button className="w-28 h-10 rounded-full bg-white hover:bg-slate-100 transition mr-4 border border-slate-200 shadow-md flex justify-center items-center">
-                            <PencilIcon className="h-4 w-4 mr-2 text-gray-700" />
-                            <p className="text-gray-700 text-sm">Save draft</p>
-                        </button>
-                        <button className="w-28 h-10 rounded-full primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center">
-                            <CheckIcon className="h-5 w-5 text-white mr-2" />
-                            <p className="text-white text-sm">Publish</p>
-                        </button>
+                        <Button
+                            loading={saving}
+                            loadingText="Saving"
+                            disabled={publishing || saving}
+                            onClick={async () => await upsertProduct(true)}
+                            leftIcon={
+                                <PencilIcon className="h-4 w-4 mr-2 text-gray-700" />
+                            }
+                            text="Save draft"
+                            className="w-32 h-10 rounded-full bg-white hover:bg-slate-100 transition mr-4 border border-slate-200 shadow-md flex justify-center items-center"
+                        />
+                        <Button
+                            loading={publishing}
+                            loadingText="Publishing"
+                            disabled={publishing || saving}
+                            text="Publish"
+                            onClick={async () => await upsertProduct(false)}
+                            leftIcon={
+                                <CheckIcon className="h-5 w-5 text-white mr-2" />
+                            }
+                            textClassNames="text-white"
+                            className="text-white w-32 h-10 rounded-full primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                        />
                     </div>
                 </div>
             </div>
-            {loading ? (
+            {loading || loadingProduct ? (
                 <div className="flex items-center justify-center my-4">
                     <Spinner size="large" />
                 </div>
@@ -669,7 +862,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     <MultiSelectInput
                                         items={store?.categories ?? []}
                                         onSelect={handleStoreCategoryChange}
-                                        createNewItem={createNewProductCategory}
+                                        initialItems={JSON.parse(
+                                            formState?.categories ?? "[]"
+                                        )}
                                     />
                                     {formErrMessages?.categories && (
                                         <p className="text-red-500 text-xs mt-1">
@@ -677,7 +872,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex w-full justify-between items-center mb-6">
+                                <div className="flex flex-col md:flex-row w-full justify-between items-start md:items-center mb-6">
                                     <div className="flex flex-col">
                                         <p className="mr-1 text-xs text-gray-600 mb-1">
                                             Product variants
@@ -689,7 +884,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         </p>
                                     </div>
                                     <div
-                                        className="flex items-center text-xs cursor-pointer"
+                                        className="flex items-center text-xs mt-2 md:mt-0 cursor-pointer"
                                         onClick={handleAddVariant}
                                     >
                                         <PlusIcon className="h-4 w-4 text-[#6d67e4] mr-1" />
@@ -774,6 +969,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                             value={formState?.discount ?? ""}
                                             onChange={handleDiscountChange}
                                             placeholder="10"
+                                            type="number"
                                             className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                         />
                                     </div>

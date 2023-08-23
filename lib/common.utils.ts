@@ -51,3 +51,22 @@ export function extractCurrencyInBracket(input: string): string | null {
         return null; // Return null if no match is found
     }
 }
+
+type AnyObject = Record<string, any>;
+
+export function excludeKeysFromObj<T extends AnyObject, K extends keyof T>(
+    obj: T,
+    keysToRemove: K[]
+): Omit<T, K> {
+    const newObj = { ...obj };
+
+    keysToRemove.forEach((key) => {
+        delete newObj[key];
+    });
+
+    return newObj;
+}
+
+// Example usage
+const originalObject = { a: 1, b: 2, c: 3, d: 4 };
+const keysToRemove = ["b", "d"];

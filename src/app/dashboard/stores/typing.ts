@@ -29,15 +29,14 @@ export interface Store {
 type ProductSellingType = "online" | "in-store" | "both";
 type WarrantyPeriod = "<1" | "1" | "2" | "3" | "4" | "5" | ">5";
 export interface Product {
+    id: string;
     name: string;
     description: string;
     inventory_count: number;
     sku_code?: string;
     store: Store;
     selling_type: ProductSellingType;
-    variations: {
-        [variationName: string]: string[];
-    }[];
+    variations: string;
     pricing: number;
     discount: number;
     delivery_charge?: number;
@@ -46,5 +45,7 @@ export interface Product {
     has_warranty: boolean;
     categories: string;
     warranty_period: WarrantyPeriod;
-    product_images: string[];
+    product_images: string;
+    secondary_key?: string;
+    isPublished: boolean;
 }

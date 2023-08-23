@@ -50,7 +50,10 @@ export const ProductVariantForm: React.FC<ProductVariantForm> = (props) => {
                         </p>
                         {Array.from(props.values.entries()).map(
                             ([key, val], i) => (
-                                <div className="w-full flex items-center mb-4">
+                                <div
+                                    className="w-full flex items-center mb-4"
+                                    key={key}
+                                >
                                     <input
                                         key={key}
                                         placeholder={`value ${i + 1}`}

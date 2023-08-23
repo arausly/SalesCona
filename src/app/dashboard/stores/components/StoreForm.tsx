@@ -466,7 +466,6 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         }
                     )
                     .select();
-                setSavedStore(newStore);
                 let shop_logo,
                     bannerUrls: (string | undefined)[] = [];
 
@@ -515,18 +514,27 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                     );
                 }
 
-                await supabase
-                    .from(supabaseTables.stores)
-                    .update({
-                        banners: JSON.stringify(bannerUrls.filter((b) => !!b)),
-                        shop_logo
-                    })
-                    .eq("id", newStore.id);
+                const { data: finalUpdateForStore, error: finalErr } =
+                    await supabase
+                        .from(supabaseTables.stores)
+                        .update({
+                            banners: JSON.stringify(
+                                bannerUrls.filter((b) => !!b)
+                            ),
+                            shop_logo
+                        })
+                        .eq("id", newStore.id)
+                        .select()
+                        .returns<Store[]>();
 
-                router.push("/dashboard/stores");
+                if (finalUpdateForStore && !finalErr) {
+                    setSavedStore(finalUpdateForStore[0]);
+                }
+
                 toast(<p className="text-sm">Successfully registered</p>, {
                     type: "success"
                 });
+                router.push("/dashboard/stores");
             } catch (err) {
                 toast(<p className="text-sm">Failed to create store</p>, {
                     type: "error"
