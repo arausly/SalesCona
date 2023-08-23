@@ -8,7 +8,8 @@ export const SUPPORT_EMAIL = "friendiesupport@gmail.com";
 export const supabaseTables = {
     product_categories: "product_categories",
     store_product_categories: "store_product_categories",
-    stores: "stores"
+    stores: "stores",
+    products: "products"
 };
 
 export const supabaseBuckets = {

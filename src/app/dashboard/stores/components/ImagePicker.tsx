@@ -76,7 +76,9 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
         (removeBannerIndex: number) => {
             setAboveFoldBanners((prev) => {
                 prev.delete(removeBannerIndex);
-                return new Map([...prev]);
+                const newBanners = new Map([...prev]);
+                handleFileChange(Array.from(newBanners.values()));
+                return newBanners;
             });
         },
         []

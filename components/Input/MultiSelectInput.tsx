@@ -4,6 +4,7 @@ import { Combobox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useFirstRender } from "@hooks/useFirstRender";
+import { Spinner } from "@components/Spinner";
 
 export interface MultiSelectProps {
     //What are the items about
@@ -50,6 +51,7 @@ export default function MultiSelectInput({
         useState<MultiSelectProps["items"]>(initialItems);
     const [query, setQuery] = useState("");
     const [displayValue, setDisplayValue] = React.useState<string>();
+    const [creating, setCreating] = React.useState<boolean>(false);
     const firstRender = useFirstRender();
 
     //this is only useful for non-interactive input
@@ -88,8 +90,10 @@ export default function MultiSelectInput({
     const handleCreateNewLabel = React.useCallback(
         async (label: string) => {
             if (!createNewItem) return;
+            setCreating(true);
             const newItem = await createNewItem(label);
             if (newItem) {
+                setCreating(false);
                 setSelected((prev) => [...prev, newItem]);
             }
         },
@@ -148,6 +152,14 @@ export default function MultiSelectInput({
                                 "Choose from options"}
                         </div>
                     )}
+                    {creating ? (
+                        <div
+                            className="absolute inset-y-0 right-10 cursor-pointer flex items-center pr-2"
+                            onClick={clearSelection}
+                        >
+                            <Spinner size="tiny" />
+                        </div>
+                    ) : null}
                     {selected.length && !inputNonInteractive ? (
                         <div
                             className="absolute inset-y-0 right-5 cursor-pointer flex items-center pr-2"
@@ -181,7 +193,9 @@ export default function MultiSelectInput({
                                 className="relative cursor-pointer flex items-center w-full select-none py-2 px-4 text-gray-700 hover:bg-slate-100"
                                 onClick={() => handleCreateNewLabel(query)}
                             >
-                                <p className="capitalize mr-1">{`"${query}" ${title}`}</p>
+                                <p className="capitalize mr-1">{`"${
+                                    query || ""
+                                }" ${title || ""}`}</p>
                                 <p>{"doesn't exist, click to create?"} </p>
                             </div>
                         ) : filteredItems.length === 0 &&

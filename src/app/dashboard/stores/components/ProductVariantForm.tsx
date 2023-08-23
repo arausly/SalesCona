@@ -35,7 +35,7 @@ export const ProductVariantForm: React.FC<ProductVariantForm> = (props) => {
                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                     />
                     <div
-                        className="hover:bg-red-100 flex items-center justify-center ml-3 w-8 h-8"
+                        className="hover:bg-red-100 rounded-lg flex items-center justify-center ml-3 w-8 h-8"
                         onClick={() => props.removeVariant(props.variantKey)}
                     >
                         <TrashIcon className="w-5 h-5 text-red-500 cursor-pointer " />

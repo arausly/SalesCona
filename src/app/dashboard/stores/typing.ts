@@ -44,6 +44,7 @@ export interface Product {
     delivery_location_restriction?: string;
     pickup_store_address?: string;
     has_warranty: boolean;
+    categories: string;
     warranty_period: WarrantyPeriod;
     product_images: string[];
 }

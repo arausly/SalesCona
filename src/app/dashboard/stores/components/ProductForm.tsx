@@ -13,6 +13,10 @@ import MultiSelectInput, {
 import { Product } from "../typing";
 import shortid from "shortid";
 import { FileWithPreview } from "@components/FileWidget";
+import { debounce } from "@lib/common.utils";
+import { supabaseTables } from "@lib/constants";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { useGetProductCategories } from "@hooks/useGetProductCategories";
 
 interface ProductFormProps {
     isEditForm: boolean;
@@ -29,15 +33,36 @@ const warrantyPeriods = [
 ];
 
 type VariantType = Map<string, { name: string; values?: Map<string, string> }>;
+type FormErrorMessagesType = Omit<
+    Product,
+    "sku_code" | "store" | "variations" | "product_images"
+> & {
+    productNameExists: boolean;
+    variations: VariantType;
+    product_images: FileWithPreview[];
+};
+type FormErrors = {
+    [key in keyof FormErrorMessagesType]: string | undefined;
+};
 
 export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const [variantOptions, setVariantOptions] = React.useState<VariantType>(
         new Map()
     );
     const [formState, setFormState] =
-        React.useState<Partial<Omit<Product, "store">>>();
+        React.useState<
+            Partial<Omit<Product, "store"> & { productNameExists: boolean }>
+        >();
     const [banners, setBanners] = React.useState<Array<FileWithPreview>>([]);
-    const [formErrMessages, setFormErrMessages] = React.useState();
+    const { productCategories, createNewProductCategory } =
+        useGetProductCategories();
+    const [formErrMessages, setFormErrMessages] =
+        React.useState<Partial<FormErrors>>();
+
+    //get store for product
+    // upsert product
+
+    const { supabase } = useBrowserSupabase();
     const pathname = usePathname();
     const [, , , storePath, , productPath] = pathname.split("/");
 
@@ -83,8 +108,85 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         }
     ];
 
+    const formHasErrors = (
+        payload: Partial<FormErrorMessagesType>
+    ): boolean => {
+        let errorMsg: Partial<FormErrors> = {};
+
+        if ("productNameExists" in payload) {
+            errorMsg.productNameExists = payload.productNameExists
+                ? "Product with this name already exist for this store"
+                : undefined;
+        }
+
+        if ("name" in payload) {
+            errorMsg.name = !payload.name?.length
+                ? "Please provide name of your product"
+                : undefined;
+        }
+
+        if ("description" in payload) {
+            errorMsg.description = !payload.description?.length
+                ? "Please provide description for your store"
+                : undefined;
+        }
+
+        if ("inventory_count" in payload) {
+            errorMsg.inventory_count =
+                !payload.inventory_count || payload.inventory_count <= 0
+                    ? "Please add the quantity of this product"
+                    : undefined;
+        }
+
+        if ("pricing" in payload) {
+            errorMsg.pricing =
+                !payload.pricing || payload.pricing <= 0
+                    ? "Please specify the price of this product"
+                    : undefined;
+        }
+
+        if ("product_images" in payload) {
+            errorMsg.product_images = !payload.product_images?.length
+                ? "Please add product images"
+                : undefined;
+        }
+
+        if ("categories" in payload) {
+            const parsedValue = payload.categories?.length
+                ? JSON.parse(payload.categories)
+                : [];
+            errorMsg.categories = !parsedValue.length
+                ? "Please select the categories your product belongs too"
+                : undefined;
+        }
+
+        if ("variations" in payload) {
+            let inconsistentPairing = false; //option name exist with option values
+            Array.from(payload.variations?.values() ?? []).forEach((v: any) => {
+                if (v.name.length && !v?.values?.size) {
+                    inconsistentPairing = true;
+                }
+            });
+            errorMsg.variations = inconsistentPairing
+                ? "Please provide values for every variant option name"
+                : undefined;
+        }
+
+        setFormErrMessages((prev) => ({ ...(prev ?? {}), ...errorMsg }));
+
+        //check  if there is any error
+        return !!Object.values(errorMsg ?? {}).find(
+            (formInputErr) => formInputErr !== undefined
+        );
+    };
+
     const handleFormChange = React.useCallback(
-        (formKey: keyof Product, formValue: any) => {
+        (
+            formKey: keyof Partial<
+                Omit<Product, "store"> & { productNameExists: boolean }
+            >,
+            formValue: any
+        ) => {
             setFormState((prevState) => ({
                 ...(prevState ?? {}),
                 [formKey]: formValue
@@ -100,7 +202,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                     name: e.target.value.trim(),
                     values: prev.get(variantKey)?.values
                 });
-                return new Map([...prev]);
+                const newVariantOptions = new Map([...prev]);
+                formHasErrors({ variations: newVariantOptions });
+                return newVariantOptions;
             });
         },
         []
@@ -115,7 +219,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
             const variantValue = e.target.value;
             setVariantOptions((prev) => {
                 prev.get(variantKey)?.values?.set(valueKey, variantValue);
-                return new Map([...prev]);
+                const newVariantOptions = new Map([...prev]);
+                formHasErrors({ variations: newVariantOptions });
+                return newVariantOptions;
             });
         },
         []
@@ -125,7 +231,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         (variantKey: string, valueKey: string) => {
             setVariantOptions((prev) => {
                 prev.get(variantKey)?.values?.delete(valueKey);
-                return new Map([...prev]);
+                const newVariantOptions = new Map([...prev]);
+                formHasErrors({ variations: newVariantOptions });
+                return newVariantOptions;
             });
         },
         []
@@ -135,7 +243,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         const newVariantValKey = shortid.generate();
         setVariantOptions((prev) => {
             prev.get(variantKey)?.values?.set(newVariantValKey, "");
-            return new Map([...prev]);
+            const newVariantOptions = new Map([...prev]);
+            formHasErrors({ variations: newVariantOptions });
+            return newVariantOptions;
         });
     }, []);
 
@@ -150,27 +260,67 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const removeValue = React.useCallback((variantKey: string) => {
         setVariantOptions((prev) => {
             prev.delete(variantKey);
-            return new Map([...prev]);
+            const newVariantOptions = new Map([...prev]);
+            formHasErrors({ variations: newVariantOptions });
+            return newVariantOptions;
         });
     }, []);
 
     const handleNameChange = React.useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            handleFormChange("name", e.target.value);
+            const newName = e.target.value;
+            handleFormChange("name", newName);
+            formHasErrors({ name: newName });
+            // checkIfProductWithNameExists(newName);
+        },
+        []
+    );
+
+    const checkIfProductWithNameExists = React.useCallback(
+        debounce(async (name) => {
+            try {
+                //same product name for the store
+                const { error, data } = await supabase
+                    .from(supabaseTables.products)
+                    .select()
+                    .eq("name", name)
+                    .eq("store", "");
+
+                if (!error && data?.length) {
+                    handleFormChange("productNameExists", true);
+                    formHasErrors({ productNameExists: true });
+                } else {
+                    handleFormChange("productNameExists", false);
+                    formHasErrors({ productNameExists: false });
+                }
+            } catch (err) {}
+        }, 500),
+        []
+    );
+
+    const handleStoreCategoryChange = React.useCallback(
+        (categories: MultiSelectProps["items"]) => {
+            const newCategories = JSON.stringify(categories);
+            handleFormChange("categories", newCategories);
+            formHasErrors({ categories: newCategories });
         },
         []
     );
 
     const handleDescriptionChange = React.useCallback(
         (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            handleFormChange("description", e.target.value);
+            const newDescription = e.target.value;
+            handleFormChange("description", newDescription);
+            formHasErrors({ description: newDescription });
         },
         []
     );
 
     const handleInventoryCountChange = React.useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            handleFormChange("inventory_count", e.target.value);
+            const newInventoryCount = Number(e.target.value);
+            handleFormChange("inventory_count", newInventoryCount);
+            formHasErrors({ inventory_count: newInventoryCount });
         },
         []
     );
@@ -188,7 +338,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
     const handlePricingChange = React.useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            handleFormChange("pricing", parseFloat(e.target.value));
+            const newPricing = parseFloat(e.target.value);
+            handleFormChange("pricing", newPricing);
+            formHasErrors({ pricing: newPricing });
         },
         []
     );
@@ -203,6 +355,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const handleFilesBannerChange = React.useCallback(
         (files: FileWithPreview[]) => {
             setBanners(files);
+            console.log({ files });
+            formHasErrors({ product_images: files });
         },
         []
     );
@@ -228,16 +382,39 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
     const handleBothSellingTypeChange = React.useCallback(
         (checked: boolean) => {
-            handleFormChange("selling_type", checked ? "both" : undefined);
+            const sellingType = checked ? "both" : undefined;
+            handleFormChange("selling_type", sellingType);
+            setFormErrMessages((prev) => ({
+                ...prev,
+                delivery_charge:
+                    sellingType === "both" &&
+                    (formState?.delivery_charge ?? 0) <= 0
+                        ? "Please provide delivery charge for online purchases"
+                        : undefined,
+                pickup_store_address:
+                    sellingType === "both" &&
+                    !formState?.pickup_store_address?.length
+                        ? "Please provide delivery charge for online purchases"
+                        : undefined
+            }));
         },
-        []
+        [formState]
     );
 
     const handleDeliveryCharge = React.useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            handleFormChange("delivery_charge", parseFloat(e.target.value));
+            const charge = parseFloat(e.target.value);
+            handleFormChange("delivery_charge", charge);
+            const shouldError =
+                formState?.selling_type === "online" && charge <= 0;
+            setFormErrMessages((prev) => ({
+                ...prev,
+                delivery_charge: shouldError
+                    ? "Please provide delivery charge for online purchases"
+                    : undefined
+            }));
         },
-        []
+        [formState]
     );
 
     const handleDeliveryLocationRestriction = React.useCallback(
@@ -249,9 +426,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
     const handlePickUpStoreAddress = React.useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            handleFormChange("pickup_store_address", e.target.value);
+            const pickupAddress = e.target.value;
+            handleFormChange("pickup_store_address", pickupAddress);
+            const shouldError =
+                formState?.selling_type === "in-store" && !pickupAddress.length;
+            setFormErrMessages((prev) => ({
+                ...prev,
+                pickup_store_address: shouldError
+                    ? "Please provide pickup address for in-store purchases"
+                    : undefined
+            }));
         },
-        []
+        [formState]
     );
 
     const handleHasWarrantyChange = React.useCallback((checked: boolean) => {
@@ -308,6 +494,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     value={formState?.name ?? ""}
                                     className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                 />
+                                {formErrMessages?.name && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {formErrMessages?.name}
+                                    </p>
+                                )}
                             </div>
                             <div className="flex flex-col">
                                 <div className="flex mb-1">
@@ -321,6 +512,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     value={formState?.description ?? ""}
                                     className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                 />
+                                {formErrMessages?.description && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {formErrMessages?.description}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -328,9 +524,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         <p className="mb-2">Inventory</p>
                         <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
                             <div className="mr-8">
-                                <p className="text-xs mb-2 text-gray-600">
-                                    Quantity
-                                </p>
+                                <div className="flex">
+                                    <p className="text-xs mb-2 text-gray-600 mr-1">
+                                        Quantity
+                                    </p>
+                                    <span className="text-[#6d67e4]">*</span>
+                                </div>
                                 <input
                                     type="number"
                                     placeholder="250"
@@ -338,6 +537,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     value={formState?.inventory_count ?? ""}
                                     className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                 />
+                                {formErrMessages?.inventory_count && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {formErrMessages?.inventory_count}
+                                    </p>
+                                )}
                             </div>
                             <div className="flex-1">
                                 <p className="text-xs mb-2 text-gray-600">
@@ -437,10 +641,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         <p className="mb-2">Category</p>
                         <div className="w-full p-5 flex flex-col border border-slate-100 rounded-md shadow-md">
                             <div className="mb-6">
-                                <p className="mr-1 text-xs text-gray-600">
-                                    Product Category
-                                </p>
-                                {/* <CategorySelectInput onSelect={() => {}} /> */}
+                                <div className="flex mb-1">
+                                    <p className="mr-1 text-xs text-gray-600">
+                                        Product Category
+                                    </p>
+                                    <span className="text-[#6d67e4]">*</span>
+                                </div>
+                                <MultiSelectInput
+                                    items={productCategories}
+                                    onSelect={handleStoreCategoryChange}
+                                    createNewItem={createNewProductCategory}
+                                />
+                                {formErrMessages?.categories && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {formErrMessages?.categories}
+                                    </p>
+                                )}
                             </div>
                             <div className="flex w-full justify-between items-center mb-6">
                                 <div className="flex flex-col">
@@ -489,15 +705,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     )) ||
                                     null}
                             </div>
+                            {formErrMessages?.variations && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {formErrMessages?.variations}
+                                </p>
+                            )}
                         </div>
                     </div>
                     <div className="flex flex-col w-full mb-6">
                         <p className="mb-2">Pricing</p>
                         <div className="w-full p-5 flex items-center border border-slate-100 rounded-md shadow-md">
                             <div className="flex-1 mr-8">
-                                <p className="text-xs mb-2 text-gray-600">
-                                    Price
-                                </p>
+                                <div className="flex">
+                                    <p className="text-xs mb-2 text-gray-600 mr-1">
+                                        Price
+                                    </p>
+                                    <span className="text-[#6d67e4]">*</span>
+                                </div>
                                 <div className="w-full relative">
                                     <span className="inline-block rounded-l-md absolute flex items-center text-gray-700 justify-center left-0.5 top-0.5 bottom-0.5 w-max px-3 bg-gray-100">
                                         $
@@ -505,10 +729,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                     <input
                                         value={formState?.pricing ?? ""}
                                         onChange={handlePricingChange}
+                                        type="number"
                                         placeholder="200"
                                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                     />
                                 </div>
+                                {formErrMessages?.pricing && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {formErrMessages?.pricing}
+                                    </p>
+                                )}
                             </div>
                             <div className="flex-1 relative">
                                 <p className="text-xs mb-2 text-gray-600">
@@ -589,6 +819,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                                 className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                             />
                                         </div>
+                                        {formErrMessages?.delivery_charge && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {
+                                                    formErrMessages?.delivery_charge
+                                                }
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="flex-1 mr-8">
                                         <p className="text-xs mb-1 text-gray-600">
@@ -655,12 +892,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                         </p>
                                     </div>
                                     <input
-                                        value={formState?.pickup_store_address}
+                                        value={
+                                            formState?.pickup_store_address ??
+                                            ""
+                                        }
                                         onChange={handlePickUpStoreAddress}
                                         placeholder="123 Maple Street, Anytown, USA, Zip Code: 98765"
                                         className="block p-2 pl-10 text-sm text-black border border-gray-300 w-full rounded-md"
                                     />
                                 </div>
+                                {formErrMessages?.pickup_store_address && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {formErrMessages?.pickup_store_address}
+                                    </p>
+                                )}
                             </Transition>
                         </div>
                     </div>
@@ -716,16 +961,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                             </Transition>
                         </div>
                     </div>
-                    <ImagePicker
-                        maxFiles={8}
-                        description="Upload your images in a widely supported format like JPEG, PNG, or GIF. 
+                    <div className="flex flex-col">
+                        {formErrMessages?.product_images && (
+                            <p className="text-red-500 text-xs my-1">
+                                {formErrMessages?.product_images}
+                            </p>
+                        )}
+                        <ImagePicker
+                            maxFiles={8}
+                            description="Upload your images in a widely supported format like JPEG, PNG, or GIF. 
                         Large image files can slow down page loading speed. Consider resizing your images to an appropriate size for online display without compromising quality. 
                         Arrange the images in a logical sequence to guide your customer's decision starting with main images followed by supplementary images."
-                        handleFileChange={handleFilesBannerChange}
-                        title="Product Images"
-                        dimensionInfo="rec. 400 * 850px"
-                        presetBanners={transformBannerToMap(banners)}
-                    />
+                            handleFileChange={handleFilesBannerChange}
+                            title="Product Images"
+                            dimensionInfo="rec. 400 * 850px"
+                            presetBanners={transformBannerToMap(banners)}
+                        />
+                    </div>
                 </div>
             </div>
         </section>
