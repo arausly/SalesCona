@@ -79,12 +79,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     const { loading, store } = useGetStoreBySlug(storePath);
 
     const transformBannerToMap = React.useCallback(
-        (banners: FileWithPreview[]) =>
+        (banners: any[]) =>
             new Map(
                 banners.map((b, i) => [
                     i,
                     {
-                        ...b,
+                        preview: b,
                         name: `product-banner-image-${i + 1}`
                     } as FileWithPreview
                 ])
@@ -1190,6 +1190,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                                 handleWarrantyPeriodChange
                                             }
                                             multiple={false}
+                                            initialItems={
+                                                warrantyPeriods.filter(
+                                                    (w) =>
+                                                        w.id ===
+                                                        formState?.warranty_period
+                                                ) ?? []
+                                            }
                                         />
                                     </div>
                                 </Transition>
