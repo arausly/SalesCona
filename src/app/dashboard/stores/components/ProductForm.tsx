@@ -329,7 +329,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
                     const { data: finalUpdateForStore, error: finalErr } =
                         await supabase
-                            .from(supabaseTables.stores)
+                            .from(supabaseTables.products)
                             .update({
                                 product_images: JSON.stringify(
                                     bannerURLs.filter((b) => !!b)
@@ -346,11 +346,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         }));
                     }
 
+                    router.push(`/dashboard/stores/${store.slug}`);
                     toast(<p className="text-sm">Successfully registered</p>, {
                         type: "success"
                     });
-
-                    router.push(`/dashboard/stores/${store.slug}`);
                 }
             } catch (err) {
             } finally {
@@ -859,6 +858,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                             *
                                         </span>
                                     </div>
+                                    <p className="text-xs font-light">
+                                        These are categories preset when you
+                                        created this store, to see more
+                                        categories change it from the store edit
+                                        page
+                                    </p>
                                     <MultiSelectInput
                                         items={store?.categories ?? []}
                                         onSelect={handleStoreCategoryChange}
