@@ -216,12 +216,25 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                         setBanners(() =>
                             JSON.parse(productFromDB.product_images ?? "[]")
                         );
-                        setVariantOptions(
-                            () =>
-                                new Map(
-                                    JSON.parse(productFromDB.variations ?? [])
-                                )
-                        );
+                        setVariantOptions(() => {
+                            const data = JSON.parse(
+                                productFromDB.variations ?? []
+                            );
+                            return new Map(
+                                data.map((d: any) => {
+                                    const [key, val] = d;
+                                    return [
+                                        key,
+                                        {
+                                            name: val.name,
+                                            values: new Map(
+                                                JSON.parse(val.values)
+                                            )
+                                        }
+                                    ];
+                                })
+                            );
+                        });
                         setFormState((prev) => ({ ...prev, ...productFromDB }));
                     }
                 } catch (err) {
