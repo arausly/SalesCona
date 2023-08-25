@@ -305,6 +305,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                             store: store.id,
                             slug: productSlug,
                             isPublished: !isDraft,
+                            store_slug: store.slug,
                             secondary_key:
                                 formState.secondary_key ?? shortid.generate()
                         },

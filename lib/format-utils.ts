@@ -1,6 +1,7 @@
 import currencies from "currency-list";
 
 export function formatNumberWithSuffix(number: number) {
+    if (number <= 0) return 0;
     const suffixes = ["", "k", "M", "B", "T"]; // Define suffixes for powers of 10
     const power = Math.floor(Math.log10(Math.abs(number)) / 3); // Calculate the power of 10
     const value = number / Math.pow(10, power * 3); // Calculate the value without suffix

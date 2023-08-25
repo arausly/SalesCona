@@ -48,4 +48,6 @@ export interface Product {
     product_images: string;
     secondary_key?: string;
     isPublished: boolean;
+    slug: string;
+    views_count: number;
 }

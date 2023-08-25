@@ -12,15 +12,17 @@ import {
 } from "@heroicons/react/24/outline";
 import { convertPathToSpaceSeparatedStr } from "@lib/format-utils";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { ProductSearch } from "../components/ProductSearch";
 import { Tab, Transition } from "@headlessui/react";
 
-//dummy data
-import products from "@data/products.json";
 import { ProductsTableView } from "../components/ProductsTableView";
 import { Product } from "../typing";
 import { ProductsGridView } from "../components/ProductsGridView";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { supabaseTables } from "@lib/constants";
+import { useGetUser } from "@hooks/useGetUser";
 
 //todo add correct from API categories
 const categories = [
@@ -83,11 +85,59 @@ enum PRESENTATION_MODES {
     GRID_VIEW = "GRID_VIEW"
 }
 
-export default function Store() {
+const tabIndexesByType = {
+    all: 0,
+    published: 1,
+    draft: 2
+} as const;
+
+export default function Store({
+    searchParams,
+    params
+}: {
+    searchParams: { type: keyof typeof tabIndexesByType };
+    params: { id: string };
+}) {
     const pathname = usePathname();
     const { fmt, lastPath } = convertPathToSpaceSeparatedStr(pathname);
     const [presentationMode, setPresentationMode] =
         React.useState<PRESENTATION_MODES>(PRESENTATION_MODES.LIST_VIEW);
+    const [products, setProducts] = React.useState<Array<Product>>([]);
+    const [tabSelectedIndex, setTabSelectedIndex] = React.useState<number>(
+        tabIndexesByType[searchParams.type] ?? 0
+    );
+    const [page, setPage] = React.useState<number>(1);
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const user = useGetUser();
+    const { supabase } = useBrowserSupabase();
+    const searchParamsInstance = useSearchParams()!;
+    const router = useRouter();
+
+    React.useEffect(() => {
+        (async () => {
+            try {
+                if (user && page) {
+                    setLoading(true);
+                    const limit = 10;
+                    const offset = limit * (page - 1);
+                    const { data, error } = await supabase
+                        .from(supabaseTables.products)
+                        .select()
+                        .eq("store_slug", params.id)
+                        .eq("user", user?.id)
+                        .range(offset, limit * page - 1)
+                        .returns<Product[]>();
+
+                    if (data?.length && !error) {
+                        setProducts(data);
+                    }
+                }
+            } catch (err) {
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [user, page]);
 
     const crumbs = React.useRef([
         {
@@ -107,7 +157,11 @@ export default function Store() {
                 leaveTo="translate-x-[100%]"
                 show={presentationMode === PRESENTATION_MODES.LIST_VIEW}
             >
-                <ProductsTableView products={products.products as Product[]} />
+                <ProductsTableView
+                    storeSlug={params.id}
+                    loading={loading}
+                    products={products}
+                />
             </Transition>
             <Transition
                 leave="transition ease-in duration-100"
@@ -115,9 +169,18 @@ export default function Store() {
                 leaveTo="translate-x-[0%]"
                 show={presentationMode === PRESENTATION_MODES.GRID_VIEW}
             >
-                <ProductsGridView products={products.products as Product[]} />
+                <ProductsGridView loading={loading} products={products} />
             </Transition>
         </>
+    );
+
+    const createSearchProductType = React.useCallback(
+        (tabType: keyof typeof tabIndexesByType) => {
+            const params = new URLSearchParams(searchParamsInstance as any);
+            params.set("type", tabType);
+            return params.toString();
+        },
+        [searchParamsInstance]
     );
 
     return (
@@ -152,13 +215,23 @@ export default function Store() {
             </div>
             {/** tab */}
             <div className="mt-8">
-                <Tab.Group>
+                <Tab.Group
+                    selectedIndex={tabSelectedIndex}
+                    onChange={setTabSelectedIndex}
+                >
                     <Tab.List>
                         <div className="flex flex-col md:flex-row items-center md:items-start">
                             <div className="flex">
                                 <Tab as={Fragment}>
                                     {({ selected }) => (
                                         <button
+                                            onClick={() =>
+                                                router.push(
+                                                    `${pathname}?${createSearchProductType(
+                                                        "all"
+                                                    )}`
+                                                )
+                                            }
                                             className={`${
                                                 selected
                                                     ? "bg-gray-100 text-black"
@@ -172,6 +245,13 @@ export default function Store() {
                                 <Tab as={Fragment}>
                                     {({ selected }) => (
                                         <button
+                                            onClick={() =>
+                                                router.push(
+                                                    `${pathname}?${createSearchProductType(
+                                                        "published"
+                                                    )}`
+                                                )
+                                            }
                                             className={`${
                                                 selected
                                                     ? "bg-gray-100 text-black"
@@ -185,6 +265,13 @@ export default function Store() {
                                 <Tab as={Fragment}>
                                     {({ selected }) => (
                                         <button
+                                            onClick={() =>
+                                                router.push(
+                                                    `${pathname}?${createSearchProductType(
+                                                        "draft"
+                                                    )}`
+                                                )
+                                            }
                                             className={`${
                                                 selected
                                                     ? "bg-gray-100 text-black"
