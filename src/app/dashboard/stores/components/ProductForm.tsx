@@ -99,7 +99,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         },
         {
             name: storePath.split("-").join(" "),
-            link: `dashboard/stores/${storePath}`
+            link: `/dashboard/stores/${storePath}`
         },
         {
             name: productPath.split("-").join(" ")
@@ -113,7 +113,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
         },
         {
             name: storePath.split("-").join(" "),
-            link: `dashboard/stores/${storePath}`
+            link: `/dashboard/stores/${storePath}`
         },
         {
             name: "New Product"
