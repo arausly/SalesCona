@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useGetShopName } from "@hooks/useGetShopName";
 import { formattedPriceInfo, spaceSeparatedStrToPath } from "@lib/format-utils";
 import { Rating } from "@components/Rating";
-import { Tooltip } from "@components/BottomTooltip";
+import { Tooltip } from "@components/Tooltip";
 import { BellIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 
 interface ProductCardProps {
@@ -60,11 +60,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         onClick={() => setLoading(true)}
                     >
                         {!!Number(product.inventoryCount) ? (
-                            <Tooltip pos="left" message="Add to bag">
+                            <Tooltip message="Add to bag">
                                 <ShoppingBagIcon className="h-5 w-5 transition group-hover:font-bold group-hover:scale-125" />
                             </Tooltip>
                         ) : (
-                            <Tooltip pos="left" message="Know when we restock">
+                            <Tooltip message="Know when we restock">
                                 <BellIcon className="h-5 w-5 transition group-hover:font-bold group-hover:scale-125" />
                             </Tooltip>
                         )}

@@ -11,36 +11,76 @@ import styles from "./sidebar.module.css";
 import { ProfileAvatar } from "@components/Avatar/ProfileAvatar";
 import {
     ArrowLeftOnRectangleIcon,
+    BanknotesIcon,
     Bars3Icon,
+    BookOpenIcon,
     BuildingStorefrontIcon,
     ChatBubbleBottomCenterTextIcon,
     HomeModernIcon,
+    LinkIcon,
+    TicketIcon,
+    UserIcon,
     UsersIcon
 } from "@heroicons/react/24/outline";
 import { storageKeys } from "@lib/constants";
 import { toast } from "react-toastify";
 import { Spinner } from "@components/Spinner";
+import { Tooltip } from "@components/Tooltip";
 
 const links = [
     {
         pathname: "/dashboard",
         title: "Home",
+        message: "Go to dashboard",
         icon: HomeModernIcon
     },
     {
         pathname: "/dashboard/stores",
         title: "Stores",
+        message: "View your stores",
         icon: BuildingStorefrontIcon
     },
     {
-        pathname: "/dashboard/followers",
-        title: "Followers",
+        pathname: "/dashboard/customers",
+        title: "Customers",
+        message: "Customer management",
         icon: UsersIcon
     },
     {
         pathname: "/dashboard/messages",
         icon: ChatBubbleBottomCenterTextIcon,
+        message: "View all your messages",
         title: "Messages"
+    },
+    {
+        pathname: "/dashboard/affiliate-links",
+        icon: LinkIcon,
+        message: "Create affiliate links",
+        title: "Affiliate links"
+    },
+    {
+        pathname: "/dashboard/coupons",
+        icon: BanknotesIcon,
+        message: "Create coupon codes",
+        title: "Coupons"
+    },
+    {
+        pathname: "/dashboard/sales",
+        icon: BookOpenIcon,
+        message: "Manage your sales",
+        title: "Sales"
+    },
+    {
+        pathname: "/dashboard/ticket",
+        icon: TicketIcon,
+        message: "Track your orders",
+        title: "Orders"
+    },
+    {
+        pathname: "/dashboard/profile",
+        icon: UserIcon,
+        message: "Account settings",
+        title: "Profile"
     }
 ];
 
@@ -121,7 +161,13 @@ export default function Sidebar() {
                         }`}
                     >
                         <link.icon className="h-5 w-5" />
-                        <p className="text-sm md:text-base">{link.title}</p>
+                        <Tooltip
+                            message={link.message}
+                            side="right"
+                            tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-0"
+                        >
+                            <p className="text-sm md:text-base">{link.title}</p>
+                        </Tooltip>
                         {link.title === "Messages" && (
                             <div className="ml-auto w-7 h-5 flex flex-row items-center justify-center text-white rounded-full primary-bg ml-2 text-xs">
                                 10

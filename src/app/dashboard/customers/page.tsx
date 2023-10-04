@@ -17,7 +17,7 @@ import {
 import blurredImage from "@assets/images/blurred-image.png";
 import { Modal } from "@components/Dialog/Dialog";
 import { RegularAvatar } from "@components/Avatar/RegularAvatar";
-import { Tooltip } from "@components/BottomTooltip";
+import { Tooltip } from "@components/Tooltip";
 
 /**
  * if paid user, you can see the email and phone number of your subscribers

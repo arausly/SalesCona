@@ -1,4 +1,4 @@
-import { Tooltip } from "@components/BottomTooltip";
+import { Tooltip } from "@components/Tooltip";
 import React from "react";
 
 interface VariationProps {

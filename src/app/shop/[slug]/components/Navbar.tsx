@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import logo from "@assets/images/grok-png.png";
 import { BellIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "@components/BottomTooltip";
+import { Tooltip } from "@components/Tooltip";
 import Link from "next/link";
 import { CustomerAlertForm } from "./CustomerAlertForm";
 import { ChatSidePane } from "./ChatSidePane";

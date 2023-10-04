@@ -41,6 +41,12 @@ export function debounce<T extends (...args: any[]) => void>(
     };
 }
 
+export const onlyIfWindowIsDefined = <T>(cb: () => void): T | undefined => {
+    if (process.browser) {
+        return cb() as T;
+    }
+};
+
 export function extractCurrencyInBracket(input: string): string | null {
     const regex = /\((.*?)\)/; // Regular expression to match text inside parentheses
     const match = regex.exec(input);

@@ -270,7 +270,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
         },
         {
             name: slug,
-            link: `dashboard/stores/${storePath}`
+            link: `/dashboard/stores/${storePath}`
         },
         {
             name: "Edit"

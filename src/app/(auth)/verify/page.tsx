@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { getHashParams } from "@lib/route-utils";
 
@@ -12,16 +12,22 @@ import { getHashParams } from "@lib/route-utils";
  */
 export default function VerifyAccount() {
     const { supabase } = useBrowserSupabase();
+    const router = useRouter();
 
     React.useEffect(() => {
-        const { access_token, refresh_token } = getHashParams();
+        const { access_token, refresh_token, type } = getHashParams();
         if (access_token && refresh_token) {
             (async () => {
-                await supabase.auth.setSession({
+                const { error } = await supabase.auth.setSession({
                     access_token,
-                    refresh_token,
+                    refresh_token
                 });
-                redirect("/login");
+
+                if (!error) {
+                    type === "recovery"
+                        ? router.push("/change-password")
+                        : router.push("/login");
+                }
             })();
         }
     }, [supabase.auth]);

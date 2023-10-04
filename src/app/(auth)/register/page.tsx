@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { inputClasses } from "../../../../components/Input/input";
 import { useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { baseURL } from "@lib/constants";
+import { baseURL, supabaseTables } from "@lib/constants";
 import { Button } from "@components/Button";
 
 interface RegisterFormValues {
@@ -50,8 +50,14 @@ export default function Register() {
                                 ? "You have entered either the wrong email or password"
                                 : "Something unexpected happened"
                         );
+                    } else if (data.user) {
+                        //todo replace with database triggers
+                        await supabase.from(supabaseTables.merchants).upsert({
+                            email: data.user.email,
+                            id: data.user.id
+                        });
+                        router.replace("/verify");
                     }
-                    router.replace("/verify");
                 } catch (err) {
                 } finally {
                     setLoading(false);
