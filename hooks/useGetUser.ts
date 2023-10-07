@@ -10,12 +10,12 @@ export const useGetUser = () => {
     const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
 
-    //ensures the current user is fetched first at most once
-    React.useEffect(() => {
-        onlyIfWindowIsDefined(() => {
-            sessionStorage.removeItem(storageKeys.user);
-        });
-    }, []);
+    // //ensures the current user is fetched first at most once
+    // React.useEffect(() => {
+    //     onlyIfWindowIsDefined(() => {
+    //         sessionStorage.removeItem(storageKeys.user);
+    //     });
+    // }, []);
 
     //subsequent retries per page should feed from the storage if exists
     React.useEffect(() => {
@@ -32,11 +32,13 @@ export const useGetUser = () => {
                         const {
                             data: { user: userInfo }
                         } = await supabase.auth.getUser();
-                        sessionStorage.setItem(
-                            storageKeys.user,
-                            JSON.stringify(userInfo)
-                        );
-                        setUser(userInfo);
+                        if (userInfo) {
+                            sessionStorage.setItem(
+                                storageKeys.user,
+                                JSON.stringify(userInfo)
+                            );
+                            setUser(userInfo);
+                        }
                     }
                 }
             });

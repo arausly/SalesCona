@@ -41,67 +41,75 @@ export const ChangePassword = () => {
         [password, supabase]
     );
 
-    return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 mt-8 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <form className="space-y-6" onSubmit={handleChangePassword}>
-                    <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm font-medium leading-6 text-gray-900"
-                        >
-                            New Password
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="password"
-                                type="password"
-                                placeholder="newsecret"
-                                autoComplete="email"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className={inputClasses({
-                                    mode: "default"
-                                })}
-                            />
-                        </div>
-                    </div>
+    const isDisabled = loading;
 
-                    <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm font-medium leading-6 text-gray-900"
-                        >
-                            Confirm Password
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="confirm-password"
-                                type="password"
-                                placeholder="newsecret"
-                                autoComplete="email"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className={inputClasses({
-                                    mode: "default"
-                                })}
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <Button
-                            loading={loading}
-                            loadingText="Changing..."
-                            text="Change Password"
-                            type="submit"
-                            disabled={loading}
-                            className="flex w-full items-center justify-center h-12 rounded-md primary-bg px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-[#393053] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+    return (
+        <div className="flex flex-col w-full items-center justify-center px-6 mt-20 lg:px-8">
+            <p className="text-lg mb-4">Change Password</p>
+            <form
+                className="space-y-6 w-full md:w-2/4"
+                onSubmit={handleChangePassword}
+            >
+                <div>
+                    <label
+                        htmlFor="email"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                        New Password
+                    </label>
+                    <div className="mt-2">
+                        <input
+                            id="password"
+                            type="password"
+                            placeholder="newsecret"
+                            autoComplete="email"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className={inputClasses({
+                                mode: "default"
+                            })}
                         />
                     </div>
-                </form>
-            </div>
+                </div>
+
+                <div>
+                    <label
+                        htmlFor="email"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                        Confirm Password
+                    </label>
+                    <div className="mt-2">
+                        <input
+                            id="confirm-password"
+                            type="password"
+                            placeholder="confirmed newsecret"
+                            autoComplete="email"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className={inputClasses({
+                                mode: "default"
+                            })}
+                        />
+                    </div>
+                </div>
+                <div>
+                    <Button
+                        loading={loading}
+                        loadingText="Changing..."
+                        text="Change Password"
+                        type="submit"
+                        disabled={isDisabled}
+                        className={`${
+                            isDisabled
+                                ? "bg-[#6d67e47f]"
+                                : "primary-bg hover:bg-indigo-500"
+                        } flex w-full justify-center rounded-md  px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                    />
+                </div>
+            </form>
         </div>
     );
 };
