@@ -16,16 +16,17 @@ export const inputClasses = cva(
         "focus:ring-indigo-600",
         "sm:text-sm",
         "sm:leading-6",
+        "pl-3"
     ],
     {
         variants: {
             mode: {
                 default: ["border=0"],
-                error: ["border-2", "border-rose-500"],
-            },
+                error: ["border-2", "border-rose-500"]
+            }
         },
         defaultVariants: {
-            mode: "default",
-        },
+            mode: "default"
+        }
     }
 );

@@ -1,21 +1,14 @@
-"use client";
 import React, { FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-
-import { Button } from "@components/Button";
-import { inputClasses } from "@components/Input/input";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 
 //images
-import logo from "@assets/images/kolony-logo.webp";
+import { Button } from "@components/Button";
+import { inputClasses } from "@components/Input/input";
+import { toast } from "react-toastify";
 
-export default function ChangePassword() {
-    const router = useRouter();
+export const ChangePassword = () => {
     const [loading, setLoading] = React.useState<boolean>(false);
     const [password, setPassword] = React.useState<string>("");
-    const [errMsg, setErrMsg] = React.useState<string>("");
     const { supabase } = useBrowserSupabase();
 
     const handleChangePassword = React.useCallback(
@@ -26,9 +19,19 @@ export default function ChangePassword() {
                 setLoading(true);
                 const { error } = await supabase.auth.updateUser({ password });
                 if (!error) {
-                    router.replace("/dashboard");
+                    toast(
+                        <p className="text-sm">Password change successful</p>,
+                        {
+                            type: "success"
+                        }
+                    );
                 } else {
-                    setErrMsg("Something went wrong, please try again later");
+                    toast(
+                        <p className="text-sm">Failed to change password</p>,
+                        {
+                            type: "error"
+                        }
+                    );
                 }
             } catch (err) {
             } finally {
@@ -39,19 +42,8 @@ export default function ChangePassword() {
     );
 
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="flex min-h-full flex-1 flex-col justify-center px-6 mt-8 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <Image
-                    className="mx-auto h-10 w-auto"
-                    src={logo}
-                    alt="company logo"
-                    placeholder="blur"
-                />
-                <h2 className="mt-10 text-center text-2xl font-semibold leading-9 tracking-tight text-gray-900">
-                    Change your password
-                </h2>
-            </div>
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                 <form className="space-y-6" onSubmit={handleChangePassword}>
                     <div>
                         <label
@@ -62,7 +54,7 @@ export default function ChangePassword() {
                         </label>
                         <div className="mt-2">
                             <input
-                                id="email"
+                                id="password"
                                 type="password"
                                 placeholder="newsecret"
                                 autoComplete="email"
@@ -75,7 +67,29 @@ export default function ChangePassword() {
                             />
                         </div>
                     </div>
-                    <p className="text-sm my-2 text-red-500">{errMsg}</p>
+
+                    <div>
+                        <label
+                            htmlFor="email"
+                            className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                            Confirm Password
+                        </label>
+                        <div className="mt-2">
+                            <input
+                                id="confirm-password"
+                                type="password"
+                                placeholder="newsecret"
+                                autoComplete="email"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className={inputClasses({
+                                    mode: "default"
+                                })}
+                            />
+                        </div>
+                    </div>
                     <div>
                         <Button
                             loading={loading}
@@ -87,16 +101,7 @@ export default function ChangePassword() {
                         />
                     </div>
                 </form>
-                <p className="mt-10 text-center text-sm text-gray-500">
-                    Go back{" "}
-                    <Link
-                        href="/dashboard"
-                        className="font-semibold leading-6 primary-color hover:text-[#635985]"
-                    >
-                        home
-                    </Link>
-                </p>
             </div>
         </div>
     );
-}
+};

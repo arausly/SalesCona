@@ -77,10 +77,10 @@ const links = [
         title: "Orders"
     },
     {
-        pathname: "/dashboard/profile",
+        pathname: "/dashboard/setting",
         icon: UserIcon,
         message: "Account settings",
-        title: "Profile"
+        title: "Settings"
     }
 ];
 
