@@ -3,7 +3,7 @@ import { useGetUser } from "../../hooks/useGetUser";
 import { RegularAvatar } from "./RegularAvatar";
 
 export const ProfileAvatar = (props: any) => {
-    const user = useGetUser();
+    const { user } = useGetUser();
     if (!user) return null;
     const name =
         user.user_metadata?.full_name ??

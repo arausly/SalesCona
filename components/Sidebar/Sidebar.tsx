@@ -100,7 +100,7 @@ export default function Sidebar() {
         try {
             setSigningOut(true);
             const { error } = await supabase.auth.signOut();
-            localStorage.removeItem(storageKeys.user);
+            sessionStorage.removeItem(storageKeys.user);
             if (!error) {
                 router.push("/login");
             } else {

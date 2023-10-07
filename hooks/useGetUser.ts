@@ -7,6 +7,7 @@ import { onlyIfWindowIsDefined } from "@lib/common.utils";
 
 export const useGetUser = () => {
     const [user, setUser] = React.useState<User | null>();
+    const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
 
     //ensures the current user is fetched first at most once
@@ -20,22 +21,27 @@ export const useGetUser = () => {
     React.useEffect(() => {
         (async () => {
             onlyIfWindowIsDefined(async () => {
-                const storedUser = sessionStorage.getItem(storageKeys.user);
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
+                if (forceRefresh) {
+                    sessionStorage.removeItem(storageKeys.user);
+                    setForceRefresh(false); //run again, by then you would be false;
                 } else {
-                    const {
-                        data: { user: userInfo }
-                    } = await supabase.auth.getUser();
-                    sessionStorage.setItem(
-                        storageKeys.user,
-                        JSON.stringify(userInfo)
-                    );
-                    setUser(userInfo);
+                    const storedUser = sessionStorage.getItem(storageKeys.user);
+                    if (storedUser) {
+                        setUser(JSON.parse(storedUser));
+                    } else {
+                        const {
+                            data: { user: userInfo }
+                        } = await supabase.auth.getUser();
+                        sessionStorage.setItem(
+                            storageKeys.user,
+                            JSON.stringify(userInfo)
+                        );
+                        setUser(userInfo);
+                    }
                 }
             });
         })();
-    }, [supabase.auth]);
+    }, [supabase.auth, forceRefresh]);
 
-    return user;
+    return { user, setForceRefresh };
 };
