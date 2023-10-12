@@ -8,19 +8,40 @@ import { toast } from "react-toastify";
 
 export const ChangePassword = () => {
     const [loading, setLoading] = React.useState<boolean>(false);
-    const [password, setPassword] = React.useState<string>("");
+    const [formState, setFormState] = React.useState<{
+        password: string;
+        confirmed: string;
+    }>({ password: "", confirmed: "" });
+    const [errMsg, setErrMsg] = React.useState<string>("");
     const { supabase } = useBrowserSupabase();
 
-    const handleChangePassword = React.useCallback(
+    const handleChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const { name, value } = e.target;
+            setFormState((prev) => {
+                if (name === "confirmed" && prev.password !== value) {
+                    setErrMsg("Password mismatch");
+                } else {
+                    setErrMsg("");
+                }
+                return { ...prev, [name]: value };
+            });
+        },
+        []
+    );
+
+    const changePassword = React.useCallback(
         async (e: FormEvent) => {
             try {
                 e.preventDefault();
-                if (!password.length) return;
+                if (!formState.password.length) return;
                 setLoading(true);
-                const { error } = await supabase.auth.updateUser({ password });
+                const { error } = await supabase.auth.updateUser({
+                    password: formState.password
+                });
                 if (!error) {
                     toast(
-                        <p className="text-sm">Password change successful</p>,
+                        <p className="text-sm">Password change successfully</p>,
                         {
                             type: "success"
                         }
@@ -38,17 +59,22 @@ export const ChangePassword = () => {
                 setLoading(false);
             }
         },
-        [password, supabase]
+        [formState, supabase]
     );
 
-    const isDisabled = loading;
+    const isDisabled = !!(
+        loading ||
+        !formState.password ||
+        !formState.confirmed ||
+        errMsg
+    );
 
     return (
         <div className="flex flex-col w-full items-center justify-center px-6 mt-20 lg:px-8">
             <p className="text-lg mb-4">Change Password</p>
             <form
-                className="space-y-6 w-full md:w-2/4"
-                onSubmit={handleChangePassword}
+                className="space-y-9 w-full md:w-2/4"
+                onSubmit={changePassword}
             >
                 <div>
                     <label
@@ -61,11 +87,11 @@ export const ChangePassword = () => {
                         <input
                             id="password"
                             type="password"
-                            placeholder="newsecret"
-                            autoComplete="email"
+                            placeholder="new secret"
                             required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name="password"
+                            value={formState.password}
+                            onChange={handleChange}
                             className={inputClasses({
                                 mode: "default"
                             })}
@@ -84,16 +110,17 @@ export const ChangePassword = () => {
                         <input
                             id="confirm-password"
                             type="password"
-                            placeholder="confirmed newsecret"
-                            autoComplete="email"
+                            placeholder="confirm new secret"
                             required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name="confirmed"
+                            value={formState.confirmed}
+                            onChange={handleChange}
                             className={inputClasses({
-                                mode: "default"
+                                mode: errMsg ? "error" : "default"
                             })}
                         />
                     </div>
+                    <p className="text-sm my-2 text-red-500">{errMsg}</p>
                 </div>
                 <div>
                     <Button

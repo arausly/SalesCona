@@ -47,7 +47,7 @@ export default function Setting({
     );
 
     return (
-        <section className="dashboard-screen-height overflow-auto p-6 md:px-20 w-full">
+        <section className="dashboard-screen-height overflow-auto p-6 px-4 md:px-20 w-full">
             <div className="flex flex-col">
                 <h3 className="text-lg md:text-2xl font-normal">Account</h3>
                 <p className="mt-1 text-zinc-500">
@@ -72,7 +72,7 @@ export default function Setting({
                                         }
                                     >
                                         <p
-                                            className={`capitalize ${
+                                            className={`capitalize text-sm md:text-base ${
                                                 selected
                                                     ? "primary-color transition"
                                                     : ""

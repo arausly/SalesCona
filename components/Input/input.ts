@@ -13,7 +13,6 @@ export const inputClasses = cva(
         "placeholder:text-gray-400",
         "focus:ring-2",
         "focus:ring-inset",
-        "focus:ring-indigo-600",
         "sm:text-sm",
         "sm:leading-6",
         "pl-3"
@@ -21,8 +20,14 @@ export const inputClasses = cva(
     {
         variants: {
             mode: {
-                default: ["border=0"],
-                error: ["border-2", "border-rose-500"]
+                default: ["border-0", "focus:ring-indigo-600"],
+                error: [
+                    "border-2",
+                    "border-rose-500",
+                    "focus:ring-none",
+                    "ring-0",
+                    "outline-none"
+                ]
             }
         },
         defaultVariants: {

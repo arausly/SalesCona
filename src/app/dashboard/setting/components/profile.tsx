@@ -5,6 +5,7 @@ import { Button } from "@components/Button";
 import { inputClasses } from "@components/Input/input";
 import { useGetUser } from "@hooks/useGetUser";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { supabaseTables } from "@lib/constants";
 
 interface ProfileFormState {
     firstname: string;
@@ -43,6 +44,7 @@ export const Profile = () => {
 
     const updatingUserInfo = React.useCallback(
         async (e: React.ChangeEvent<HTMLFormElement>) => {
+            if (!user) return;
             e.preventDefault();
             try {
                 setLoading(true);
@@ -50,6 +52,11 @@ export const Profile = () => {
                     data: formState
                 });
                 if (data && !error) {
+                    //update secondary storage as well.
+                    await supabase
+                        .from(supabaseTables.merchants)
+                        .update({ ...formState })
+                        .eq("id", user.id);
                     setForceRefresh(true);
                 }
             } catch (err) {
@@ -57,7 +64,7 @@ export const Profile = () => {
                 setLoading(false);
             }
         },
-        [formState]
+        [formState, user]
     );
 
     if (!user) return null;
@@ -78,7 +85,10 @@ export const Profile = () => {
                     <p>{user?.email ?? ""}</p>
                 </div>
             </div>
-            <form className="mt-8 w-full md:w-2/4" onSubmit={updatingUserInfo}>
+            <form
+                className="mt-8 space-y-6 w-full md:w-2/4"
+                onSubmit={updatingUserInfo}
+            >
                 <div>
                     <label
                         htmlFor="firstname"
@@ -101,7 +111,7 @@ export const Profile = () => {
                         />
                     </div>
                 </div>
-                <div className="mt-3.5">
+                <div>
                     <label
                         htmlFor="lastname"
                         className="block text-sm font-medium leading-6 text-gray-900"
@@ -123,7 +133,7 @@ export const Profile = () => {
                         />
                     </div>
                 </div>
-                <div className="mt-3.5">
+                <div>
                     <label
                         htmlFor="email"
                         className="block text-sm font-medium leading-6 text-gray-900"
@@ -144,7 +154,7 @@ export const Profile = () => {
                         />
                     </div>
                 </div>
-                <div className="mt-8">
+                <div>
                     <Button
                         loading={loading}
                         loadingText="Saving"

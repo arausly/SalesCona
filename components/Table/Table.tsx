@@ -12,7 +12,7 @@ interface TableProps {
         id: string;
         label: string | JSX.Element;
     }>;
-    rows: { [key: string]: string | JSX.Element | number }[];
+    rows: { [key: string]: string | JSX.Element }[];
     pagination: {
         finalPage: number;
         totalItemsCount: number;
@@ -23,6 +23,7 @@ interface TableProps {
     loading?: boolean;
     actionButton?: JSX.Element;
     noDataAltAction?: JSX.Element | null;
+    noDataMsg?: string;
 }
 
 // type a = TableProps["headers"][number]["id"];
@@ -37,7 +38,8 @@ export const Table: React.FC<TableProps> = ({
     onSearch,
     loading,
     actionButton,
-    noDataAltAction
+    noDataAltAction,
+    noDataMsg
 }) => {
     const [paginationRange, setPaginationRange] = React.useState([1, 5]);
     const [currentPage, setCurrentPage] = React.useState<number>(1);
@@ -129,7 +131,12 @@ export const Table: React.FC<TableProps> = ({
                 </div>
             ) : !rows.length ? (
                 <div className="flex flex-col items-center">
-                    <NoData msg="No products found, try filtering by published, draft" />
+                    <NoData
+                        msg={
+                            noDataMsg ??
+                            "No report found, try filtering by campaign, date or radio station"
+                        }
+                    />
                     {noDataAltAction}
                 </div>
             ) : (

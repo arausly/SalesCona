@@ -37,6 +37,7 @@ export default function Login() {
                     const { data, error } =
                         await supabase.auth.signInWithPassword(values);
                     if (!error && data) {
+                        // router.back()
                         router.replace("/dashboard");
                     } else {
                         setErrMsg(
