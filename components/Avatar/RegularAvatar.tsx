@@ -4,7 +4,8 @@ import { generateAvatarBg, generateAvatarInitials } from "@lib/format-utils";
 
 const avatarSizes = {
     normal: "w-12 h-12",
-    small: "w-8 h-8"
+    small: "w-8 h-8",
+    medium: "w-10 h-10"
 };
 
 interface IProps {

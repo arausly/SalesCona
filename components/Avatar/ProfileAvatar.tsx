@@ -8,5 +8,7 @@ export const ProfileAvatar = (props: any) => {
     const name =
         user.user_metadata?.full_name ??
         `${user.user_metadata?.firstname} ${user.user_metadata.lastname}`;
-    return <RegularAvatar className="block md:hidden" name={name} />;
+    return (
+        <RegularAvatar className="block md:hidden" name={name} size="medium" />
+    );
 };

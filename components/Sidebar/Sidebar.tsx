@@ -10,6 +10,16 @@ import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import styles from "./sidebar.module.css";
 import { ProfileAvatar } from "@components/Avatar/ProfileAvatar";
 import {
+    Sheet,
+    SheetClose,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger
+} from "@components/ui/sheet";
+import {
     ArrowLeftOnRectangleIcon,
     BanknotesIcon,
     Bars3Icon,
@@ -90,7 +100,7 @@ const pacifico = Pacifico({
 });
 
 export default function Sidebar() {
-    const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
+    const [open, setOpen] = React.useState<boolean>(false);
     const pathname = usePathname();
     const { supabase } = useBrowserSupabase();
     const [signingOut, setSigningOut] = React.useState<boolean>(false);
@@ -115,23 +125,76 @@ export default function Sidebar() {
         }
     }, [supabase.auth]);
 
-    const handleNavToggle = React.useCallback(() => {
-        setShowMobileMenu((s) => !s);
-    }, []);
+    const navLinks = (
+        <div className="w-full h-full flex flex-col flex-1 mt-8 md:mt-4">
+            {links.map((link, i) => (
+                <Link
+                    key={link.title}
+                    href={link.pathname}
+                    className={`flex items-center text-[rgb(2 6 23)] no-underline cursor-pointer transition mb-8 md:mb-10 ${
+                        (!i && pathname === link.pathname) ||
+                        (i && pathname.indexOf(link.pathname) > -1)
+                            ? styles.sidebarActiveLinkItem
+                            : ""
+                    }`}
+                    onClick={() => setOpen(false)}
+                >
+                    <link.icon className="h-5 w-5" />
+                    <Tooltip
+                        message={link.message}
+                        side="right"
+                        tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-0"
+                    >
+                        <p className="text-sm md:text-base ml-6">
+                            {link.title}
+                        </p>
+                    </Tooltip>
+                    {link.title === "Messages" && (
+                        <div className="ml-auto w-7 h-5 flex flex-row items-center justify-center text-white rounded-full primary-bg ml-2 text-xs">
+                            10
+                        </div>
+                    )}
+                </Link>
+            ))}
+            <div
+                className="items-center cursor-pointer flex mt-auto mb-4"
+                onClick={handleSignOut}
+            >
+                {signingOut ? (
+                    <Spinner size="tiny" />
+                ) : (
+                    <ArrowLeftOnRectangleIcon className="h-6 w-6" />
+                )}
+                <p className="text-sm md:text-lg ml-4">Logout</p>
+            </div>
+        </div>
+    );
 
     return (
-        <nav
-            className={`${styles.wrapper} ${
-                !showMobileMenu ? styles.wrapperCollapse : ""
-            }`}
-        >
-            <div className={styles.sidebarHeaderBox}>
-                <button
-                    className={styles.sidebarToggler}
-                    onClick={handleNavToggle}
-                >
-                    <Bars3Icon className="h-6 w-6" />
-                </button>
+        <nav className={styles.wrapper}>
+            <div className="flex md:pb-4 items-center justify-between md:border-b border-[#ececed]">
+                <Sheet open={open} onOpenChange={setOpen}>
+                    <SheetTrigger asChild>
+                        <button
+                            className={styles.sidebarToggler}
+                            onClick={() => setOpen(true)}
+                        >
+                            <Bars3Icon className="h-6 w-6" />
+                        </button>
+                    </SheetTrigger>
+                    <SheetContent
+                        side="left"
+                        className="w-2/4"
+                        onInteractOutside={() => setOpen(false)}
+                    >
+                        <SheetHeader className="border-b items-start border-slate-100 pb-5">
+                            <p className={`${pacifico.className} text-4xl`}>
+                                Friendie
+                            </p>
+                        </SheetHeader>
+                        <div className="h-[90%]">{navLinks}</div>
+                    </SheetContent>
+                </Sheet>
                 <p
                     className={`${pacifico.className} ${styles.sidebarBrandName}`}
                 >
@@ -142,51 +205,7 @@ export default function Sidebar() {
                 </p>
                 <ProfileAvatar />
             </div>
-            <div
-                className={`${styles.sidebarNavLinks} ${
-                    showMobileMenu
-                        ? styles.sidebarNavLinksShow
-                        : styles.sidebarNavLinksHide
-                }`}
-            >
-                {links.map((link, i) => (
-                    <Link
-                        key={link.title}
-                        href={link.pathname}
-                        className={`${styles.sidebarNavLinkItem} ${
-                            (!i && pathname === link.pathname) ||
-                            (i && pathname.indexOf(link.pathname) > -1)
-                                ? styles.sidebarActiveLinkItem
-                                : ""
-                        }`}
-                    >
-                        <link.icon className="h-5 w-5" />
-                        <Tooltip
-                            message={link.message}
-                            side="right"
-                            tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-0"
-                        >
-                            <p className="text-sm md:text-base">{link.title}</p>
-                        </Tooltip>
-                        {link.title === "Messages" && (
-                            <div className="ml-auto w-7 h-5 flex flex-row items-center justify-center text-white rounded-full primary-bg ml-2 text-xs">
-                                10
-                            </div>
-                        )}
-                    </Link>
-                ))}
-                <div
-                    className={`${styles.sidebarNavLinkItem} items-center flex `}
-                    onClick={handleSignOut}
-                >
-                    {signingOut ? (
-                        <Spinner size="tiny" />
-                    ) : (
-                        <ArrowLeftOnRectangleIcon className="h-6 w-6" />
-                    )}
-                    <p className="text-sm md:text-lg">Logout</p>
-                </div>
-            </div>
+            <div className="hidden md:block h-full">{navLinks}</div>
         </nav>
     );
 }
