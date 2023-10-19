@@ -143,7 +143,7 @@ export default function Sidebar() {
                     <Tooltip
                         message={link.message}
                         side="right"
-                        tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-0"
+                        tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-4"
                     >
                         <p className="text-sm md:text-base ml-6">
                             {link.title}
