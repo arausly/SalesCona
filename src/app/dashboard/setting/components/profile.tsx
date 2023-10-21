@@ -77,7 +77,7 @@ export const Profile = () => {
     const disabled = loading || !changeExist;
 
     return (
-        <section className="flex flex-col w-full items-center justify-center px-6 mt-20 lg:px-8">
+        <section className="flex flex-col w-full items-center justify-center px-6 mt-16 lg:px-8">
             <div className="flex items-center">
                 <RegularAvatar name={name} className="mr-6" />
                 <div className="flex flex-col">

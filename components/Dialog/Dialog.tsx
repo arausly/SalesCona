@@ -22,7 +22,7 @@ export const Modal: React.FC<ModalProps> = ({
         <Transition appear show={isOpen} as={Fragment}>
             <Dialog
                 as="div"
-                className={`relative z-10 ${dialogClassName}`}
+                className={`relative ${dialogClassName}`}
                 onClose={toggleModal}
             >
                 <Transition.Child

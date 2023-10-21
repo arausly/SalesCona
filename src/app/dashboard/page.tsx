@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import Dropdown from "@components/Menudrown";
+import Dropdown from "@components/Menudropdown";
 import {
     ArrowTrendingDownIcon,
     ArrowTrendingUpIcon,
     BuildingStorefrontIcon,
-    CalendarDaysIcon,
+    CalendarDaysIcon
 } from "@heroicons/react/24/outline";
 import { formatNumberWithSuffix, truncateString } from "@lib/format-utils";
 import { Table } from "@components/Table/Table";
@@ -24,12 +24,12 @@ const dateSelections = [
     { label: "Last one week" },
     { label: "Last one month" },
     { label: "Last 3 months" },
-    { label: "Last one year" },
+    { label: "Last one year" }
 ];
 const stores = [{ label: "Shiol" }, { label: "Wakaious" }]; //todo replace with real data
 const trendingIcons = [
     { icon: ArrowTrendingDownIcon, direction: "down" },
-    { icon: ArrowTrendingUpIcon, direction: "up" },
+    { icon: ArrowTrendingUpIcon, direction: "up" }
 ];
 
 const headers = [
@@ -37,7 +37,7 @@ const headers = [
     { id: "price", label: "Price" },
     { id: "category", label: "Category" },
     { id: "description", label: "Description" },
-    { id: "views", label: "Views" },
+    { id: "views", label: "Views" }
 ];
 
 const rows = [
@@ -56,7 +56,7 @@ const rows = [
         category: "creams",
         views: "73",
         description:
-            "All shi-oil creams are top notch and well soothing to the skin",
+            "All shi-oil creams are top notch and well soothing to the skin"
     },
     {
         name: (
@@ -72,7 +72,7 @@ const rows = [
         price: Number(3500).toLocaleString(),
         category: "sneakers",
         views: "27",
-        description: "Affordable male sneaker wears,",
+        description: "Affordable male sneaker wears,"
     },
     {
         name: (
@@ -86,7 +86,7 @@ const rows = [
         price: Number(1700).toLocaleString(),
         category: "shirts",
         description: "Casual male shirts",
-        views: "15",
+        views: "15"
     },
     {
         name: (
@@ -98,14 +98,14 @@ const rows = [
         price: Number(2900).toLocaleString(),
         category: "bag",
         description: "luxury bags available",
-        views: "10",
-    },
+        views: "10"
+    }
 ];
 
 const pagination = {
     finalPage: 50,
     totalItemsCount: 500,
-    pageItemCount: 10,
+    pageItemCount: 10
 };
 
 const reviews = [
@@ -113,33 +113,33 @@ const reviews = [
         name: "Emmanuel ikechukwu",
         comment: "I will never sleep on your sales, one of the best",
         rating: 4.5,
-        date: "12-02-2023",
+        date: "12-02-2023"
     },
     {
         name: "Chinedu moses",
         comment: "A good experience all in all",
         rating: 4,
-        date: "13-02-2023",
+        date: "13-02-2023"
     },
     {
         name: "Babajide simons",
         comment: "I am had to wait 5 days before receiving your product ",
         rating: 2,
-        date: "now",
+        date: "now"
     },
     {
         name: "Sarah ajib",
         comment:
             "I really like your shop page, I found exactly what I was looking for and received within 3 days",
         rating: 5,
-        date: "2-01-2023",
+        date: "2-01-2023"
     },
     {
         name: "Akanbi",
         comment: "I couldn't find the cream advertized on your main page",
         rating: 1,
-        date: "23-02-2023",
-    },
+        date: "23-02-2023"
+    }
 ];
 
 export default function Dashboard() {
@@ -160,7 +160,7 @@ export default function Dashboard() {
             {/** filters  */}
             <div className="flex flex-col md:flex-row">
                 <div className="mb-3 md:mr-3">
-                    <Dropdown
+                    <Dropdown<{ label: string }>
                         titleIcon={
                             <CalendarDaysIcon
                                 className="ml-2 -mr-1 h-5 w-5 text-black mr-2"
@@ -168,11 +168,11 @@ export default function Dashboard() {
                             />
                         }
                         items={dateSelections}
-                        onSelectItem={(label) => setSelectedDuration(label)}
+                        onSelectItem={(item) => setSelectedDuration(item.label)}
                     />
                 </div>
                 <div>
-                    <Dropdown
+                    <Dropdown<{ label: string }>
                         titleIcon={
                             <BuildingStorefrontIcon
                                 className="ml-2 -mr-1 h-5 w-5 text-black mr-2"
@@ -180,7 +180,7 @@ export default function Dashboard() {
                             />
                         }
                         items={stores}
-                        onSelectItem={(label) => setSelectedStore(label)}
+                        onSelectItem={(item) => setSelectedStore(item.label)}
                     />
                 </div>
             </div>
@@ -270,7 +270,7 @@ export default function Dashboard() {
                         />
                     </div>
                 </div>
-                <aside className="h-full shadow-md bg-white mt-6 md:mt-0 ml-0 md:ml-10 w-full md:w-max p-3 rounded-sm flex flex-col overflow-auto">
+                <aside className="h-full shadow-md bg-white mt-6 md:mt-0 ml-0 md:ml-10 w-full p-3 rounded-sm flex flex-col overflow-auto">
                     <div className="flex flex-row justify-between items-center border-b border-slate-200 pb-2 mb-2">
                         <p className="text-lg md:text-xl mr-8">Reviews</p>
                         <div className="flex flex-col">

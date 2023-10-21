@@ -29,7 +29,7 @@ import slider1 from "@assets/images/shirts.webp";
 import slider2 from "@assets/images/slider2.jpeg";
 import slider3 from "@assets/images/slider3.jpeg";
 import slider4 from "@assets/images/slider4.jpeg";
-import Dropdown from "@components/Menudrown";
+import Dropdown from "@components/Menudropdown";
 import { RegularAvatar } from "@components/Avatar/RegularAvatar";
 import { CustomerReviewForm } from "../../components/CustomerReviewForm";
 

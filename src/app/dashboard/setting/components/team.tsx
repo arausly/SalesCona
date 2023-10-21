@@ -11,6 +11,7 @@ import { supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import React from "react";
 import { AddNewMember } from "./sheets/add-new-member";
+import { MerchantUser, Permission, Role } from "../../typing";
 
 const headers = [
     { id: "firstname", label: "Firstname" },
@@ -28,7 +29,12 @@ const pagination = {
     pageItemCount: 10
 };
 
-export const Team = () => {
+interface TeamProps {
+    roles: Role[];
+    permissions: Permission[];
+}
+
+export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
     const { user } = useGetUser();
     const [members, setMembers] = React.useState<MerchantUser[]>([]);
     const { supabase } = useBrowserSupabase();
@@ -53,7 +59,7 @@ export const Team = () => {
         () =>
             members.map((m) => ({
                 ...excludeKeysFromObj(m, ["owner_id"]),
-                role: m.role.title,
+                role: m.role.label,
                 actions: (
                     <dd className="flex items-center">
                         <span className="mr-4">
@@ -70,8 +76,12 @@ export const Team = () => {
 
     return (
         <>
-            <AddNewMember ref={sheetTriggerRef} />
-            <div className="flex flex-col w-full items-center justify-center px-0 md:px-6 mt-20 lg:px-8">
+            <AddNewMember
+                roles={roles}
+                permissions={permissions}
+                ref={sheetTriggerRef}
+            />
+            <div className="flex flex-col w-full items-center justify-center px-0 md:px-6 mt-16 lg:px-8">
                 <Table
                     title="Members"
                     headers={headers}

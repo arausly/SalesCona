@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import Dropdown from "@components/Menudrown";
+import Dropdown from "@components/Menudropdown";
 import { Table } from "@components/Table/Table";
 import {
     BuildingStorefrontIcon,

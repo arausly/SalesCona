@@ -10,7 +10,9 @@ export const supabaseTables = {
     store_product_categories: "store_product_categories",
     stores: "stores",
     products: "products",
-    merchants: "merchants"
+    merchants: "merchants",
+    roles: "roles",
+    permissions: "permissions"
 };
 
 export const supabaseBuckets = {

@@ -6,7 +6,7 @@ import {
     FunnelIcon
 } from "@heroicons/react/24/outline";
 import { Transition } from "@headlessui/react";
-import Dropdown from "@components/Menudrown";
+import Dropdown from "@components/Menudropdown";
 
 //images
 import shirt from "@assets/images/shirts.webp";

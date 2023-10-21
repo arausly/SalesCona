@@ -7,6 +7,10 @@ import { ChangePassword } from "./components/change-password";
 import { Team } from "./components/team";
 import { Subscription } from "./components/subscription";
 import { usePathname, useRouter } from "next/navigation";
+import { Permission, Role } from "../typing";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { supabaseTables } from "@lib/constants";
+import { useGetUser } from "@hooks/useGetUser";
 
 const tabIndexesByType = {
     profile: 0,
@@ -27,8 +31,12 @@ export default function Setting({
 }: {
     searchParams: { tab: keyof typeof tabIndexesByType };
 }) {
+    const [roles, setRoles] = React.useState<Role[]>([]); //roles created by staff
+    const [permissions, setPermissions] = React.useState<Permission[]>([]); //permissions per role
     const router = useRouter();
     const pathname = usePathname();
+    const { user } = useGetUser();
+    const { supabase } = useBrowserSupabase();
 
     const handleTabChange = (index: number) => {
         router.push(
@@ -45,6 +53,35 @@ export default function Setting({
         },
         [searchParams]
     );
+
+    //fetch owner roles
+    React.useEffect(() => {
+        (async () => {
+            if (user) {
+                const { data, error } = await supabase
+                    .from(supabaseTables.roles)
+                    .select()
+                    .eq("merchant", user.id)
+                    .returns<Role[]>();
+
+                if (data && !error) {
+                    setRoles(data);
+                }
+            }
+        })();
+    }, [user]);
+
+    React.useEffect(() => {
+        (async () => {
+            const { data, error } = await supabase
+                .from(supabaseTables.permissions)
+                .select()
+                .returns<Permission[]>();
+            if (data && !error) {
+                setPermissions(data);
+            }
+        })();
+    }, []);
 
     return (
         <section className="dashboard-screen-height overflow-auto p-6 px-4 md:px-20 w-full">
@@ -93,7 +130,7 @@ export default function Setting({
                             <ChangePassword />
                         </Tab.Panel>
                         <Tab.Panel>
-                            <Team />
+                            <Team roles={roles} permissions={permissions} />
                         </Tab.Panel>
                         <Tab.Panel>
                             <Subscription />

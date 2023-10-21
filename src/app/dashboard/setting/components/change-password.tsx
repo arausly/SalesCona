@@ -70,7 +70,7 @@ export const ChangePassword = () => {
     );
 
     return (
-        <div className="flex flex-col w-full items-center justify-center px-6 mt-20 lg:px-8">
+        <div className="flex flex-col w-full items-center justify-center px-6 mt-16 lg:px-8">
             <p className="text-lg mb-4">Change Password</p>
             <form
                 className="space-y-9 w-full md:w-2/4"

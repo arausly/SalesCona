@@ -4,14 +4,17 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-export interface DropdownProps {
+export interface DropdownProps<T> {
     titleIcon?: JSX.Element;
     title?: string;
-    items: Array<{
-        label: string;
-        icon?: React.FC<any>;
-    }>;
-    onSelectItem: (item: string) => void;
+    items: Array<
+        Partial<T> & {
+            label: string;
+            icon?: React.FC<any>;
+            decoy?: boolean; //trigger external actions only instead of selecting as an item
+        }
+    >;
+    onSelectItem: (item: T) => void;
     menuButton?: JSX.Element;
     menuClassNames?: string;
     wrapperClasses?: string;
@@ -19,24 +22,26 @@ export interface DropdownProps {
     highlightButtonOnClick?: boolean;
 }
 
-export default function Dropdown(props: DropdownProps) {
+export default function Dropdown<T>(props: DropdownProps<T>) {
     const [selectedOption, setSelectedOption] = React.useState<string>();
     const [activeLabels, setActiveLabels] = React.useState<
         Map<string, boolean>
     >(new Map());
     const handleSelection = React.useCallback(
-        (item: DropdownProps["items"][number]) => {
-            props.onSelectItem(item.label);
-            setSelectedOption(item.label);
-            if (props.highlightButtonOnClick) {
-                setActiveLabels((prev) => {
-                    if (prev.has(item.label)) {
-                        prev.delete(item.label);
-                        return new Map([...prev]);
-                    } else {
-                        return new Map([...prev, [item.label, true]]);
-                    }
-                });
+        (item: DropdownProps<T>["items"][number]) => {
+            props.onSelectItem(item as T);
+            if (!item.decoy) {
+                setSelectedOption(item.label);
+                if (props.highlightButtonOnClick) {
+                    setActiveLabels((prev) => {
+                        if (prev.has(item.label)) {
+                            prev.delete(item.label);
+                            return new Map([...prev]);
+                        } else {
+                            return new Map([...prev, [item.label, true]]);
+                        }
+                    });
+                }
             }
         },
         [props]
@@ -56,7 +61,7 @@ export default function Dropdown(props: DropdownProps) {
                         <p className="text-black text-ellipsis overflow-hidden whitespace-nowrap">
                             {selectedOption ??
                                 props.title ??
-                                props.items[0].label}
+                                props.items[0]?.label}
                         </p>
                         <ChevronDownIcon
                             className="ml-auto -mr-1 h-5 w-5 text-black"

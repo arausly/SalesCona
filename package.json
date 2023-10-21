@@ -13,6 +13,7 @@
         "@heroicons/react": "^2.0.17",
         "@popperjs/core": "^2.11.7",
         "@radix-ui/react-dialog": "^1.0.5",
+        "@radix-ui/react-switch": "^1.0.3",
         "@radix-ui/react-tooltip": "^1.0.7",
         "@supabase/auth-helpers-nextjs": "^0.6.1",
         "@supabase/supabase-js": "^2.21.0",
@@ -42,6 +43,7 @@
         "typescript": "5.0.4"
     },
     "devDependencies": {
-        "@types/shortid": "^0.0.29"
+        "@types/shortid": "^0.0.29",
+        "prettier": "^3.0.3"
     }
 }
