@@ -1,9 +1,12 @@
 "use client";
 import { Table } from "@components/Table/Table";
 import {
+    EllipsisHorizontalIcon,
     PencilIcon,
+    PlusIcon,
     TrashIcon,
-    UserGroupIcon
+    UserGroupIcon,
+    UserPlusIcon
 } from "@heroicons/react/24/outline";
 import { useGetUser } from "@hooks/useGetUser";
 import { excludeKeysFromObj } from "@lib/common.utils";
@@ -11,7 +14,18 @@ import { supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import React from "react";
 import { AddNewMember } from "./sheets/add-new-member";
-import { MerchantUser, Permission, Role } from "../../typing";
+import { MerchantStaff, Permission, Role } from "../../typing";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@components/ui/dropdown-menu";
+import { Prompt } from "@components/Dialog/Prompt";
+import { toast } from "react-toastify";
 
 const headers = [
     { id: "firstname", label: "Firstname" },
@@ -19,8 +33,9 @@ const headers = [
     { id: "email", label: "email" },
     { id: "role", label: "Role" },
     { id: "created_at", label: "Date added" },
-    { id: "last_active", label: "Last active" },
-    { id: "actions", label: "Actions" }
+    { id: "last_active", label: "Last Login" },
+    { id: "status", label: "Status" },
+    { id: "actions", label: "" }
 ];
 
 const pagination = {
@@ -36,18 +51,83 @@ interface TeamProps {
 
 export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
     const { user } = useGetUser();
-    const [members, setMembers] = React.useState<MerchantUser[]>([]);
+    const [members, setMembers] = React.useState<MerchantStaff[]>([]);
+    const [openDeletePrompt, setOpenDeletePrompt] =
+        React.useState<boolean>(false);
+    const [openSuspendPrompt, setOpenSuspendPrompt] =
+        React.useState<boolean>(false);
+    const [editingMember, setEditingMember] = React.useState<boolean>(false); //for remove & suspend
+    const [selectedMemberStaff, setSelectedMemberStaff] =
+        React.useState<MerchantStaff>();
+    const [] = React.useState<boolean>();
     const { supabase } = useBrowserSupabase();
     const sheetTriggerRef = React.useRef();
+
+    React.useEffect(() => {
+        const subscription = supabase
+            .channel(supabaseTables.merchant_staffs)
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: supabaseTables.merchant_staffs
+                },
+
+                async (payload) => {
+                    let memberPayload = payload.new as MerchantStaff;
+                    const { data, error } = await supabase
+                        .from(supabaseTables.roles)
+                        .select()
+                        .eq("id", memberPayload.role);
+
+                    if (data?.length && !error) {
+                        memberPayload.role = data[0] as Role;
+                    }
+
+                    switch (payload.eventType) {
+                        case "INSERT":
+                            console.log({ new: payload.new });
+                            setMembers((prev) => [
+                                ...prev,
+                                payload.new as MerchantStaff
+                            ]);
+                            break;
+                        case "DELETE":
+                            setMembers((prev) => [
+                                ...prev.filter(
+                                    (oldMember) =>
+                                        oldMember.id !== payload.old.id
+                                )
+                            ]);
+                            break;
+                        case "UPDATE":
+                            setMembers((prev) =>
+                                prev.map((oldMember) => {
+                                    if (oldMember.id === memberPayload.id) {
+                                        return memberPayload;
+                                    }
+                                    return oldMember;
+                                })
+                            );
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     React.useEffect(() => {
         (async () => {
             if (user) {
                 const { data, error } = await supabase
-                    .from(supabaseTables.merchants)
-                    .select()
-                    .eq("owner_id", user.id)
-                    .returns<MerchantUser[]>();
+                    .from(supabaseTables.merchant_staffs)
+                    .select("*,role(*)")
+                    .eq("owner", user.id)
+                    .returns<MerchantStaff[]>();
                 if (data && !error) {
                     setMembers(data);
                 }
@@ -55,33 +135,158 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
         })();
     }, [user]);
 
+    const openMemberCreationSheet = React.useCallback(() => {
+        const trigger = sheetTriggerRef?.current as any;
+        if (trigger) {
+            trigger.click();
+        }
+    }, [sheetTriggerRef]);
+
+    const MemberActions = ({ member }: { member: MerchantStaff }) => {
+        const handleEdit = () => {
+            setSelectedMemberStaff(member);
+            openMemberCreationSheet();
+        };
+
+        const handleSuspendUser = () => {
+            setSelectedMemberStaff(member);
+            setOpenSuspendPrompt(true);
+        };
+
+        const handleRemoveUser = () => {
+            setSelectedMemberStaff(member);
+            setOpenDeletePrompt(true);
+        };
+
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button>
+                        <EllipsisHorizontalIcon className="h-8 w-10 primary-color" />
+                    </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={handleEdit}>
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleSuspendUser}>
+                            Suspend
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleRemoveUser}>
+                            Remove
+                        </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
+    };
+
     const rows = React.useMemo(
         () =>
-            members.map((m) => ({
-                ...excludeKeysFromObj(m, ["owner_id"]),
-                role: m.role.label,
-                actions: (
-                    <dd className="flex items-center">
-                        <span className="mr-4">
-                            <TrashIcon />
-                        </span>
-                        <span className="">
-                            <PencilIcon />
-                        </span>
-                    </dd>
-                )
-            })),
+            members.reduce((acc, m) => {
+                if (!m.is_deleted) {
+                    acc.push({
+                        ...excludeKeysFromObj(m, [
+                            "owner",
+                            "suspended",
+                            "is_deleted"
+                        ]),
+                        created_at: new Date(m.created_at).toLocaleDateString(),
+                        role: m.role.label,
+                        last_active: m.last_active ?? "Never",
+                        actions: <MemberActions member={m} />,
+                        status: (
+                            <span
+                                className={`inline-flex items-center rounded-md ${
+                                    m.suspended
+                                        ? "bg-pink-50 text-pink-700 ring-pink-700/10"
+                                        : "bg-green-50 text-green-700 ring-green-600/20"
+                                }  px-2 py-1 text-xs font-medium ring-1 ring-inset `}
+                            >
+                                {m.suspended ? "Suspended" : "Active"}
+                            </span>
+                        )
+                    });
+                }
+                return acc;
+            }, [] as any[]),
         [members]
+    );
+
+    const promptAction = React.useCallback(
+        async (prompt: "suspend" | "delete") => {
+            if (!selectedMemberStaff) return;
+            try {
+                const payload =
+                    prompt === "delete"
+                        ? { is_deleted: true }
+                        : { suspended: true };
+
+                setEditingMember(true);
+                const { error } = await supabase
+                    .from(supabaseTables.merchant_staffs)
+                    .update(payload)
+                    .eq("id", selectedMemberStaff.id);
+                if (!error) {
+                    toast(
+                        <p className="text-sm">Removed staff successfully</p>,
+                        {
+                            type: "success"
+                        }
+                    );
+                } else {
+                    toast(<p className="text-sm">Failed to remove staff</p>, {
+                        type: "error"
+                    });
+                }
+            } catch (err) {
+            } finally {
+                setEditingMember(false);
+                setOpenDeletePrompt(false);
+                setOpenSuspendPrompt(false);
+            }
+        },
+        [selectedMemberStaff]
     );
 
     return (
         <>
+            <Prompt
+                isOpen={openDeletePrompt}
+                action={() => promptAction("delete")}
+                actionMsg="remove user"
+                contentMsg={`Are you sure you want to remove "${selectedMemberStaff?.firstname}" from your staff list?`}
+                title="Remove user"
+                toggleModal={() => setOpenDeletePrompt((o) => !o)}
+            />
+            <Prompt
+                isOpen={openSuspendPrompt}
+                action={() => promptAction("suspend")}
+                actionMsg="suspend user"
+                contentMsg={`Are you sure you want to suspend "${selectedMemberStaff?.firstname}" from your staff list?`}
+                title="Suspend user"
+                toggleModal={() => setOpenSuspendPrompt((o) => !o)}
+            />
             <AddNewMember
                 roles={roles}
                 permissions={permissions}
                 ref={sheetTriggerRef}
+                currentMember={selectedMemberStaff}
             />
             <div className="flex flex-col w-full items-center justify-center px-0 md:px-6 mt-16 lg:px-8">
+                {(rows.length && (
+                    <button
+                        onClick={openMemberCreationSheet}
+                        className="w-48 h-10 mb-4 rounded-lg self-end primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                    >
+                        <UserPlusIcon className="h-5 w-5 text-white mr-2" />
+                        <p className="text-white text-sm">Add new member</p>
+                    </button>
+                )) ||
+                    null}
                 <Table
                     title="Members"
                     headers={headers}
@@ -92,12 +297,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                     noDataMsg="No members added to your account yet"
                     noDataAltAction={
                         <button
-                            onClick={() => {
-                                const trigger = sheetTriggerRef?.current as any;
-                                if (trigger) {
-                                    trigger.click();
-                                }
-                            }}
+                            onClick={openMemberCreationSheet}
                             className="w-48 h-10 mt-4 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
                         >
                             <UserGroupIcon className="h-5 w-5 text-white mr-2" />

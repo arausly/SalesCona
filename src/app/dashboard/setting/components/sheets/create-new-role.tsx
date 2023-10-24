@@ -13,8 +13,11 @@ import {
     SheetTrigger
 } from "@components/ui/sheet";
 import { inputClasses } from "@components/Input/input";
-import { Permission } from "../../../typing";
+import { Permission, Role } from "../../../typing";
 import { Switch } from "@components/ui/switch";
+import { supabaseTables } from "@lib/constants";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { useGetUser } from "@hooks/useGetUser";
 
 interface CreateNewRoleProps {
     permissions: Permission[];
@@ -25,6 +28,58 @@ export const CreateNewRole = React.forwardRef(
         const [saving, setSaving] = React.useState<boolean>(false);
         const [open, setOpen] = React.useState<boolean>(false);
         const [roleLabel, setRoleLabel] = React.useState<string>("");
+        const [errorMsg, setErrorMsg] = React.useState<string>("");
+        const [selectedPermissions, setSelectedPermissions] = React.useState<{
+            [key: string]: boolean;
+        }>({});
+        const { supabase } = useBrowserSupabase();
+        const { user } = useGetUser();
+
+        //add role
+        const createRole = React.useCallback(async () => {
+            try {
+                if (!user || !roleLabel.length) return;
+                const permissions = Object.keys(selectedPermissions);
+                if (!permissions.length) {
+                    setErrorMsg(
+                        `Please select the permissions associated with the role ${roleLabel}`
+                    );
+                    return;
+                }
+                setSaving(true);
+                //create role entry in role db
+                const { data, error } = await supabase
+                    .from(supabaseTables.roles)
+                    .insert<{ label: string; merchant: string }>({
+                        label: roleLabel.trim(),
+                        merchant: user.id
+                    })
+                    .select()
+                    .returns<Role[]>();
+
+                if (data?.length && !error) {
+                    const permissionsForRoles = permissions.map(
+                        (permission) => ({
+                            permission,
+                            role: data[0].id
+                        })
+                    );
+
+                    const { error: err } = await supabase
+                        .from(supabaseTables.permissions_for_roles)
+                        .insert(permissionsForRoles);
+
+                    if (!err) {
+                        setRoleLabel("");
+                        setOpen(false);
+                    } else {
+                    }
+                }
+            } catch (err) {
+            } finally {
+                setSaving(false);
+            }
+        }, [user, roleLabel, selectedPermissions]);
 
         return (
             <Sheet open={open} onOpenChange={setOpen}>
@@ -80,21 +135,33 @@ export const CreateNewRole = React.forwardRef(
                                             {permission.description}
                                         </p>
                                     </div>
-                                    <Switch id={`${permission.id}`} />
+                                    <Switch
+                                        id={`${permission.id}`}
+                                        onCheckedChange={(checked) =>
+                                            setSelectedPermissions((prev) => ({
+                                                ...prev,
+                                                [permission.id]: checked
+                                            }))
+                                        }
+                                    />
                                 </label>
                             ))}
                         </div>
+                        {errorMsg && (
+                            <p className="text-sm my-2 text-red-500">
+                                {errorMsg}
+                            </p>
+                        )}
                     </div>
                     <SheetFooter className="mt-8">
-                        <SheetClose asChild>
-                            <Button
-                                type="submit"
-                                loadingText="Saving"
-                                loading={saving}
-                                text="Save changes"
-                                className="text-white w-32 h-10 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
-                            />
-                        </SheetClose>
+                        <Button
+                            type="submit"
+                            loadingText="Saving"
+                            loading={saving}
+                            text="Save changes"
+                            onClick={createRole}
+                            className="text-white w-32 h-10 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                        />
                     </SheetFooter>
                 </SheetContent>
             </Sheet>

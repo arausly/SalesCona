@@ -1,17 +1,24 @@
-export interface MerchantUser {
+export interface Merchant {
     id: string;
     created_at: string;
     email: string;
-    owner_id: MerchantUser;
-    role: Role;
     firstname: string;
     lastname: string;
+}
+
+export interface MerchantStaff extends Merchant {
+    owner: Merchant;
+    auth_id: string;
+    last_active: string;
+    role: Role;
+    suspended: boolean;
+    is_deleted: boolean;
 }
 
 export interface Role {
     label: string;
     store: string;
-    merchant: MerchantUser;
+    merchant: Merchant;
     id: string;
 }
 

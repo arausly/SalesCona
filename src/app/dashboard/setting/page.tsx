@@ -72,6 +72,27 @@ export default function Setting({
     }, [user]);
 
     React.useEffect(() => {
+        const subscription = supabase
+            .channel(supabaseTables.roles)
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: supabaseTables.roles
+                },
+                (payload) => {
+                    setRoles((roles) => [...roles, payload.new as Role]);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
+
+    React.useEffect(() => {
         (async () => {
             const { data, error } = await supabase
                 .from(supabaseTables.permissions)

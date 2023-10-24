@@ -2,7 +2,7 @@
 import React from "react";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { User } from "@supabase/supabase-js";
-import { storageKeys } from "@lib/constants";
+import { storageKeys, supabaseTables } from "@lib/constants";
 import { onlyIfWindowIsDefined } from "@lib/common.utils";
 
 export const useGetUser = () => {
@@ -38,6 +38,14 @@ export const useGetUser = () => {
                                 JSON.stringify(userInfo)
                             );
                             setUser(userInfo);
+
+                            //update last active info on merchant
+                            await supabase
+                                .from(supabaseTables.merchants)
+                                .update({
+                                    last_active: new Date().toISOString()
+                                })
+                                .eq("id", userInfo.id);
                         }
                     }
                 }

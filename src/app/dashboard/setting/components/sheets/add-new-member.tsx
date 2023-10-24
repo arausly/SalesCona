@@ -1,5 +1,4 @@
 import React from "react";
-import { nanoid } from "nanoid";
 
 import {
     Sheet,
@@ -13,93 +12,77 @@ import {
 import { Button } from "@components/Button";
 import { Modal } from "@components/Dialog/Dialog";
 import { inputClasses } from "@components/Input/input";
-import {
-    EyeIcon,
-    EyeSlashIcon,
-    KeyIcon,
-    UserPlusIcon,
-    UsersIcon
-} from "@heroicons/react/24/outline";
-import { Tooltip } from "@components/Tooltip";
+import { UserPlusIcon, UsersIcon } from "@heroicons/react/24/outline";
 import Dropdown from "@components/Menudropdown";
-import { Permission, Role } from "../../../typing";
+import { MerchantStaff, Permission, Role } from "../../../typing";
 import { CreateNewRole } from "./create-new-role";
-
-const CancelRequestPrompt = ({
-    toggleModal,
-    isOpen,
-    closeForm
-}: {
-    isOpen: boolean;
-    toggleModal: () => void;
-    closeForm: () => void;
-}) => {
-    return (
-        <Modal
-            dialogClassName="z-50"
-            title="Unsaved changes"
-            isOpen={isOpen}
-            toggleModal={toggleModal}
-        >
-            <div className="flex flex-col w-full mt-2">
-                <p className="mb-2 text-sm font-light">
-                    Closing this form would erase any progress made, are you
-                    sure you want to close?
-                </p>
-            </div>
-            <div className="mt-4 flex items-center justify-end">
-                <button
-                    type="button"
-                    className="mr-3 inline-flex justify-center shadow-md rounded-md border border-transparent bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200 focus:outline-none ease-in-out focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    onClick={toggleModal}
-                >
-                    No, take me back
-                </button>
-                <button
-                    type="button"
-                    className="mr-3 z-50 inline-flex justify-center shadow-md rounded-md border border-transparent bg-[#D83F31] hover:bg-[#C70039] px-4 py-2 text-sm font-medium text-white focus:outline-none ease-in-out focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    onClick={closeForm}
-                >
-                    Yes, close
-                </button>
-            </div>
-        </Modal>
-    );
-};
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { supabaseTables } from "@lib/constants";
+import { useGetUser } from "@hooks/useGetUser";
+import { Prompt } from "@components/Dialog/Prompt";
 
 interface AddNewMemberProps {
     roles: Array<Role>;
     permissions: Permission[];
+    currentMember?: MerchantStaff;
 }
 
 interface MemberPayload {
     firstname: string;
     lastname: string;
     email: string;
-    password: string;
 }
 
+const initialPayload = {
+    email: "",
+    firstname: "",
+    lastname: ""
+};
+
 export const AddNewMember = React.forwardRef(
-    ({ roles, permissions }: AddNewMemberProps, ref: any) => {
+    ({ roles, permissions, currentMember }: AddNewMemberProps, ref: any) => {
         const [open, setOpen] = React.useState<boolean>(false);
         const [addingMember, setAddingMember] = React.useState<boolean>(false);
         const [showPassword, setShowPassword] = React.useState<boolean>(false);
         const [selectedRole, setSelectedRole] = React.useState<Role>();
         const [formState, setFormState] = React.useState<MemberPayload>({
-            firstname: "",
-            lastname: "",
-            email: "",
-            password: ""
+            firstname: currentMember?.firstname ?? "",
+            lastname: currentMember?.lastname ?? "",
+            email: currentMember?.email ?? ""
         });
+        const [formStateCopy, setFormStateCopy] = React.useState<MemberPayload>(
+            {
+                firstname: currentMember?.firstname ?? "",
+                lastname: currentMember?.lastname ?? "",
+                email: currentMember?.email ?? ""
+            }
+        );
+        const [addingErrorMsg, setAddingErrorMsg] = React.useState<string>(""); //errors occurring when adding new members
         const createRoleRef = React.useRef<HTMLButtonElement | null>(null);
         const [errorState, setErrorState] = React.useState<
-            Pick<MemberPayload, "password" | "email">
+            Partial<MemberPayload>
         >({
-            password: "",
-            email: ""
+            email: "",
+            firstname: "",
+            lastname: ""
         });
         const [isCancelPromptOpen, setIsCancelPromptOpen] =
             React.useState<boolean>(false);
+        const { user } = useGetUser();
+        const { supabase } = useBrowserSupabase();
+
+        React.useEffect(() => {
+            if (currentMember && formState.email === "") {
+                const initialPayload = {
+                    firstname: currentMember?.firstname ?? "",
+                    lastname: currentMember?.lastname ?? "",
+                    email: currentMember?.email ?? ""
+                };
+                setFormState({ ...initialPayload });
+                setFormStateCopy({ ...initialPayload });
+                setSelectedRole(currentMember.role);
+            }
+        }, [currentMember]);
 
         /** toggle cancel prompt */
         const toggleModal = React.useCallback(
@@ -107,10 +90,65 @@ export const AddNewMember = React.forwardRef(
             []
         );
 
-        const addNewMember = React.useCallback(() => {}, []);
+        const isFormNotValid = React.useCallback(() => {
+            const err = {
+                firstname: !formState.firstname.length
+                    ? "please provide firstname"
+                    : undefined,
+                lastname: !formState.lastname.length
+                    ? "please provide lastname"
+                    : undefined,
+                email: !formState.email.length
+                    ? "please provide email"
+                    : undefined
+                // password: !formState.password.length
+                //     ? "please provide password"
+                //     : undefined
+            };
+            setErrorState(err as MemberPayload);
+            return Object.values(err).find((v) => !!v);
+        }, [formState]);
+
+        const addNewMember = React.useCallback(async () => {
+            //create new supabase user
+            if (!user) return;
+
+            if (isFormNotValid()) return;
+
+            if (!selectedRole) {
+                setAddingErrorMsg("Select role for this user");
+                return;
+            }
+
+            try {
+                setAddingMember(true);
+                const { error: merchantError } = await supabase
+                    .from(supabaseTables.merchant_staffs)
+                    .insert({
+                        ...formState,
+                        owner: user.id,
+                        role: selectedRole.id
+                    });
+
+                if (!merchantError) {
+                    setOpen(false);
+                }
+            } catch (err) {
+                setAddingErrorMsg("Couldn't add new member, please try again");
+            } finally {
+                setAddingMember(false);
+                setAddingErrorMsg("");
+            }
+            //create new merchant user
+        }, [formState, user, selectedRole]);
 
         const handleAddMemberFormClose = (open: boolean) => {
-            if (true && !open) {
+            const thereIsChange =
+                formState.firstname !== formStateCopy.firstname ||
+                formState.lastname !== formStateCopy.lastname ||
+                formState.email !== formStateCopy.email;
+
+            if (thereIsChange && !open) {
                 //there is a change made and form wants to close
                 setIsCancelPromptOpen(true);
             } else {
@@ -121,19 +159,29 @@ export const AddNewMember = React.forwardRef(
         const closePromptAndMemberForm = React.useCallback(() => {
             setIsCancelPromptOpen(false);
             setOpen(false);
+            setFormState({ ...initialPayload });
+            setFormStateCopy({ ...initialPayload });
         }, []);
 
         const handleFormChange = React.useCallback(
             (event: React.ChangeEvent<HTMLInputElement>) => {
                 const { name, value } = event.target;
-                setFormState((prev) => ({ ...prev, [name]: value }));
+                setFormState((prev) => ({
+                    ...prev,
+                    [name]: value.toLowerCase()
+                }));
+                setErrorState((prev) => ({
+                    ...prev,
+                    [name]: value.length ? undefined : `please provide ${name}`
+                }));
             },
             []
         );
 
-        const handleGeneratePassword = React.useCallback(() => {
-            setFormState((prev) => ({ ...prev, password: nanoid() }));
-        }, []);
+        // const handleGeneratePassword = React.useCallback(() => {
+        //     setFormState((prev) => ({ ...prev, password: nanoid() }));
+        //     setErrorState({ password: undefined });
+        // }, []);
 
         const handleRoleSelection = React.useCallback(
             (role: Role) => {
@@ -142,6 +190,7 @@ export const AddNewMember = React.forwardRef(
                     createRoleRef.current?.click();
                 } else {
                     setSelectedRole(role);
+                    setAddingErrorMsg(role ? "" : "Select role for this user");
                 }
             },
             [createRoleRef]
@@ -149,11 +198,15 @@ export const AddNewMember = React.forwardRef(
 
         return (
             <>
-                <CancelRequestPrompt
+                <Prompt
                     isOpen={isCancelPromptOpen}
                     toggleModal={toggleModal}
-                    closeForm={closePromptAndMemberForm}
+                    action={closePromptAndMemberForm}
+                    title="Unsaved Changes"
+                    contentMsg="Closing this form would erase any progress made, are you sure you want to close?"
+                    actionMsg="close"
                 />
+
                 <CreateNewRole ref={createRoleRef} permissions={permissions} />
                 <Sheet
                     open={open}
@@ -189,17 +242,22 @@ export const AddNewMember = React.forwardRef(
                                         value={formState.firstname}
                                         onChange={handleFormChange}
                                         className={inputClasses({
-                                            mode: "default"
+                                            mode: errorState.firstname
+                                                ? "error"
+                                                : "default"
                                         })}
                                     />
                                 </div>
+                                <p className="text-sm my-2 text-red-500">
+                                    {errorState.firstname}
+                                </p>
                             </div>
                             <div>
                                 <label
                                     htmlFor="lastname"
                                     className="block text-sm font-medium leading-6 text-gray-900"
                                 >
-                                    Firstname
+                                    Lastname
                                 </label>
                                 <div className="mt-2">
                                     <input
@@ -211,10 +269,15 @@ export const AddNewMember = React.forwardRef(
                                         value={formState.lastname}
                                         onChange={handleFormChange}
                                         className={inputClasses({
-                                            mode: "default"
+                                            mode: errorState.lastname
+                                                ? "error"
+                                                : "default"
                                         })}
                                     />
                                 </div>
+                                <p className="text-sm my-2 text-red-500">
+                                    {errorState.lastname}
+                                </p>
                             </div>
                             <div>
                                 <label
@@ -239,8 +302,11 @@ export const AddNewMember = React.forwardRef(
                                         })}
                                     />
                                 </div>
+                                <p className="text-sm my-2 text-red-500">
+                                    {errorState.email}
+                                </p>
                             </div>
-                            <div>
+                            {/* <div>
                                 <label
                                     htmlFor="email"
                                     className="block text-sm font-medium leading-6 text-gray-900"
@@ -288,8 +354,11 @@ export const AddNewMember = React.forwardRef(
                                             <EyeSlashIcon className="h-5 w-5 cursor-pointer" />
                                         )}
                                     </div>
+                                    <p className="text-sm my-2 text-red-500">
+                                        {errorState.password}
+                                    </p>
                                 </div>
-                            </div>
+                            </div> */}
                             <div>
                                 <label
                                     htmlFor="role"
@@ -318,6 +387,9 @@ export const AddNewMember = React.forwardRef(
                                         ]}
                                         onSelectItem={handleRoleSelection}
                                     />
+                                    <p className="text-sm my-2 text-red-500">
+                                        {addingErrorMsg}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -326,6 +398,7 @@ export const AddNewMember = React.forwardRef(
                                 type="submit"
                                 loadingText="Adding"
                                 text="Add Member"
+                                loading={addingMember}
                                 className="text-white w-32 h-10 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
                                 onClick={addNewMember}
                             />
