@@ -1,4 +1,5 @@
 import React from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import {
     Sheet,
@@ -72,16 +73,14 @@ export const AddNewMember = React.forwardRef(
         const { supabase } = useBrowserSupabase();
 
         React.useEffect(() => {
-            if (currentMember && formState.email === "") {
-                const initialPayload = {
-                    firstname: currentMember?.firstname ?? "",
-                    lastname: currentMember?.lastname ?? "",
-                    email: currentMember?.email ?? ""
-                };
-                setFormState({ ...initialPayload });
-                setFormStateCopy({ ...initialPayload });
-                setSelectedRole(currentMember.role);
-            }
+            const initialPayload = {
+                firstname: currentMember?.firstname ?? "",
+                lastname: currentMember?.lastname ?? "",
+                email: currentMember?.email ?? ""
+            };
+            setFormState({ ...initialPayload });
+            setFormStateCopy({ ...initialPayload });
+            setSelectedRole(currentMember?.role);
         }, [currentMember]);
 
         /** toggle cancel prompt */
@@ -124,11 +123,15 @@ export const AddNewMember = React.forwardRef(
                 setAddingMember(true);
                 const { error: merchantError } = await supabase
                     .from(supabaseTables.merchant_staffs)
-                    .insert({
-                        ...formState,
-                        owner: user.id,
-                        role: selectedRole.id
-                    });
+                    .upsert(
+                        {
+                            ...formState,
+                            owner: user.id,
+                            role: selectedRole.id,
+                            id: currentMember?.id ?? uuidv4()
+                        },
+                        { onConflict: "id" }
+                    );
 
                 if (!merchantError) {
                     setOpen(false);
@@ -140,7 +143,7 @@ export const AddNewMember = React.forwardRef(
                 setAddingErrorMsg("");
             }
             //create new merchant user
-        }, [formState, user, selectedRole]);
+        }, [formState, user, selectedRole, currentMember]);
 
         const handleAddMemberFormClose = (open: boolean) => {
             const thereIsChange =
@@ -382,9 +385,12 @@ export const AddNewMember = React.forwardRef(
                                                 id: "creation",
                                                 icon: UserPlusIcon,
                                                 decoy: true
-                                            },
+                                            } as any,
                                             ...roles
                                         ]}
+                                        initiallySelectedOption={
+                                            selectedRole?.label
+                                        }
                                         onSelectItem={handleRoleSelection}
                                     />
                                     <p className="text-sm my-2 text-red-500">
@@ -396,10 +402,16 @@ export const AddNewMember = React.forwardRef(
                         <SheetFooter className="mt-8">
                             <Button
                                 type="submit"
-                                loadingText="Adding"
-                                text="Add Member"
+                                loadingText={
+                                    currentMember ? "Updating" : "Adding"
+                                }
+                                text={
+                                    currentMember
+                                        ? "Update member"
+                                        : "Add member"
+                                }
                                 loading={addingMember}
-                                className="text-white w-32 h-10 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                                className="text-white w-36 h-10 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
                                 onClick={addNewMember}
                             />
                         </SheetFooter>

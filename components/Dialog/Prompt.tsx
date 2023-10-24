@@ -1,3 +1,4 @@
+import { Button } from "@components/Button";
 import { Modal } from "./Dialog";
 
 interface PromptProps {
@@ -7,6 +8,7 @@ interface PromptProps {
     actionMsg: string;
     title: string;
     contentMsg: string;
+    actionWorking?: boolean;
 }
 
 export const Prompt = ({
@@ -15,7 +17,8 @@ export const Prompt = ({
     action,
     title,
     contentMsg,
-    actionMsg
+    actionMsg,
+    actionWorking
 }: PromptProps) => {
     return (
         <Modal
@@ -35,13 +38,14 @@ export const Prompt = ({
                 >
                     No, take me back
                 </button>
-                <button
-                    type="button"
+                <Button
                     className="mr-3 z-50 inline-flex justify-center shadow-md rounded-md border border-transparent bg-[#D83F31] hover:bg-[#C70039] px-4 py-2 text-sm font-medium text-white focus:outline-none ease-in-out focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    type="button"
                     onClick={action}
-                >
-                    Yes, {actionMsg}
-                </button>
+                    loading={actionWorking}
+                    text={`Yes, ${actionMsg}`}
+                    loadingText="working..."
+                />
             </div>
         </Modal>
     );

@@ -4,32 +4,35 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
+type defaultDropdownItemType = {
+    label: string;
+    icon?: React.FC<any>;
+    decoy?: boolean; //trigger external actions only instead of selecting as an item
+};
+
 export interface DropdownProps<T> {
     titleIcon?: JSX.Element;
     title?: string;
-    items: Array<
-        Partial<T> & {
-            label: string;
-            icon?: React.FC<any>;
-            decoy?: boolean; //trigger external actions only instead of selecting as an item
-        }
-    >;
-    onSelectItem: (item: T) => void;
+    items: Array<T & defaultDropdownItemType>;
+    onSelectItem: (item: T & defaultDropdownItemType) => void;
     menuButton?: JSX.Element;
     menuClassNames?: string;
     wrapperClasses?: string;
     menuItemsClasses?: string;
     highlightButtonOnClick?: boolean;
+    initiallySelectedOption?: string;
 }
 
 export default function Dropdown<T>(props: DropdownProps<T>) {
-    const [selectedOption, setSelectedOption] = React.useState<string>();
+    const [selectedOption, setSelectedOption] = React.useState<
+        string | undefined
+    >(props.initiallySelectedOption);
     const [activeLabels, setActiveLabels] = React.useState<
         Map<string, boolean>
     >(new Map());
     const handleSelection = React.useCallback(
-        (item: DropdownProps<T>["items"][number]) => {
-            props.onSelectItem(item as T);
+        (item: T & defaultDropdownItemType) => {
+            props.onSelectItem(item);
             if (!item.decoy) {
                 setSelectedOption(item.label);
                 if (props.highlightButtonOnClick) {
@@ -46,6 +49,10 @@ export default function Dropdown<T>(props: DropdownProps<T>) {
         },
         [props]
     );
+
+    React.useEffect(() => {
+        setSelectedOption(props.initiallySelectedOption);
+    }, [props.initiallySelectedOption]);
 
     return (
         <div

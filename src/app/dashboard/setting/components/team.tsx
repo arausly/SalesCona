@@ -52,6 +52,8 @@ interface TeamProps {
 export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
     const { user } = useGetUser();
     const [members, setMembers] = React.useState<MerchantStaff[]>([]);
+    const [fetchingMembers, setFetchingMembers] =
+        React.useState<boolean>(false);
     const [openDeletePrompt, setOpenDeletePrompt] =
         React.useState<boolean>(false);
     const [openSuspendPrompt, setOpenSuspendPrompt] =
@@ -87,7 +89,6 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
 
                     switch (payload.eventType) {
                         case "INSERT":
-                            console.log({ new: payload.new });
                             setMembers((prev) => [
                                 ...prev,
                                 payload.new as MerchantStaff
@@ -123,13 +124,19 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
     React.useEffect(() => {
         (async () => {
             if (user) {
-                const { data, error } = await supabase
-                    .from(supabaseTables.merchant_staffs)
-                    .select("*,role(*)")
-                    .eq("owner", user.id)
-                    .returns<MerchantStaff[]>();
-                if (data && !error) {
-                    setMembers(data);
+                try {
+                    setFetchingMembers(true);
+                    const { data, error } = await supabase
+                        .from(supabaseTables.merchant_staffs)
+                        .select("*,role(*)")
+                        .eq("owner", user.id)
+                        .returns<MerchantStaff[]>();
+                    if (data && !error) {
+                        setMembers(data);
+                    }
+                } catch (err) {
+                } finally {
+                    setFetchingMembers(false);
                 }
             }
         })();
@@ -173,7 +180,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleSuspendUser}>
-                            Suspend
+                            {member.suspended ? "Reactivate" : "Suspend"}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleRemoveUser}>
                             Remove
@@ -223,7 +230,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                 const payload =
                     prompt === "delete"
                         ? { is_deleted: true }
-                        : { suspended: true };
+                        : { suspended: !selectedMemberStaff.suspended };
 
                 setEditingMember(true);
                 const { error } = await supabase
@@ -252,6 +259,11 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
         [selectedMemberStaff]
     );
 
+    const handleOpenNewMemberSheet = React.useCallback(() => {
+        setSelectedMemberStaff(undefined);
+        openMemberCreationSheet();
+    }, []);
+
     return (
         <>
             <Prompt
@@ -261,14 +273,20 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                 contentMsg={`Are you sure you want to remove "${selectedMemberStaff?.firstname}" from your staff list?`}
                 title="Remove user"
                 toggleModal={() => setOpenDeletePrompt((o) => !o)}
+                actionWorking={editingMember}
             />
             <Prompt
                 isOpen={openSuspendPrompt}
                 action={() => promptAction("suspend")}
-                actionMsg="suspend user"
-                contentMsg={`Are you sure you want to suspend "${selectedMemberStaff?.firstname}" from your staff list?`}
+                actionMsg={`${
+                    selectedMemberStaff?.suspended ? "reactivate" : "suspend"
+                } user`}
+                contentMsg={`Are you sure you want to ${
+                    selectedMemberStaff?.suspended ? "reactivate" : "suspend"
+                } "${selectedMemberStaff?.firstname}" from your staff list?`}
                 title="Suspend user"
                 toggleModal={() => setOpenSuspendPrompt((o) => !o)}
+                actionWorking={editingMember}
             />
             <AddNewMember
                 roles={roles}
@@ -279,7 +297,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
             <div className="flex flex-col w-full items-center justify-center px-0 md:px-6 mt-16 lg:px-8">
                 {(rows.length && (
                     <button
-                        onClick={openMemberCreationSheet}
+                        onClick={handleOpenNewMemberSheet}
                         className="w-48 h-10 mb-4 rounded-lg self-end primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
                     >
                         <UserPlusIcon className="h-5 w-5 text-white mr-2" />
@@ -291,13 +309,14 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                     title="Members"
                     headers={headers}
                     onSearch={() => {}}
+                    loading={fetchingMembers}
                     onPaginate={() => {}}
                     pagination={pagination}
                     rows={rows}
                     noDataMsg="No members added to your account yet"
                     noDataAltAction={
                         <button
-                            onClick={openMemberCreationSheet}
+                            onClick={handleOpenNewMemberSheet}
                             className="w-48 h-10 mt-4 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
                         >
                             <UserGroupIcon className="h-5 w-5 text-white mr-2" />
