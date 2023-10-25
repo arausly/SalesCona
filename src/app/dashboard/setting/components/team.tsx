@@ -176,13 +176,22 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={handleEdit}>
+                        <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={handleEdit}
+                        >
                             Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleSuspendUser}>
+                        <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={handleSuspendUser}
+                        >
                             {member.suspended ? "Reactivate" : "Suspend"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleRemoveUser}>
+                        <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={handleRemoveUser}
+                        >
                             Remove
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
