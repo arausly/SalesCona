@@ -4,6 +4,11 @@ export interface Merchant {
     email: string;
     firstname: string;
     lastname: string;
+    last_active: string;
+    trial_started_at: string;
+    subscription_start_date: string;
+    subscription_end_date: string;
+    subscription: string;
 }
 
 export interface MerchantStaff extends Merchant {

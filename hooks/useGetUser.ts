@@ -29,23 +29,63 @@ export const useGetUser = () => {
                     if (storedUser) {
                         setUser(JSON.parse(storedUser));
                     } else {
+                        let user;
+                        let isMerchantOwner = false;
                         const {
-                            data: { user: userInfo }
+                            data: { user: authUserInfo }
                         } = await supabase.auth.getUser();
-                        if (userInfo) {
-                            sessionStorage.setItem(
-                                storageKeys.user,
-                                JSON.stringify(userInfo)
-                            );
-                            setUser(userInfo);
 
-                            //update last active info on merchant
-                            await supabase
+                        if (authUserInfo) {
+                            const { data: merchant, error } = await supabase
                                 .from(supabaseTables.merchants)
-                                .update({
-                                    last_active: new Date().toISOString()
-                                })
-                                .eq("id", userInfo.id);
+                                .select()
+                                .eq("id", authUserInfo.id);
+
+                            if (merchant?.length && !error) {
+                                //user is a merchant
+                                user = {
+                                    ...authUserInfo,
+                                    ...merchant[0]
+                                };
+                                isMerchantOwner = true;
+                            } else {
+                                //check if user auth id corresponds to merchant staff instead
+                                const {
+                                    data: merchantStaff,
+                                    error: staffError
+                                } = await supabase
+                                    .from(supabaseTables.merchant_staffs)
+                                    .select("*,owner(*)")
+                                    .eq("id", authUserInfo.id);
+                                if (merchantStaff?.length && !staffError) {
+                                    user = {
+                                        ...authUserInfo,
+                                        ...merchantStaff[0]
+                                    };
+                                    isMerchantOwner = false;
+                                }
+                            }
+
+                            if (user) {
+                                sessionStorage.setItem(
+                                    storageKeys.user,
+                                    JSON.stringify(user)
+                                );
+                                setUser(user);
+
+                                //update last active info on merchant
+                                await supabase
+                                    .from(
+                                        isMerchantOwner
+                                            ? supabaseTables.merchants
+                                            : supabaseTables.merchant_staffs
+                                    )
+                                    .update({
+                                        last_active:
+                                            authUserInfo.last_sign_in_at
+                                    })
+                                    .eq("id", user.id);
+                            }
                         }
                     }
                 }

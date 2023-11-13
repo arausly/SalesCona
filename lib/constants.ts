@@ -14,7 +14,8 @@ export const supabaseTables = {
     merchant_staffs: "merchant_staffs",
     roles: "roles",
     permissions: "permissions",
-    permissions_for_roles: "permissions_for_roles"
+    permissions_for_roles: "permissions_for_roles",
+    subscriptions: "subscriptions"
 };
 
 export const supabaseBuckets = {
