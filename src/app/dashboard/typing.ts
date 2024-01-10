@@ -18,6 +18,8 @@ export interface MerchantStaff extends Merchant {
     role: Role;
     suspended: boolean;
     is_deleted: boolean;
+    firstname: string;
+    lastname: string;
 }
 
 export interface Role {

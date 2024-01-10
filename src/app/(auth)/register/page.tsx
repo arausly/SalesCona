@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { baseURL, supabaseTables } from "@lib/constants";
 import { Button } from "@components/Button";
+import { MerchantStaff } from "../../dashboard/typing";
 
 interface RegisterFormValues {
     email: string;
@@ -17,16 +18,40 @@ interface RegisterFormValues {
     lastname: string;
 }
 
-export default function Register() {
+export default function Register({
+    searchParams
+}: {
+    searchParams: { [key: string]: string };
+}) {
     const {
         handleSubmit,
         register,
+        setValue,
         formState: { errors }
     } = useForm<RegisterFormValues>();
     const [loading, setLoading] = React.useState<boolean>(false);
     const [errMsg, setErrMsg] = React.useState<string>("");
     const router = useRouter();
     const { supabase } = useBrowserSupabase();
+
+    React.useEffect(() => {
+        (async () => {
+            if (searchParams.staff) {
+                const { data, error } = await supabase
+                    .from(supabaseTables.merchant_staffs)
+                    .select()
+                    .eq("id", searchParams.staff)
+                    .returns<MerchantStaff[]>();
+
+                if (data?.length && !error) {
+                    const merchant_staff = data[0];
+                    setValue("email", merchant_staff.email);
+                    setValue("firstname", merchant_staff.firstname);
+                    setValue("lastname", merchant_staff.lastname);
+                }
+            }
+        })();
+    }, [searchParams.staff]);
 
     const handleRegisterFormSubmission = React.useCallback(
         (e: FormEvent) => {
@@ -52,9 +77,12 @@ export default function Register() {
                         );
                     } else if (data.user) {
                         //todo replace with database triggers
+                        //check if merchant staff
                         await supabase.from(supabaseTables.merchants).upsert({
                             email: data.user.email,
-                            id: data.user.id
+                            id: data.user.id,
+                            firstname: values.firstname,
+                            lastname: values.lastname
                         });
                         router.replace("/verify");
                     }

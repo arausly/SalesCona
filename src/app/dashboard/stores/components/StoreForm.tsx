@@ -330,8 +330,8 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         storeName: !storeName?.length
                             ? "Please provide store name"
                             : storeAlreadyExist
-                            ? `A store with the name ${storeName} already exists`
-                            : undefined
+                              ? `A store with the name ${storeName} already exists`
+                              : undefined
                     };
                     break;
                 case "description":
@@ -429,7 +429,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                             twitter: twitterPage,
                             currency: JSON.stringify(selectedCurrency),
                             isPublished: !isDraft,
-                            user_id: user?.id,
+                            user: user?.id,
                             secondary_key:
                                 existingStore?.secondary_key ??
                                 shortid.generate()

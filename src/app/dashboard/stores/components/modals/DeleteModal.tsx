@@ -31,7 +31,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
             const { error } = await supabase
                 .from(supabaseTables.stores)
                 .update({ is_soft_deleted: true })
-                .eq("user_id", user.id)
+                .eq("user", user.id)
                 .eq("id", currentStore.id);
             if (!error) {
                 refreshStores();
