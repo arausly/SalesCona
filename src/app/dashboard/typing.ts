@@ -1,4 +1,6 @@
-export interface Merchant {
+import { User } from "@supabase/supabase-js";
+
+export interface Merchant extends Omit<User, "role"> {
     id: string;
     created_at: string;
     email: string;

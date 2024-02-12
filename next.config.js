@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    experimental: {
+/**
+ *  experimental: {
         appDir: true
     },
+ */
+const nextConfig = {
     reactStrictMode: true,
     images: {
         dangerouslyAllowSVG: true,

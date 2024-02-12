@@ -1,15 +1,24 @@
 "use client";
 import React, { FormEvent } from "react";
 import Image from "next/image";
-import logo from "@assets/images/kolony-logo.webp";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { inputClasses } from "../../../../components/Input/input";
 import { useRouter } from "next/navigation";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { baseURL, supabaseTables } from "@lib/constants";
+
+//components
 import { Button } from "@components/Button";
+//hooks
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+//images
+import logo from "@assets/images/kolony-logo.webp";
+//css
+import { inputClasses } from "../../../../components/Input/input";
+//constants
+import { baseURL, supabaseTables } from "@lib/constants";
+//types
 import { MerchantStaff } from "../../dashboard/typing";
+//utils
+import { extractStaffId } from "@lib/common.utils";
 
 interface RegisterFormValues {
     email: string;
@@ -18,10 +27,11 @@ interface RegisterFormValues {
     lastname: string;
 }
 
+//
 export default function Register({
-    searchParams
+    searchParams: { auth: staffAuthInfo }
 }: {
-    searchParams: { [key: string]: string };
+    searchParams: { auth: string };
 }) {
     const {
         handleSubmit,
@@ -34,24 +44,30 @@ export default function Register({
     const router = useRouter();
     const { supabase } = useBrowserSupabase();
 
+    //check for merchant staff and set defaults for inputs
     React.useEffect(() => {
         (async () => {
-            if (searchParams.staff) {
-                const { data, error } = await supabase
-                    .from(supabaseTables.merchant_staffs)
-                    .select()
-                    .eq("id", searchParams.staff)
-                    .returns<MerchantStaff[]>();
+            if (staffAuthInfo) {
+                const extractedInfo = extractStaffId(staffAuthInfo);
+                if (extractedInfo) {
+                    const { id } = extractedInfo;
+                    //check that merchant with Id exist
+                    const { data, error } = await supabase
+                        .from(supabaseTables.merchant_staffs)
+                        .select()
+                        .eq("id", id)
+                        .returns<MerchantStaff[]>();
 
-                if (data?.length && !error) {
-                    const merchant_staff = data[0];
-                    setValue("email", merchant_staff.email);
-                    setValue("firstname", merchant_staff.firstname);
-                    setValue("lastname", merchant_staff.lastname);
+                    if (data?.length && !error) {
+                        const merchant_staff = data[0];
+                        setValue("firstname", merchant_staff.firstname);
+                        setValue("lastname", merchant_staff.lastname);
+                        setValue("email", merchant_staff.email);
+                    }
                 }
             }
         })();
-    }, [searchParams.staff]);
+    }, [staffAuthInfo]);
 
     const handleRegisterFormSubmission = React.useCallback(
         (e: FormEvent) => {
@@ -65,7 +81,8 @@ export default function Register({
                             emailRedirectTo: `${baseURL}/verify`,
                             data: {
                                 firstname: values.firstname,
-                                lastname: values.lastname
+                                lastname: values.lastname,
+                                merchant: staffAuthInfo ? false : true //whether a staff of a merchant that has staffs
                             }
                         }
                     });
@@ -75,14 +92,12 @@ export default function Register({
                                 ? "You have entered either the wrong email or password"
                                 : "Something unexpected happened"
                         );
-                    } else if (data.user) {
+                    } else if (data.user && !staffAuthInfo) {
+                        //no merchant staff markers then create as merchant
                         //todo replace with database triggers
-                        //check if merchant staff
                         await supabase.from(supabaseTables.merchants).upsert({
                             email: data.user.email,
-                            id: data.user.id,
-                            firstname: values.firstname,
-                            lastname: values.lastname
+                            id: data.user.id
                         });
                         router.replace("/verify");
                     }
@@ -105,7 +120,9 @@ export default function Register({
                     placeholder="blur"
                 />
                 <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                    Register your account
+                    {staffAuthInfo
+                        ? "Complete your registration"
+                        : "Register your account"}
                 </h2>
             </div>
 

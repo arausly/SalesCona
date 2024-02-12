@@ -1,12 +1,13 @@
 "use client";
 import React from "react";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { User } from "@supabase/supabase-js";
-import { storageKeys, supabaseTables } from "@lib/constants";
+import { storageKeys } from "@lib/constants";
 import { onlyIfWindowIsDefined } from "@lib/common.utils";
+import { Merchant, MerchantStaff } from "../src/app/dashboard/typing";
+import { supabaseTables } from "../db/tables.db";
 
 export const useGetUser = () => {
-    const [user, setUser] = React.useState<User | null>();
+    const [user, setUser] = React.useState<Merchant | null>(); //todo fix type can be merchant user or staff
     const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
 
@@ -46,7 +47,7 @@ export const useGetUser = () => {
                                 user = {
                                     ...authUserInfo,
                                     ...merchant[0]
-                                };
+                                } as Merchant;
                                 isMerchantOwner = true;
                             } else {
                                 //check if user auth id corresponds to merchant staff instead
@@ -71,7 +72,7 @@ export const useGetUser = () => {
                                     storageKeys.user,
                                     JSON.stringify(user)
                                 );
-                                setUser(user);
+                                setUser(user as MerchantStaff);
 
                                 //update last active info on merchant
                                 await supabase

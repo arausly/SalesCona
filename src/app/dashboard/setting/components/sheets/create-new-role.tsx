@@ -15,9 +15,9 @@ import {
 import { inputClasses } from "@components/Input/input";
 import { Permission, Role } from "../../../typing";
 import { Switch } from "@components/ui/switch";
-import { supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetUser } from "@hooks/useGetUser";
+import { supabaseTables } from "../../../../../../db/tables.db";
 
 interface CreateNewRoleProps {
     permissions: Permission[];

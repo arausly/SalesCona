@@ -5,6 +5,11 @@
         "Supabase",
         "upsert"
     ],
+<<<<<<< Updated upstream
     "editor.formatOnSave": true,
     "prettier.enable": true
+=======
+    "prettier.enable": true,
+    "editor.formatOnSave": true
+>>>>>>> Stashed changes
 }

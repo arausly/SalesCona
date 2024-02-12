@@ -11,12 +11,8 @@ import styles from "./sidebar.module.css";
 import { ProfileAvatar } from "@components/Avatar/ProfileAvatar";
 import {
     Sheet,
-    SheetClose,
     SheetContent,
-    SheetDescription,
-    SheetFooter,
     SheetHeader,
-    SheetTitle,
     SheetTrigger
 } from "@components/ui/sheet";
 import {

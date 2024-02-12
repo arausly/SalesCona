@@ -5,12 +5,13 @@ import { Tab } from "@headlessui/react";
 import { Profile } from "./components/profile";
 import { ChangePassword } from "./components/change-password";
 import { Team } from "./components/team";
-import { Subscription } from "./components/subscription";
+import { Payment } from "./components/payment";
 import { usePathname, useRouter } from "next/navigation";
 import { Permission, Role } from "../typing";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { supabaseTables } from "@lib/constants";
 import { useGetUser } from "@hooks/useGetUser";
+import { SubscriptionMetadata, SubscriptionPlan } from "./typing";
+import { supabaseTables } from "../../../../db/tables.db";
 
 const tabIndexesByType = {
     profile: 0,
@@ -33,6 +34,9 @@ export default function Setting({
 }) {
     const [roles, setRoles] = React.useState<Role[]>([]); //roles created by staff
     const [permissions, setPermissions] = React.useState<Permission[]>([]); //permissions per role
+    const [subscriptions, setSubscriptions] = React.useState<
+        SubscriptionMetadata[]
+    >([]);
     const router = useRouter();
     const pathname = usePathname();
     const { user } = useGetUser();
@@ -71,6 +75,7 @@ export default function Setting({
         })();
     }, [user]);
 
+    //listen for roles updates
     React.useEffect(() => {
         const subscription = supabase
             .channel(supabaseTables.roles)
@@ -103,6 +108,19 @@ export default function Setting({
             }
         })();
     }, []);
+    //todo coming back to this shortly
+    // React.useEffect(() => {
+    //     (async () => {
+    //         const { data, error } = await supabase
+    //             .from(supabaseTables.subscriptions)
+    //             .select()
+    //             .returns<Array<SubscriptionMetadata>>();
+
+    //         if (data && !error) {
+    //             setSubscriptions(() => data);
+    //         }
+    //     })();
+    // }, []);
 
     return (
         <section className="dashboard-screen-height overflow-auto p-6 px-4 md:px-20 w-full">
@@ -154,7 +172,7 @@ export default function Setting({
                             <Team roles={roles} permissions={permissions} />
                         </Tab.Panel>
                         <Tab.Panel>
-                            <Subscription />
+                            <Payment subscriptions={subscriptions} />
                         </Tab.Panel>
                     </Tab.Panels>
                 </Tab.Group>

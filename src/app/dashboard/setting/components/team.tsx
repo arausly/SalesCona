@@ -2,15 +2,11 @@
 import { Table } from "@components/Table/Table";
 import {
     EllipsisHorizontalIcon,
-    PencilIcon,
-    PlusIcon,
-    TrashIcon,
     UserGroupIcon,
     UserPlusIcon
 } from "@heroicons/react/24/outline";
 import { useGetUser } from "@hooks/useGetUser";
 import { excludeKeysFromObj } from "@lib/common.utils";
-import { supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import React from "react";
 import { AddNewMember } from "./sheets/add-new-member";
@@ -26,6 +22,7 @@ import {
 } from "@components/ui/dropdown-menu";
 import { Prompt } from "@components/Dialog/Prompt";
 import { toast } from "react-toastify";
+import { supabaseTables } from "../../../../../db/tables.db";
 
 const headers = [
     { id: "firstname", label: "Firstname" },

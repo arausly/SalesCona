@@ -18,9 +18,9 @@ import Dropdown from "@components/Menudropdown";
 import { MerchantStaff, Permission, Role } from "../../../typing";
 import { CreateNewRole } from "./create-new-role";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { supabaseTables } from "@lib/constants";
 import { useGetUser } from "@hooks/useGetUser";
 import { Prompt } from "@components/Dialog/Prompt";
+import { supabaseTables } from "../../../../../../db/tables.db";
 
 interface AddNewMemberProps {
     roles: Array<Role>;
