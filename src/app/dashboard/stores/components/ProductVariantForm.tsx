@@ -1,6 +1,5 @@
 import { PlusIcon, TrashIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import React from "react";
-import { Product } from "../typing";
 
 interface ProductVariantForm {
     removeVariant: (variantKey: string) => void;

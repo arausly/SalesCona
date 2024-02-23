@@ -1,6 +1,8 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
+import { UserPlusIcon, UsersIcon } from "@heroicons/react/24/outline";
 
+//components
 import {
     Sheet,
     SheetContent,
@@ -13,14 +15,17 @@ import {
 import { Button } from "@components/Button";
 import { Modal } from "@components/Dialog/Dialog";
 import { inputClasses } from "@components/Input/input";
-import { UserPlusIcon, UsersIcon } from "@heroicons/react/24/outline";
 import Dropdown from "@components/Menudropdown";
 import { MerchantStaff, Permission, Role } from "../../../typing";
 import { CreateNewRole } from "./create-new-role";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { useGetUser } from "@hooks/useGetUser";
 import { Prompt } from "@components/Dialog/Prompt";
-import { supabaseTables } from "../../../../../../db/tables.db";
+
+//hooks
+import { useGetUser } from "@hooks/useGetUser";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+
+//db
+import { tables } from "@db/tables.db";
 
 interface AddNewMemberProps {
     roles: Array<Role>;
@@ -122,7 +127,7 @@ export const AddNewMember = React.forwardRef(
             try {
                 setAddingMember(true);
                 const { error: merchantError } = await supabase
-                    .from(supabaseTables.merchant_staffs)
+                    .from(tables.merchant_staffs)
                     .upsert(
                         {
                             ...formState,

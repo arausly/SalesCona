@@ -1,33 +1,36 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "allowJs": true,
-        "skipLibCheck": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "preserve",
-        "incremental": true,
-        "plugins": [
-            {
-                "name": "next"
-            }
-        ],
-        "paths": {
-            "@lib/*": ["./lib/*"],
-            "@assets/*": ["./assets/*"], 
-            "@components/*": ["./components/*"],
-            "@styles/*": ["./styles/*"],
-            "@hooks/*": ["./hooks/*"],
-            "@data/*": ["./data/*"]
-        }
-    },
-    "include": ["src/app/next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    "exclude": ["node_modules"]
+  "compilerOptions": {
+      "target": "es5",
+      "lib": ["dom", "dom.iterable", "esnext"],
+      "allowJs": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "forceConsistentCasingInFileNames": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "downlevelIteration": true,
+      "module": "esnext",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "jsx": "preserve",
+      "incremental": true,
+      "plugins": [
+          {
+              "name": "next"
+          }
+      ],
+      "paths": {
+          "@lib/*": ["./lib/*"],
+          "@assets/*": ["./assets/*"], 
+          "@components/*": ["./components/*"],
+          "@styles/*": ["./styles/*"],
+          "@hooks/*": ["./hooks/*"],
+          "@data/*": ["./data/*"], 
+          "@db/*": ["./db/*"], 
+          "@services/*": ["./services/*"]
+      }
+  },
+  "include": ["src/app/next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

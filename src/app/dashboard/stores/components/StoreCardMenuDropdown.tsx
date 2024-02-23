@@ -52,7 +52,7 @@ export const StoreCardMenuDropdown: React.FC<StoreCardMenuProps> = (props) => {
     );
 
     return (
-        <Dropdown
+        <Dropdown<any>
             items={actions}
             wrapperClasses="!static"
             menuButton={

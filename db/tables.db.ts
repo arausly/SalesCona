@@ -1,4 +1,4 @@
-export const supabaseTables = {
+export const tables = {
     product_categories: "product_categories",
     store_product_categories: "store_product_categories",
     stores: "stores",

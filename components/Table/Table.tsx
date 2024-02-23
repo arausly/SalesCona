@@ -12,7 +12,7 @@ interface TableProps {
         id: string;
         label: string | JSX.Element;
     }>;
-    rows: { [key: string]: string | JSX.Element }[];
+    rows: { [key: string]: string | number | JSX.Element }[];
     pagination: {
         finalPage: number;
         totalItemsCount: number;

@@ -1,11 +1,17 @@
 "use client";
 import React from "react";
+
+//components
 import { RegularAvatar } from "@components/Avatar/RegularAvatar";
 import { Button } from "@components/Button";
 import { inputClasses } from "@components/Input/input";
+
+//hooks
 import { useGetUser } from "@hooks/useGetUser";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { supabaseTables } from "@lib/constants";
+
+//db
+import { tables } from "@db/tables.db";
 
 interface ProfileFormState {
     firstname: string;
@@ -36,7 +42,7 @@ export const Profile = () => {
                     ({
                         ...(prev ?? {}),
                         [name]: value
-                    } as ProfileFormState)
+                    }) as ProfileFormState
             );
         },
         []
@@ -54,7 +60,7 @@ export const Profile = () => {
                 if (data && !error) {
                     //update secondary storage as well.
                     await supabase
-                        .from(supabaseTables.merchants)
+                        .from(tables.merchants)
                         .update({ ...formState })
                         .eq("id", user.id);
                     setForceRefresh(true);

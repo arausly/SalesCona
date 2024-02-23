@@ -3,7 +3,9 @@ import React from "react";
 import Image from "next/image";
 import { CheckIcon, PencilIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import shortid from "shortid";
+import { toast } from "react-toastify";
 
+//components
 import {
     copyToClipboard,
     debounce,
@@ -14,22 +16,30 @@ import MultiSelectInput, {
     MultiSelectProps
 } from "@components/Input/MultiSelectInput";
 import FileWidget, { FileWithPreview } from "@components/FileWidget";
-
-//styles
-import { getCurrencies, spaceSeparatedStrToPath } from "@lib/format-utils";
-import { usePathname, useRouter } from "next/navigation";
 import { Breadcrumb } from "@components/Breadcrumb";
 import { ImagePicker } from "./ImagePicker";
-
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { baseURL, supabaseBuckets, supabaseTables } from "@lib/constants";
-import { Store } from "../typing";
-import { useGetProductCategories } from "@hooks/useGetProductCategories";
-import { Button } from "@components/Button";
-import { useGetUser } from "@hooks/useGetUser";
-import { toast } from "react-toastify";
-import { SavingPrompt } from "./modals/SavingPrompt";
 import { Spinner } from "@components/Spinner";
+import { SavingPrompt } from "./modals/SavingPrompt";
+import { Button } from "@components/Button";
+
+//hooks
+import { usePathname, useRouter } from "next/navigation";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+import { useGetProductCategories } from "@hooks/useGetProductCategories";
+import { useGetUser } from "@hooks/useGetUser";
+
+//db
+import { tables } from "@db/tables.db";
+
+//utils
+import { getCurrencies, spaceSeparatedStrToPath } from "@lib/format-utils";
+
+//constants
+import { baseURL } from "@lib/constants";
+
+//typing
+import { Store } from "../typing";
+import { buckets } from "@db/buckets.db";
 
 const imagePickerBannerDesc =
     "Customize your page by adding beautiful banner slides that makes your page unique. you can add up to 4 slides that describe your product offerings, promo, discounts, new stock etc. Make sure the logo and the background banners contrast well for appealing aesthetics";
@@ -93,7 +103,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
     const [presetBanners, setPresetBanners] =
         React.useState<Map<number, FileWithPreview>>();
     const router = useRouter();
-    const user = useGetUser();
+    const { user } = useGetUser();
     const { productCategories, createNewProductCategory } =
         useGetProductCategories();
 
@@ -124,7 +134,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                 try {
                     setLoadingStore(true);
                     const { data, error } = await supabase
-                        .from(supabaseTables.stores)
+                        .from(tables.stores)
                         .select()
                         .eq("slug", storePath)
                         .returns<Store[]>();
@@ -134,7 +144,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
                         const { data: fetchedStoreCategories, error: err } =
                             await supabase
-                                .from(supabaseTables.store_product_categories)
+                                .from(tables.store_product_categories)
                                 .select("*,category(*)")
                                 .eq("store", store.id)
                                 .returns<Store["categories"][][number]>();
@@ -202,7 +212,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
             try {
                 const { error, data } = await supabase
-                    .from(supabaseTables.stores)
+                    .from(tables.stores)
                     .select()
                     .eq("name", name);
                 if (!error && data?.length) {
@@ -418,7 +428,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
             async function updateOrCreateStore(storeSlug: string) {
                 const createdStore = await supabase
-                    .from(supabaseTables.stores)
+                    .from(tables.stores)
                     .upsert(
                         {
                             name: storeName?.trim(),
@@ -454,7 +464,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                 if (error) throw error;
                 const newStore = data[0] as Store;
                 await supabase
-                    .from(supabaseTables.store_product_categories)
+                    .from(tables.store_product_categories)
                     .upsert(
                         storeCategories?.map((cat) => ({
                             category: cat.id,
@@ -474,7 +484,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                     const logoFileName = `${user.id}/${newStore.id}/logo/${storeSlug}`;
                     const { data: logoData, error: logoErr } =
                         await supabase.storage
-                            .from(supabaseBuckets.shop)
+                            .from(buckets.shop)
                             .upload(logoFileName, shopLogo, {
                                 cacheControl: "3600",
                                 upsert: true,
@@ -484,7 +494,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                     if (logoData && !logoErr) {
                         //get public url from bucket
                         const logoPublicStore = await supabase.storage
-                            .from(supabaseBuckets.shop)
+                            .from(buckets.shop)
                             .getPublicUrl(logoFileName);
 
                         shop_logo = logoPublicStore.data.publicUrl;
@@ -496,7 +506,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                         banners.map(async (banner, i) => {
                             const storeFileName = `${user.id}/${newStore.id}/banners/${storeSlug}-${i}`;
                             const { data, error } = await supabase.storage
-                                .from(supabaseBuckets.shop)
+                                .from(buckets.shop)
                                 .upload(storeFileName, banner, {
                                     cacheControl: "3600",
                                     upsert: true,
@@ -506,7 +516,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                             if (data && !error) {
                                 //get public url from bucket
                                 const bannerPublicStore = await supabase.storage
-                                    .from(supabaseBuckets.shop)
+                                    .from(buckets.shop)
                                     .getPublicUrl(storeFileName);
                                 return bannerPublicStore.data.publicUrl;
                             }
@@ -516,7 +526,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
                 const { data: finalUpdateForStore, error: finalErr } =
                     await supabase
-                        .from(supabaseTables.stores)
+                        .from(tables.stores)
                         .update({
                             banners: JSON.stringify(
                                 bannerUrls.filter((b) => !!b)

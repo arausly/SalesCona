@@ -1,13 +1,17 @@
 "use client";
 import React from "react";
+
+//utils
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { storageKeys } from "@lib/constants";
 import { onlyIfWindowIsDefined } from "@lib/common.utils";
-import { Merchant, MerchantStaff } from "../src/app/dashboard/typing";
-import { supabaseTables } from "../db/tables.db";
+
+//typings
+import { User } from "@supabase/supabase-js";
+import { tables } from "@db/tables.db";
 
 export const useGetUser = () => {
-    const [user, setUser] = React.useState<Merchant | null>(); //todo fix type can be merchant user or staff
+    const [user, setUser] = React.useState<User>();
     const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
 
@@ -30,63 +34,30 @@ export const useGetUser = () => {
                     if (storedUser) {
                         setUser(JSON.parse(storedUser));
                     } else {
-                        let user;
-                        let isMerchantOwner = false;
                         const {
                             data: { user: authUserInfo }
                         } = await supabase.auth.getUser();
-
                         if (authUserInfo) {
-                            const { data: merchant, error } = await supabase
-                                .from(supabaseTables.merchants)
-                                .select()
+                            sessionStorage.setItem(
+                                storageKeys.user,
+                                JSON.stringify(authUserInfo)
+                            );
+                            setUser(authUserInfo);
+
+                            ///track to record when users signed in last
+                            const isMerchant =
+                                authUserInfo?.user_metadata.merchant;
+                            await supabase
+                                .from(
+                                    isMerchant
+                                        ? tables.merchants
+                                        : tables.merchant_staffs
+                                )
+                                .update({
+                                    last_sign_in_at:
+                                        authUserInfo.last_sign_in_at
+                                })
                                 .eq("id", authUserInfo.id);
-
-                            if (merchant?.length && !error) {
-                                //user is a merchant
-                                user = {
-                                    ...authUserInfo,
-                                    ...merchant[0]
-                                } as Merchant;
-                                isMerchantOwner = true;
-                            } else {
-                                //check if user auth id corresponds to merchant staff instead
-                                const {
-                                    data: merchantStaff,
-                                    error: staffError
-                                } = await supabase
-                                    .from(supabaseTables.merchant_staffs)
-                                    .select("*,owner(*)")
-                                    .eq("id", authUserInfo.id);
-                                if (merchantStaff?.length && !staffError) {
-                                    user = {
-                                        ...authUserInfo,
-                                        ...merchantStaff[0]
-                                    };
-                                    isMerchantOwner = false;
-                                }
-                            }
-
-                            if (user) {
-                                sessionStorage.setItem(
-                                    storageKeys.user,
-                                    JSON.stringify(user)
-                                );
-                                setUser(user as MerchantStaff);
-
-                                //update last active info on merchant
-                                await supabase
-                                    .from(
-                                        isMerchantOwner
-                                            ? supabaseTables.merchants
-                                            : supabaseTables.merchant_staffs
-                                    )
-                                    .update({
-                                        last_active:
-                                            authUserInfo.last_sign_in_at
-                                    })
-                                    .eq("id", user.id);
-                            }
                         }
                     }
                 }

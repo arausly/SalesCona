@@ -1,3 +1,3 @@
-export const supabaseBuckets = {
+export const buckets = {
     shop: "shop"
 };

@@ -1,8 +1,20 @@
 import React from "react";
-import { ProductCategory } from "../src/app/dashboard/stores/typing";
-import { supabaseTables } from "@lib/constants";
+
+//hooks
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
+
+//utils
 import { debounce } from "@lib/common.utils";
+import {
+    getProductCategories,
+    searchProductCategories
+} from "@services/product_categories/product_categories.service";
+
+//db
+import { tables } from "@db/tables.db";
+
+//typing
+import { ProductCategory } from "../src/app/dashboard/stores/typing";
 
 export const useGetProductCategories = () => {
     const [categories, setCategories] = React.useState<Array<ProductCategory>>(
@@ -15,9 +27,7 @@ export const useGetProductCategories = () => {
     React.useEffect(() => {
         (async () => {
             try {
-                const { data, error } = await supabase
-                    .from(supabaseTables.product_categories)
-                    .select();
+                const { data, error } = await getProductCategories();
                 if (!error && data) {
                     setCategories(data as ProductCategory[]);
                 }
@@ -25,14 +35,10 @@ export const useGetProductCategories = () => {
         })();
     }, []);
 
-    const searchProductCategories = React.useCallback(
+    const search = React.useCallback(
         debounce(async (query: string) => {
             try {
-                const { data, error } = await supabase
-                    .from(supabaseTables.product_categories)
-                    .select()
-                    .ilike("label", `%${query}%`);
-
+                const { data, error } = await searchProductCategories(query);
                 if (!error && data) {
                     setCategories(data as ProductCategory[]);
                 }
@@ -46,7 +52,7 @@ export const useGetProductCategories = () => {
             if (!label?.trim()) return;
             try {
                 const { error, data } = await supabase
-                    .from(supabaseTables.product_categories)
+                    .from(tables.product_categories)
                     .insert({ label: label.trim().toLowerCase() })
                     .select();
                 if (!error && data) {
@@ -64,6 +70,6 @@ export const useGetProductCategories = () => {
     return {
         productCategories: categories,
         createNewProductCategory,
-        searchProductCategories
+        searchProductCategories: search
     };
 };

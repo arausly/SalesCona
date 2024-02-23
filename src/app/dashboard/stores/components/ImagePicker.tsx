@@ -53,7 +53,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
                                     FileWithPreview
                                 ]
                         )
-                ]);
+                ]) as Map<number, FileWithPreview>;
                 handleFileChange(Array.from(newBanners.values()));
                 return newBanners;
             });

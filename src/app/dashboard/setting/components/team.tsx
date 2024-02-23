@@ -1,16 +1,14 @@
 "use client";
+import React from "react";
+import { toast } from "react-toastify";
+
+//components
 import { Table } from "@components/Table/Table";
 import {
     EllipsisHorizontalIcon,
     UserGroupIcon,
     UserPlusIcon
 } from "@heroicons/react/24/outline";
-import { useGetUser } from "@hooks/useGetUser";
-import { excludeKeysFromObj } from "@lib/common.utils";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import React from "react";
-import { AddNewMember } from "./sheets/add-new-member";
-import { MerchantStaff, Permission, Role } from "../../typing";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,8 +19,20 @@ import {
     DropdownMenuTrigger
 } from "@components/ui/dropdown-menu";
 import { Prompt } from "@components/Dialog/Prompt";
-import { toast } from "react-toastify";
-import { supabaseTables } from "../../../../../db/tables.db";
+import { AddNewMember } from "./sheets/add-new-member";
+
+//hooks
+import { useGetUser } from "@hooks/useGetUser";
+
+//utils
+import { excludeKeysFromObj } from "@lib/common.utils";
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+
+//db
+import { tables } from "@db/tables.db";
+
+//typing
+import { MerchantStaff, Permission, Role } from "../../typing";
 
 const headers = [
     { id: "firstname", label: "Firstname" },
@@ -64,19 +74,19 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
 
     React.useEffect(() => {
         const subscription = supabase
-            .channel(supabaseTables.merchant_staffs)
+            .channel(tables.merchant_staffs)
             .on(
                 "postgres_changes",
                 {
                     event: "*",
                     schema: "public",
-                    table: supabaseTables.merchant_staffs
+                    table: tables.merchant_staffs
                 },
 
                 async (payload) => {
                     let memberPayload = payload.new as MerchantStaff;
                     const { data, error } = await supabase
-                        .from(supabaseTables.roles)
+                        .from(tables.roles)
                         .select()
                         .eq("id", memberPayload.role);
 
@@ -124,7 +134,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                 try {
                     setFetchingMembers(true);
                     const { data, error } = await supabase
-                        .from(supabaseTables.merchant_staffs)
+                        .from(tables.merchant_staffs)
                         .select("*,role(*)")
                         .eq("owner", user.id)
                         .returns<MerchantStaff[]>();
@@ -240,7 +250,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
 
                 setEditingMember(true);
                 const { error } = await supabase
-                    .from(supabaseTables.merchant_staffs)
+                    .from(tables.merchant_staffs)
                     .update(payload)
                     .eq("id", selectedMemberStaff.id);
                 if (!error) {

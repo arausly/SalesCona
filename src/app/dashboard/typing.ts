@@ -7,13 +7,13 @@ export interface Merchant extends Omit<User, "role"> {
     firstname: string;
     lastname: string;
     last_active: string;
-    trial_started_at: string;
     subscription_start_date: string;
     subscription_end_date: string;
     subscription: string;
 }
 
 export interface MerchantStaff extends Merchant {
+    /** The manager, the employer of the staff */
     owner: Merchant;
     auth_id: string;
     last_active: string;
@@ -22,6 +22,7 @@ export interface MerchantStaff extends Merchant {
     is_deleted: boolean;
     firstname: string;
     lastname: string;
+    id: string;
 }
 
 export interface Role {

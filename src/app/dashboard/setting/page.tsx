@@ -2,16 +2,26 @@
 
 import React from "react";
 import { Tab } from "@headlessui/react";
+
+//components
 import { Profile } from "./components/profile";
 import { ChangePassword } from "./components/change-password";
 import { Team } from "./components/team";
 import { Payment } from "./components/payment";
+
+//hooks
 import { usePathname, useRouter } from "next/navigation";
-import { Permission, Role } from "../typing";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetUser } from "@hooks/useGetUser";
+
+//typing
+import { Permission, Role } from "../typing";
+
+//typing
 import { SubscriptionMetadata, SubscriptionPlan } from "./typing";
-import { supabaseTables } from "../../../../db/tables.db";
+
+//db
+import { tables } from "@db/tables.db";
 
 const tabIndexesByType = {
     profile: 0,
@@ -63,7 +73,7 @@ export default function Setting({
         (async () => {
             if (user) {
                 const { data, error } = await supabase
-                    .from(supabaseTables.roles)
+                    .from(tables.roles)
                     .select()
                     .eq("merchant", user.id)
                     .returns<Role[]>();
@@ -78,13 +88,13 @@ export default function Setting({
     //listen for roles updates
     React.useEffect(() => {
         const subscription = supabase
-            .channel(supabaseTables.roles)
+            .channel(tables.roles)
             .on(
                 "postgres_changes",
                 {
                     event: "INSERT",
                     schema: "public",
-                    table: supabaseTables.roles
+                    table: tables.roles
                 },
                 (payload) => {
                     setRoles((roles) => [...roles, payload.new as Role]);
@@ -100,7 +110,7 @@ export default function Setting({
     React.useEffect(() => {
         (async () => {
             const { data, error } = await supabase
-                .from(supabaseTables.permissions)
+                .from(tables.permissions)
                 .select()
                 .returns<Permission[]>();
             if (data && !error) {
@@ -112,7 +122,7 @@ export default function Setting({
     // React.useEffect(() => {
     //     (async () => {
     //         const { data, error } = await supabase
-    //             .from(supabaseTables.subscriptions)
+    //             .from(tables.subscriptions)
     //             .select()
     //             .returns<Array<SubscriptionMetadata>>();
 

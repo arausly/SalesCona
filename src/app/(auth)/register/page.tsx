@@ -9,16 +9,18 @@ import { useRouter } from "next/navigation";
 import { Button } from "@components/Button";
 //hooks
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
+//db
+import { tables } from "@db/tables.db";
+//types
+import { Merchant, MerchantStaff } from "../../dashboard/typing";
+//utils
+import { extractStaffId } from "@lib/common.utils";
 //images
 import logo from "@assets/images/kolony-logo.webp";
 //css
 import { inputClasses } from "../../../../components/Input/input";
 //constants
-import { baseURL, supabaseTables } from "@lib/constants";
-//types
-import { MerchantStaff } from "../../dashboard/typing";
-//utils
-import { extractStaffId } from "@lib/common.utils";
+import { baseURL } from "@lib/constants";
 
 interface RegisterFormValues {
     email: string;
@@ -43,6 +45,8 @@ export default function Register({
     const [errMsg, setErrMsg] = React.useState<string>("");
     const router = useRouter();
     const { supabase } = useBrowserSupabase();
+    const [existingMerchantStaff, setExistingMerchantStaff] =
+        React.useState<MerchantStaff>();
 
     //check for merchant staff and set defaults for inputs
     React.useEffect(() => {
@@ -53,13 +57,14 @@ export default function Register({
                     const { id } = extractedInfo;
                     //check that merchant with Id exist
                     const { data, error } = await supabase
-                        .from(supabaseTables.merchant_staffs)
-                        .select()
+                        .from(tables.merchant_staffs)
+                        .select("*,owner(*)")
                         .eq("id", id)
                         .returns<MerchantStaff[]>();
 
                     if (data?.length && !error) {
                         const merchant_staff = data[0];
+                        setExistingMerchantStaff(merchant_staff);
                         setValue("firstname", merchant_staff.firstname);
                         setValue("lastname", merchant_staff.lastname);
                         setValue("email", merchant_staff.email);
@@ -75,6 +80,25 @@ export default function Register({
             return handleSubmit(async (values) => {
                 try {
                     setLoading(true);
+                    let merchant: Merchant | undefined = undefined;
+
+                    //create merchant if not merchant_staff
+                    if (!staffAuthInfo) {
+                        const { data: merchantData, error: merchantError } =
+                            await supabase
+                                .from(tables.merchants)
+                                .insert({
+                                    email: values.email
+                                })
+                                .select()
+                                .returns<Merchant[]>();
+
+                        if (merchantData && !merchantError) {
+                            merchant = merchantData[0];
+                        }
+                    }
+
+                    //create user as either a merchant or a merchant_staff
                     const { data, error } = await supabase.auth.signUp({
                         ...values,
                         options: {
@@ -82,7 +106,8 @@ export default function Register({
                             data: {
                                 firstname: values.firstname,
                                 lastname: values.lastname,
-                                merchant: staffAuthInfo ? false : true //whether a staff of a merchant that has staffs
+                                merchant_staff: existingMerchantStaff,
+                                merchant
                             }
                         }
                     });
@@ -93,11 +118,11 @@ export default function Register({
                                 : "Something unexpected happened"
                         );
                     } else if (data.user && !staffAuthInfo) {
-                        //no merchant staff markers then create as merchant
+                        //no merchant_staff markers then create as merchant
                         //todo replace with database triggers
-                        await supabase.from(supabaseTables.merchants).upsert({
+                        await supabase.from(tables.merchants).update({
                             email: data.user.email,
-                            id: data.user.id
+                            user: data.user.id
                         });
                         router.replace("/verify");
                     }
@@ -246,7 +271,6 @@ export default function Register({
                         />
                     </div>
                 </form>
-
                 <p className="mt-10 text-center text-sm text-gray-500">
                     Already have an account?{" "}
                     <Link
@@ -257,19 +281,6 @@ export default function Register({
                     </Link>
                 </p>
             </div>
-            {/* <div className="flex items-center mb-4 mt-8">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <div className="mx-4 text-black text-sm">Continue with</div>
-                <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            <div className="flex justify-center space-x-4">
-                <button className="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-8 rounded flex">
-                    Facebook
-                </button>
-                <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded">
-                    Google
-                </button>
-            </div> */}
         </div>
     );
 }

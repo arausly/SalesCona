@@ -1,9 +1,14 @@
 import React from "react";
 
-import { supabaseTables } from "@lib/constants";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { ProductCategory, Store } from "../typing";
+//hooks
 import { useGetUser } from "@hooks/useGetUser";
+
+//services
+import { getStoreBySlug } from "@services/stores/stores.service";
+import { getStoreProductCategories } from "@services/stores/store-product_categories/store-product_categories.service";
+
+//typing
+import { ProductCategory, Store } from "../typing";
 
 interface StoreBySlug extends Omit<Store, "categories"> {
     categories: Array<{
@@ -17,29 +22,25 @@ interface StoreBySlug extends Omit<Store, "categories"> {
 
 export const useGetStoreBySlug = (slug: string) => {
     const [loading, setLoading] = React.useState<boolean>(false);
-    const { supabase } = useBrowserSupabase();
     const [store, setStore] = React.useState<StoreBySlug>();
-    const user = useGetUser();
+    const { user } = useGetUser();
 
     React.useEffect(() => {
         (async () => {
             if (slug && user) {
                 setLoading(true);
                 try {
-                    const { data, error } = await supabase
-                        .from(supabaseTables.stores)
-                        .select()
-                        .eq("slug", slug)
-                        .eq("user_id", user.id)
-                        .returns<Store[]>();
+                    const { data, error } = await getStoreBySlug({
+                        slug,
+                        userId: user.id
+                    });
 
                     if (data?.length && !error) {
                         // data[0].
-                        const { data: categories, error: err } = await supabase
-                            .from(supabaseTables.store_product_categories)
-                            .select("*,category(*)")
-                            .eq("store", data[0].id)
-                            .returns<Store["categories"]>();
+                        const { data: categories, error: err } =
+                            await getStoreProductCategories({
+                                storeId: data[0].id
+                            });
 
                         if (categories?.length && !err) {
                             data[0].categories = categories.map((c) => ({

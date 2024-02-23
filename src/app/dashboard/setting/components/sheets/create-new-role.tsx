@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+
+//components
 import { Button } from "@components/Button";
 import {
     Sheet,
@@ -13,11 +15,17 @@ import {
     SheetTrigger
 } from "@components/ui/sheet";
 import { inputClasses } from "@components/Input/input";
-import { Permission, Role } from "../../../typing";
 import { Switch } from "@components/ui/switch";
+
+//typing
+import { Permission, Role } from "../../../typing";
+
+//hooks
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetUser } from "@hooks/useGetUser";
-import { supabaseTables } from "../../../../../../db/tables.db";
+
+//db
+import { tables } from "@db/tables.db";
 
 interface CreateNewRoleProps {
     permissions: Permission[];
@@ -49,7 +57,7 @@ export const CreateNewRole = React.forwardRef(
                 setSaving(true);
                 //create role entry in role db
                 const { data, error } = await supabase
-                    .from(supabaseTables.roles)
+                    .from(tables.roles)
                     .insert<{ label: string; merchant: string }>({
                         label: roleLabel.trim(),
                         merchant: user.id
@@ -66,7 +74,7 @@ export const CreateNewRole = React.forwardRef(
                     );
 
                     const { error: err } = await supabase
-                        .from(supabaseTables.permissions_for_roles)
+                        .from(tables.permissions_for_roles)
                         .insert(permissionsForRoles);
 
                     if (!err) {

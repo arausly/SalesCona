@@ -2,11 +2,18 @@
 import React, { FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
+//components
+import { Button } from "@components/Button";
+
+//hooks
 import { useRouter } from "next/navigation";
 
-import { Button } from "@components/Button";
+//utils
 import { inputClasses } from "@components/Input/input";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
+
+//constants
 import { baseURL } from "@lib/constants";
 
 //images

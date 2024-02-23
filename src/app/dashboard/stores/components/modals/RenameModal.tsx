@@ -5,9 +5,12 @@ import { StoreContext } from "../StoreList";
 import { useGetUser } from "@hooks/useGetUser";
 import { toast } from "react-toastify";
 import { debounce } from "@lib/common.utils";
-import { supabaseTables } from "@lib/constants";
 import { spaceSeparatedStrToPath } from "@lib/format-utils";
 import { Button } from "@components/Button";
+import {
+    renameStore,
+    storeWithNameExist
+} from "@services/stores/stores.service";
 
 interface RenameModalProps {
     isOpen: boolean;
@@ -23,20 +26,18 @@ export const RenameModal: React.FC<RenameModalProps> = ({
     const [loading, setLoading] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
     const { currentStore, refreshStores } = React.useContext(StoreContext);
-    const user = useGetUser();
+    const { user } = useGetUser();
 
     const handleStoreRename = React.useCallback(async () => {
         try {
             setLoading(true);
             if (!user || !currentStore || !newName.length) return;
-            const { error } = await supabase
-                .from(supabaseTables.stores)
-                .update({
-                    name: newName,
-                    slug: spaceSeparatedStrToPath(newName)
-                })
-                .eq("user_id", user.id)
-                .eq("id", currentStore.id);
+            const { error } = await renameStore({
+                name: newName,
+                slug: spaceSeparatedStrToPath(newName),
+                userId: user.id,
+                storeId: currentStore.id
+            });
             if (error) {
                 setErrorMessage(
                     "Had issues updating the store name, please try again"
@@ -59,15 +60,11 @@ export const RenameModal: React.FC<RenameModalProps> = ({
         debounce(async (storeName: string) => {
             try {
                 if (!user) return;
-                const { data, error } = await supabase
-                    .from(supabaseTables.stores)
-                    .select()
-                    .eq("user_id", user.id)
-                    .or(
-                        `name.eq.${storeName},slug.eq.${spaceSeparatedStrToPath(
-                            storeName
-                        )}`
-                    );
+                const { data } = await storeWithNameExist({
+                    userId: user.id,
+                    storeName,
+                    slug: spaceSeparatedStrToPath(storeName)
+                });
 
                 setErrorMessage(
                     data?.length

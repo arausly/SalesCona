@@ -193,7 +193,7 @@ export default function Followers() {
                         />
                     }
                     items={stores}
-                    onSelectItem={(label) => setSelectedStore(label)}
+                    onSelectItem={(item) => setSelectedStore(item.label)}
                 />
             </div>
             <Table

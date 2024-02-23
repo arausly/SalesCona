@@ -7,11 +7,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
     title: "Sign up page",
-    description: "simple solution for taking your shop digital",
+    description: "simple solution for taking your shop digital"
 };
 
 export default function RootLayout({
-    children,
+    children
 }: {
     children: React.ReactNode;
 }) {

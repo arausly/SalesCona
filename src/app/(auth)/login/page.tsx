@@ -5,9 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { inputClasses } from "../../../../components/Input/input";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
+//components
 import { Button } from "@components/Button";
+
+//hooks
+import { useBrowserSupabase } from "@lib/supabaseBrowser";
+
+//classes
+import { inputClasses } from "../../../../components/Input/input";
 
 //images
 import logo from "@assets/images/kolony-logo.webp";

@@ -1,12 +1,13 @@
 import React from "react";
 import { Modal } from "@components/Dialog/Dialog";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { SUPPORT_EMAIL, supabaseTables } from "@lib/constants";
+import { SUPPORT_EMAIL } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetUser } from "@hooks/useGetUser";
 import { StoreContext } from "../StoreList";
 import { toast } from "react-toastify";
 import { Button } from "@components/Button";
+import { softDeleteStore } from "@services/stores/stores.service";
 
 interface DeleteModalProps {
     isOpen: boolean;
@@ -19,7 +20,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 }) => {
     const [loading, setLoading] = React.useState(false);
     const { supabase } = useBrowserSupabase();
-    const user = useGetUser();
+    const { user } = useGetUser();
     const { currentStore, refreshStores } = React.useContext(StoreContext);
     const [confirmedText, setConfirmedText] = React.useState<string>("");
     const isDisabled = confirmedText !== currentStore?.name?.toLowerCase();
@@ -28,11 +29,10 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
         if (!user || !currentStore) return;
         try {
             setLoading(true);
-            const { error } = await supabase
-                .from(supabaseTables.stores)
-                .update({ is_soft_deleted: true })
-                .eq("user", user.id)
-                .eq("id", currentStore.id);
+            const { error } = await softDeleteStore({
+                userId: user.id,
+                storeId: currentStore.id
+            });
             if (!error) {
                 refreshStores();
                 toggleModal();

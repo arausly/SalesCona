@@ -1,12 +1,12 @@
-import { supabaseTables } from "../../db/tables.db";
 import { supabase } from "../../supabase/supabase.browser";
 
 //typing
 import { SubscriptionPopulatedWithCategoryInfo } from "../../db/typing";
+import { tables } from "@db/tables.db";
 
 export const getSubscriptions = async () => {
     const { data, error } = await supabase
-        .from(supabaseTables.subscriptions)
+        .from(tables.subscriptions)
         .select("*,category(*)")
         .returns<SubscriptionPopulatedWithCategoryInfo[]>();
     if (error) throw error;

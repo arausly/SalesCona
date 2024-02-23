@@ -8,19 +8,19 @@ import { Lato } from "next/font/google";
 
 const raleway = Lato({
     weight: ["100", "300", "400", "700", "900"],
-    subsets: ["latin"],
+    subsets: ["latin"]
 });
 
 export const metadata = {
-    title: "kolony-buy",
+    title: "SalesCona",
     description: "simple solution for taking your shop digital",
     icons: {
-        icon: "/kolony-logo.webp",
-    },
+        icon: "/kolony-logo.webp"
+    }
 };
 
 export default function RootLayout({
-    children,
+    children
 }: {
     children: React.ReactNode;
 }) {

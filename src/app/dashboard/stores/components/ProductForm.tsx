@@ -19,13 +19,14 @@ import { Product } from "../typing";
 import shortid from "shortid";
 import { FileWithPreview } from "@components/FileWidget";
 import { debounce, excludeKeysFromObj } from "@lib/common.utils";
-import { supabaseBuckets, supabaseTables } from "@lib/constants";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetUser } from "@hooks/useGetUser";
 import { useGetStoreBySlug } from "../hooks/useGetStoreBySlug";
 import { Spinner } from "@components/Spinner";
 import { Button } from "@components/Button";
 import { SavingPrompt } from "./modals/SavingPrompt";
+import { tables } from "@db/tables.db";
+import { buckets } from "@db/buckets.db";
 
 interface ProductFormProps {
     isEditForm: boolean;
@@ -73,7 +74,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
     //hooks
     const { supabase } = useBrowserSupabase();
     const pathname = usePathname();
-    const user = useGetUser();
+    const { user } = useGetUser();
     const router = useRouter();
     const [, , , storePath, , productPath] = pathname.split("/");
     const { loading, store } = useGetStoreBySlug(storePath);
@@ -204,7 +205,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                 try {
                     setLoadingProduct(true);
                     const { data, error } = await supabase
-                        .from(supabaseTables.products)
+                        .from(tables.products)
                         .select()
                         .eq("user", user.id)
                         .eq("store", store.id)
@@ -292,7 +293,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
             });
             try {
                 const { data, error } = await supabase
-                    .from(supabaseTables.products)
+                    .from(tables.products)
                     .upsert(
                         {
                             ...excludeKeysFromObj(formState, [
@@ -324,7 +325,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 const productFileName = `${user.id}/${store.id}/${newProduct.id}/${productSlug}-${i}`;
                                 const { data: d, error: e } =
                                     await supabase.storage
-                                        .from(supabaseBuckets.shop)
+                                        .from(buckets.shop)
                                         .upload(productFileName, banner, {
                                             cacheControl: "3600",
                                             upsert: true,
@@ -333,7 +334,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                                 if (d && !e) {
                                     const bannerPublicStore =
                                         await supabase.storage
-                                            .from(supabaseBuckets.shop)
+                                            .from(buckets.shop)
                                             .getPublicUrl(productFileName);
                                     return bannerPublicStore.data.publicUrl;
                                 }
@@ -343,7 +344,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
 
                     const { data: finalUpdateForStore, error: finalErr } =
                         await supabase
-                            .from(supabaseTables.products)
+                            .from(tables.products)
                             .update({
                                 product_images: JSON.stringify(
                                     bannerURLs.filter((b) => !!b)
@@ -476,7 +477,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ isEditForm }) => {
                 if (!store) return;
                 //same product name for the store
                 const { error, data } = await supabase
-                    .from(supabaseTables.products)
+                    .from(tables.products)
                     .select()
                     .eq("name", name)
                     .eq("store", store.id);

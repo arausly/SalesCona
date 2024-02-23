@@ -1,13 +1,20 @@
 import React from "react";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { useGetUser } from "../../../../../hooks/useGetUser";
-import { supabaseTables } from "@lib/constants";
-import { Store } from "../typing";
+
+//hooks
+import { useGetUser } from "@hooks/useGetUser";
+
+//utils
 import { debounce } from "@lib/common.utils";
 
+//services
+import { getStores, searchStores } from "@services/stores/stores.service";
+import { getStoreProductCategories } from "@services/stores/store-product_categories/store-product_categories.service";
+
+//typing
+import { Store } from "../typing";
+
 export const useGetStores = () => {
-    const user = useGetUser();
-    const { supabase } = useBrowserSupabase();
+    const { user } = useGetUser();
     const [loading, setLoading] = React.useState<boolean>(false);
     const [stores, setStores] = React.useState<Store[]>([]);
     const [refreshCounter, setRefresh] = React.useState<number>(0);
@@ -17,11 +24,7 @@ export const useGetStores = () => {
             if (!user) return;
             setLoading(true);
             try {
-                const { data, error } = await supabase
-                    .from(supabaseTables.stores)
-                    .select()
-                    .eq("user_id", user.id)
-                    .eq("is_soft_deleted", false);
+                const { data, error } = await getStores(user.id);
 
                 if (!error && data) {
                     await populateWithCategories(data as Store[]);
@@ -36,17 +39,15 @@ export const useGetStores = () => {
 
     const refreshStores = React.useCallback(() => setRefresh((r) => ++r), []);
 
-    const searchStores = React.useCallback(
+    const search = React.useCallback(
         debounce(async (query: string) => {
             try {
                 if (!user) return;
                 setLoading(true);
-                const { data, error } = await supabase
-                    .from(supabaseTables.stores)
-                    .select()
-                    .eq("user_id", user.id)
-                    .eq("is_soft_deleted", false)
-                    .or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+                const { data, error } = await searchStores({
+                    query,
+                    merchantId: user.id
+                }); //todo change to merchant id
 
                 if (!error && data) {
                     await populateWithCategories(data as Store[]);
@@ -65,10 +66,10 @@ export const useGetStores = () => {
             try {
                 await Promise.all(
                     stores.map(async (store) => {
-                        const { data: storeCategories, error } = await supabase
-                            .from(supabaseTables.store_product_categories)
-                            .select("category(*)")
-                            .eq("store", store.id);
+                        const { data: storeCategories, error } =
+                            await getStoreProductCategories({
+                                storeId: store.id
+                            });
 
                         if (storeCategories?.length && !error) {
                             store.categories =
@@ -81,5 +82,10 @@ export const useGetStores = () => {
         []
     );
 
-    return { stores, storeLoading: loading, searchStores, refreshStores };
+    return {
+        stores,
+        storeLoading: loading,
+        searchStores: search,
+        refreshStores
+    };
 };

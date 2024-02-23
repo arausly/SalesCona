@@ -169,7 +169,7 @@ export const ProductSearch: React.FC<ProductSearchProps> = ({
                                 </div>
                             ))}
                         {categories.length > shownCategoriesCap && (
-                            <Dropdown
+                            <Dropdown<any>
                                 items={categories
                                     .slice(shownCategoriesCap)
                                     .map(({ label }) => ({ label }))}

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { getHashParams } from "@lib/route-utils";
 

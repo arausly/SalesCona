@@ -185,7 +185,7 @@ export default function Sidebar() {
                     >
                         <SheetHeader className="border-b items-start border-slate-100 pb-5">
                             <p className={`${pacifico.className} text-4xl`}>
-                                Friendie
+                                SalesCona
                             </p>
                         </SheetHeader>
                         <div className="h-[90%]">{navLinks}</div>
@@ -194,7 +194,7 @@ export default function Sidebar() {
                 <p
                     className={`${pacifico.className} ${styles.sidebarBrandName}`}
                 >
-                    Friendie
+                    SalesCona
                 </p>
                 <p className={styles.sideMobileOnly}>
                     {links.find((l) => l.pathname === pathname)?.title}
