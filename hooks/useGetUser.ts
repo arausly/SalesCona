@@ -51,7 +51,7 @@ export const useGetUser = () => {
                                 .from(
                                     isMerchant
                                         ? tables.merchants
-                                        : tables.merchant_staffs
+                                        : tables.merchantStaffs
                                 )
                                 .update({
                                     last_sign_in_at:

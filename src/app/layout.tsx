@@ -1,4 +1,5 @@
 import SupabaseProvider from "@lib/supabaseBrowser";
+import type { Metadata } from "next";
 
 //styles
 import "./globals.css";
@@ -11,7 +12,7 @@ const raleway = Lato({
     subsets: ["latin"]
 });
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "SalesCona",
     description: "simple solution for taking your shop digital",
     icons: {

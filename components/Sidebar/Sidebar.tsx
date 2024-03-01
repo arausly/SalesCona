@@ -58,29 +58,24 @@ const links = [
         message: "View all your messages",
         title: "Messages"
     },
+
     {
         pathname: "/dashboard/affiliate-links",
         icon: LinkIcon,
-        message: "Create affiliate links",
-        title: "Affiliate links"
-    },
-    {
-        pathname: "/dashboard/coupons",
-        icon: BanknotesIcon,
-        message: "Create coupon codes",
+        message: "Manage affiliate links & coupons",
         title: "Coupons"
     },
     {
         pathname: "/dashboard/sales",
         icon: BookOpenIcon,
-        message: "Manage your sales",
+        message: "Manage your sales and orders",
         title: "Sales"
     },
     {
-        pathname: "/dashboard/ticket",
-        icon: TicketIcon,
-        message: "Track your orders",
-        title: "Orders"
+        pathname: "/dashboard/transactions",
+        icon: BookOpenIcon,
+        message: "Monitor transactions",
+        title: "Transactions"
     },
     {
         pathname: "/dashboard/setting",

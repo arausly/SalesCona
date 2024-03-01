@@ -28,7 +28,8 @@
           "@hooks/*": ["./hooks/*"],
           "@data/*": ["./data/*"], 
           "@db/*": ["./db/*"], 
-          "@services/*": ["./services/*"]
+          "@services/*": ["./services/*"], 
+          "@supabase/*": ["./supabase/*"]
       }
   },
   "include": ["src/app/next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

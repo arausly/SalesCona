@@ -1,13 +1,20 @@
 export const tables = {
-    product_categories: "product_categories",
-    store_product_categories: "store_product_categories",
+    productCategories: "product_categories",
+    storeProductCategories: "store_product_categories",
     stores: "stores",
     products: "products",
     merchants: "merchants",
-    merchant_staffs: "merchant_staffs",
+    merchantStaffs: "merchant_staffs",
     roles: "roles",
     permissions: "permissions",
-    permissions_for_roles: "permissions_for_roles",
-    subscriptions: "subscriptions",
-    subscription_categories: "subscription_categories"
+    permissionsForRoles: "permissions_for_roles",
+    merchantBankAccounts: "merchant_bank-accounts",
+    merchantBillings: "merchant_billings",
+    merchantCards: "merchant_cards",
+    merchantCharges: "merchant_charges",
+    merchantPayouts: "merchant_payout",
+    merchantTransactions: "merchant_transactions",
+    merchantUsages: "merchant_usages",
+    usageCategories: "usage_categories",
+    usages: "usages"
 };
