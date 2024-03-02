@@ -16,5 +16,8 @@ export const tables = {
     merchantTransactions: "merchant_transactions",
     merchantUsages: "merchant_usages",
     usageCategories: "usage_categories",
-    usages: "usages"
+    usages: "usages",
+    merchantStoreSocials: "merchant_store_socials",
+    storeDeliveryChargePerLocation: "store_delivery_charge_per_location",
+    productCosts: "product_costs"
 };

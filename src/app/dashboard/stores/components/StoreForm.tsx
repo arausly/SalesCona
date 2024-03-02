@@ -144,7 +144,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
 
                         const { data: fetchedStoreCategories, error: err } =
                             await supabase
-                                .from(tables.store_product_categories)
+                                .from(tables.storeProductCategories)
                                 .select("*,category(*)")
                                 .eq("store", store.id)
                                 .returns<Store["categories"][][number]>();
@@ -464,7 +464,7 @@ export const StoreForm: React.FC<StoreFormProps> = ({ isEditForm }) => {
                 if (error) throw error;
                 const newStore = data[0] as Store;
                 await supabase
-                    .from(tables.store_product_categories)
+                    .from(tables.storeProductCategories)
                     .upsert(
                         storeCategories?.map((cat) => ({
                             category: cat.id,

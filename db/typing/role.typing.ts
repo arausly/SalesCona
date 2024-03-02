@@ -1,4 +1,5 @@
 import { MerchantStaffTable } from "./merchantStaff.typing";
+import { StoreTable } from "./store.typing";
 
 export interface RoleTable {
     label: string;
@@ -10,4 +11,5 @@ export interface RoleTable {
 
 export interface Role extends Omit<RoleTable, "merchant_staff" | "store"> {
     merchant_staff: MerchantStaffTable;
+    store: StoreTable;
 }
