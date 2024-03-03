@@ -1,6 +1,7 @@
 //utility that verifies that a merchant can carry out certain operations
 //what a merchant can't do a merchant staff can't as well.
 
+import { User } from "@db/typing/merchantStaff.typing";
 import { usages } from "./typing";
 
 /**
@@ -8,9 +9,9 @@ import { usages } from "./typing";
  */
 
 export default class Usage {
-    merchant = null;
-    constructor(merchant: any) {
-        this.merchant = merchant;
+    user: User = null;
+    constructor(user: User) {
+        this.user = user;
     }
 
     private canCreateStore = (): boolean => {

@@ -1,4 +1,4 @@
-import { UsageCategory } from "./usageCategories.typing";
+import { UsageCategory } from "./usageCategory.typing";
 
 export interface UsageTable {
     id: string;

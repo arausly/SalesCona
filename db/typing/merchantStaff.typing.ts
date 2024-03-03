@@ -21,3 +21,5 @@ export interface MerchantStaff
     owner: Merchant;
     role: Role;
 }
+
+export type User = (Merchant & MerchantStaff) | null | undefined;
