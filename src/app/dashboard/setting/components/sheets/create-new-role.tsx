@@ -74,7 +74,7 @@ export const CreateNewRole = React.forwardRef(
                     );
 
                     const { error: err } = await supabase
-                        .from(tables.permissions_for_roles)
+                        .from(tables.actionsForRoles)
                         .insert(permissionsForRoles);
 
                     if (!err) {

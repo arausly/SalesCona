@@ -1,5 +1,5 @@
 //what the users can perform on the app
-export enum actions {
+export enum ActionKeys {
     toCreateStore = "createNewStore",
     toChangeStoreName = "changeStoreName",
     toAddNewProduct = "addNewProduct",
@@ -15,5 +15,6 @@ export enum actions {
     toAddStaffToStore = "addStaff",
     toRemoveStaffFromStore = "removeStaff",
     suspendStaffFromStore = "suspendStaff",
-    toAllowCustomerNotification = "customerNotification"
+    toAllowCustomerNotification = "customerNotification",
+    toAddImagesToProduct = "addImagesToProduct"
 }

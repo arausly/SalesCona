@@ -1,6 +1,7 @@
 import { tables } from "@db/tables.db";
 import { supabase } from "../../supabase/supabase.browser";
 import { Store } from "../../src/app/dashboard/stores/typing";
+import { StoreTable } from "@db/typing/store.typing";
 
 /**
  *
@@ -11,8 +12,9 @@ export const getStores = async (merchantId: string) =>
     await supabase
         .from(tables.stores)
         .select()
-        .eq("user_id", merchantId)
-        .eq("is_soft_deleted", false);
+        .eq("merchant", merchantId)
+        .eq("is_soft_deleted", false)
+        .returns<StoreTable[]>();
 
 export const searchStores = async ({
     merchantId,

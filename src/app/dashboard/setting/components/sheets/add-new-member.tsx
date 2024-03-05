@@ -127,7 +127,7 @@ export const AddNewMember = React.forwardRef(
             try {
                 setAddingMember(true);
                 const { error: merchantError } = await supabase
-                    .from(tables.merchant_staffs)
+                    .from(tables.merchantStaffs)
                     .upsert(
                         {
                             ...formState,

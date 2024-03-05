@@ -74,13 +74,13 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
 
     React.useEffect(() => {
         const subscription = supabase
-            .channel(tables.merchant_staffs)
+            .channel(tables.merchantStaffs)
             .on(
                 "postgres_changes",
                 {
                     event: "*",
                     schema: "public",
-                    table: tables.merchant_staffs
+                    table: tables.merchantStaffs
                 },
 
                 async (payload) => {
@@ -134,7 +134,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                 try {
                     setFetchingMembers(true);
                     const { data, error } = await supabase
-                        .from(tables.merchant_staffs)
+                        .from(tables.merchantStaffs)
                         .select("*,role(*)")
                         .eq("owner", user.id)
                         .returns<MerchantStaff[]>();
@@ -250,7 +250,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
 
                 setEditingMember(true);
                 const { error } = await supabase
-                    .from(tables.merchant_staffs)
+                    .from(tables.merchantStaffs)
                     .update(payload)
                     .eq("id", selectedMemberStaff.id);
                 if (!error) {

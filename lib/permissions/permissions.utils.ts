@@ -1,8 +1,8 @@
 import Usage from "@lib/usages/usage.utils";
-import { actions } from "./typing";
 import { User } from "@db/typing/merchantStaff.typing";
-import { findPermissionsByStaffId } from "@services/permissionForRole/permissionForRole.service";
-import { PermissionForRole } from "@db/typing/permissionsForRole.typing";
+import { findPermissionsByStaffId } from "@services/actionForRole/actionForRole.service";
+import { ActionKeys } from "./typing";
+import { ActionForRole } from "@db/typing/actionsForRole.typing";
 
 /* staff.has(permissions.toChangeStoreName) --> bool
    usage.can(usages.createStore) --> bool
@@ -11,7 +11,7 @@ import { PermissionForRole } from "@db/typing/permissionsForRole.typing";
 export default class Permission {
     user: User = null;
     usage: Usage | null = null;
-    permissions: PermissionForRole[] = [];
+    permissions: ActionForRole[] = [];
 
     constructor(user: User) {
         this.user = user;
@@ -37,20 +37,29 @@ export default class Permission {
     /**
      * checks if this staff can perform the said action in argument
      */
-    private hasPermissionFor = (action: actions): boolean => {
+    private hasPermissionFor = (actionKey: ActionKeys): boolean => {
         if (!this.user?.owner) return true; // as a merchant, you can do all things :)
         //if one of the permissions for
         const permissionFound = this.permissions.some(
-            (permission) => permission.permission.action === action
+            (permission) => permission.action.key === actionKey
         );
         return permissionFound;
     };
 
     //check both permission and usages privileges to determine if any user can do anything
-    has = (permission: actions): boolean => {
+    has = async (permission: ActionKeys): Promise<boolean> => {
+        if (!this.usage) return false;
         switch (permission) {
-            case actions.toChangeStoreName:
-                return this.hasPermissionFor(actions.toChangeStoreName);
+            case ActionKeys.toChangeStoreName:
+                return (
+                    this.hasPermissionFor(ActionKeys.toChangeStoreName) &&
+                    (await this.usage.has(ActionKeys.toChangeStoreName))
+                );
+            case ActionKeys.toCreateStore:
+                return (
+                    this.hasPermissionFor(ActionKeys.toCreateStore) &&
+                    (await this.usage.has(ActionKeys.toCreateStore))
+                );
             default:
                 return false;
         }

@@ -1,11 +1,11 @@
 import { tables } from "@db/tables.db";
-import { PermissionForRole } from "@db/typing/permissionsForRole.typing";
+import { ActionForRole } from "@db/typing/actionsForRole.typing";
 import { supabase } from "@supabase/supabase.browser";
 
 /** find all the permissions a particular staff */
 export const findPermissionsByStaffId = async (id: string) =>
     supabase
-        .from(tables.permissionsForRoles)
+        .from(tables.actionsForRoles)
         .select("*, permission(*)")
         .eq("merchant_staff", id)
-        .returns<PermissionForRole[]>();
+        .returns<ActionForRole[]>();

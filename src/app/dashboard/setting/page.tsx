@@ -22,6 +22,7 @@ import { SubscriptionMetadata, SubscriptionPlan } from "./typing";
 
 //db
 import { tables } from "@db/tables.db";
+import { Action } from "@db/typing/action.typing";
 
 const tabIndexesByType = {
     profile: 0,
@@ -110,9 +111,9 @@ export default function Setting({
     React.useEffect(() => {
         (async () => {
             const { data, error } = await supabase
-                .from(tables.permissions)
+                .from(tables.actions)
                 .select()
-                .returns<Permission[]>();
+                .returns<Action[]>();
             if (data && !error) {
                 setPermissions(data);
             }
