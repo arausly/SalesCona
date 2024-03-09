@@ -19,6 +19,7 @@ export interface MerchantUsage
 }
 
 export interface MerchantUsagePopulatedAction
-    extends Omit<MerchantUsage, "usage"> {
+    extends Omit<MerchantUsage, "usage" | "store"> {
     usage: Usage;
+    store: string;
 }

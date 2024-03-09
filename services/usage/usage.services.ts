@@ -17,10 +17,13 @@ export const getMerchantUsages = async (merchantId?: string) => {
     return !error && data ? data : [];
 };
 
+//usages per store
 export type UsageAggregate = {
-    [key in ActionKeys]: {
-        level: number;
-        privilege: string;
+    [storeId: string]: {
+        [key in ActionKeys]: {
+            level: number;
+            privilege: string;
+        };
     };
 };
 
@@ -28,22 +31,24 @@ export const transformMerchantUsages = (
     merchantUsages: MerchantUsagePopulatedAction[]
 ) => {
     return merchantUsages.reduce((aggregate, merchantUsage) => {
+        const aggregateKey = merchantUsage.usage.associated_action.key;
+        const storeId = merchantUsage.store ?? "store";
         const newEntry = () => {
-            aggregate[aggregateKey] = {
+            aggregate[storeId][aggregateKey] = {
                 level: merchantUsage.usage.level,
                 privilege: merchantUsage.usage.name
             };
         };
-        const aggregateKey = merchantUsage.usage.associated_action.key;
         if (!merchantUsage.active) return aggregate;
 
         if (
-            aggregate[aggregateKey] &&
-            aggregate[aggregateKey].level < merchantUsage.usage.level
+            aggregate[storeId][aggregateKey] &&
+            aggregate[storeId][aggregateKey].level < merchantUsage.usage.level
         ) {
             newEntry();
         } else {
-            if (!aggregate[aggregateKey]) {
+            //to prevent overwriting by lesser only if non existence
+            if (!aggregate[storeId][aggregateKey]) {
                 newEntry();
             }
         }

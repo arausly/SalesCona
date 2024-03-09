@@ -3,6 +3,7 @@
 
 import { User } from "@db/typing/merchantStaff.typing";
 import { ActionKeys } from "@lib/permissions/typing";
+import { getProductsForStore } from "@services/product/product.service";
 import { getStores } from "@services/stores/stores.service";
 import {
     UsageAggregate,
@@ -44,27 +45,30 @@ export default class Usage {
         );
     };
 
+    //when store is null, it's because it's a usage above stores level e.g create a store :)
+    private getUsage = (usage: ActionKeys, storeId = "store") =>
+        this.usageAggregate && this.usageAggregate[`${storeId}`][usage];
+
     //checks if a user is allowed to create new store
     private canCreateNewStore = async (): Promise<boolean> => {
-        if (!this.usageAggregate || !this.merchantId) return false;
         //whats your usage cap?
-        const usageLevel = this.usageAggregate.createNewStore.level;
+        const usage = this.getUsage(ActionKeys.toCreateStore);
+        if (!usage) return false;
 
-        if (usageLevel) {
+        if (usage.level) {
             //can create multiple stores
             return true;
         } else {
             //if check if your store count is less than the usage cap
             try {
-                const { data, error } = await getStores(this.merchantId);
+                const { data, error } = await getStores(this.merchantId!);
                 if (error) return false;
                 if (data.length) {
                     //already have an exiting store
 
                     //add notification to queue
                     this.appendQueue({
-                        currentUsagePrivilege:
-                            this.usageAggregate.createNewStore.privilege,
+                        currentUsagePrivilege: usage.privilege,
                         action: ActionKeys.toCreateStore,
                         message:
                             "Upgrade store usage limit, to create a new store"
@@ -77,11 +81,55 @@ export default class Usage {
         }
     };
 
+    /**
+     * checks if a user is allowed to add a new product to a store
+     *
+     * check what the usage cap is
+     * if the current number of products in the store exceeds the usage cap, then user needs to upgrade
+     */
+    private canAddNewProduct = async (storeId: string): Promise<boolean> => {
+        try {
+            const { data } = await getProductsForStore(storeId);
+
+            const products = data ?? [];
+
+            if (products.length < 10) return true; //free to add products up to 10
+
+            const usage = this.getUsage(ActionKeys.toAddNewProduct, storeId);
+            if (!usage) return false;
+
+            switch (usage.level) {
+                case 1:
+                    //then you can't have more than 20 products
+                    return products.length < 20;
+                case 2:
+                    //then you can't have more than 50 products
+                    return products.length < 50;
+                case 3:
+                    //you can do all things :)
+                    return true;
+                default:
+                    return false;
+            }
+        } catch (err) {
+            //todo add to logger error for monitoring
+            return false;
+        }
+    };
+
+    private canCreateAffiliateLink = async () => {};
+
     //decides what a merchant can and cannot do
-    has = async (action: ActionKeys): Promise<boolean> => {
+    has = async <PayloadType = any>(
+        action: ActionKeys,
+        payload: PayloadType
+    ): Promise<boolean> => {
+        if (!this.usageAggregate || !this.merchantId) return false;
         switch (action) {
             case ActionKeys.toCreateStore:
                 return await this.canCreateNewStore();
+            case ActionKeys.toAddNewProduct:
+                return await this.canAddNewProduct(payload as string);
             default:
                 return true;
         }

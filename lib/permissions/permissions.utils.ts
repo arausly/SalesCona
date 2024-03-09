@@ -46,22 +46,28 @@ export default class Permission {
         return permissionFound;
     };
 
-    //check both permission and usages privileges to determine if any user can do anything
-    has = async (permission: ActionKeys): Promise<boolean> => {
-        if (!this.usage) return false;
-        switch (permission) {
-            case ActionKeys.toChangeStoreName:
-                return (
-                    this.hasPermissionFor(ActionKeys.toChangeStoreName) &&
-                    (await this.usage.has(ActionKeys.toChangeStoreName))
-                );
-            case ActionKeys.toCreateStore:
-                return (
-                    this.hasPermissionFor(ActionKeys.toCreateStore) &&
-                    (await this.usage.has(ActionKeys.toCreateStore))
-                );
-            default:
-                return false;
-        }
-    };
+    /**
+     * check both permission and usages privileges to determine if any user can do anything
+     * PayloadType could be store, merchant, user etc
+     **/
+    // has = async <PayloadType>(
+    //     action: ActionKeys,
+    //     payload: PayloadType
+    // ): Promise<boolean> => {
+    //     if (!this.usage) return false;
+    //     switch (action) {
+    //         case ActionKeys.toChangeStoreName:
+    //             return (
+    //                 this.hasPermissionFor(ActionKeys.toChangeStoreName) &&
+    //                 (await this.usage.has(ActionKeys.toChangeStoreName))
+    //             );
+    //         case ActionKeys.toCreateStore:
+    //             return (
+    //                 this.hasPermissionFor(ActionKeys.toCreateStore) &&
+    //                 (await this.usage.has(ActionKeys.toCreateStore))
+    //             );
+    //         default:
+    //             return false;
+    //     }
+    // };
 }
