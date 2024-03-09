@@ -17,6 +17,7 @@ export interface StoreTable {
     delivery_location_restriction: string;
     pickup_store_address: string;
     general_discount: number;
+    subdomain: string;
 }
 
 export interface Store extends Omit<StoreTable, "merchant"> {

@@ -22,5 +22,8 @@ export const tables = {
     productCosts: "product_costs",
     merchantAffiliateLinks: "merchant_affiliate_links",
     merchantAffiliateLinksStats: "merchant_affiliate_links_statistics",
-    merchantCouponCodes: "merchant_coupon_codes"
+    merchantCouponCodes: "merchant_coupon_codes",
+    emailTemplates: "email_templates",
+    merchantEmails: "merchant_emails",
+    shopTemplates: "shop_templates"
 };

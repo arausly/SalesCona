@@ -3,6 +3,8 @@
 
 import { User } from "@db/typing/merchantStaff.typing";
 import { ActionKeys } from "@lib/permissions/typing";
+import { getAffiliateLinksForStoreSinceTimeAgo } from "@services/affiliateLinks/afiiliateLinks.service";
+import { getCouponsForStoreSinceTimeAgo } from "@services/coupons/coupon.service";
 import { getProductsForStore } from "@services/product/product.service";
 import { getStores } from "@services/stores/stores.service";
 import {
@@ -99,6 +101,9 @@ export default class Usage {
             if (!usage) return false;
 
             switch (usage.level) {
+                case 0:
+                    //basic usage level, can't have more than 10 products listed
+                    return products.length < 10;
                 case 1:
                     //then you can't have more than 20 products
                     return products.length < 20;
@@ -117,7 +122,62 @@ export default class Usage {
         }
     };
 
-    private canCreateAffiliateLink = async () => {};
+    private monthlyMeteredResource = async <T>({
+        action,
+        resourceGetter,
+        storeId
+    }: {
+        action: ActionKeys;
+        storeId: string;
+        resourceGetter: (
+            storeId: string,
+            days: number
+        ) => Promise<{
+            data: T;
+            error: any;
+        }>;
+    }) => {
+        try {
+            const { data, error } = await resourceGetter(storeId, 30);
+            const resources = (data ?? []) as T[];
+
+            if (error) return false;
+
+            //user hasn't created resource since 30 days, then just allow.
+            if (!resources.length) return true;
+
+            const usage = this.getUsage(action, storeId);
+
+            if (!usage) return false;
+
+            //the usage level determines the accessibility for resources
+            return !!usage.level;
+        } catch (err) {
+            return false;
+        }
+    };
+
+    private canCreateCouponCodes = async (
+        storeId: string
+    ): Promise<boolean> => {
+        return this.monthlyMeteredResource({
+            storeId,
+            action: ActionKeys.toCreateCoupon,
+            resourceGetter: getCouponsForStoreSinceTimeAgo
+        });
+    };
+
+    private canCreateAffiliateLink = async (
+        storeId: string
+    ): Promise<boolean> => {
+        return this.monthlyMeteredResource({
+            storeId,
+            action: ActionKeys.toCreateAffiliateLink,
+            resourceGetter: getAffiliateLinksForStoreSinceTimeAgo
+        });
+    };
+
+    private canUseEmailMarketingFeature = async () => {};
 
     //decides what a merchant can and cannot do
     has = async <PayloadType = any>(
@@ -130,6 +190,10 @@ export default class Usage {
                 return await this.canCreateNewStore();
             case ActionKeys.toAddNewProduct:
                 return await this.canAddNewProduct(payload as string);
+            case ActionKeys.toCreateAffiliateLink:
+                return await this.canCreateAffiliateLink(payload as string);
+            case ActionKeys.toCreateCoupon:
+                return await this.canCreateCouponCodes(payload as string);
             default:
                 return true;
         }
