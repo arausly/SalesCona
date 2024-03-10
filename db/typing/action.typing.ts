@@ -6,9 +6,4 @@ export interface Action {
     title: string;
     description: string;
     key: ActionKeys;
-    store: string;
-}
-
-export interface PopulatedAction extends Omit<Action, "store"> {
-    store: StoreTable;
 }

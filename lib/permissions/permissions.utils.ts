@@ -36,12 +36,18 @@ export default class Permission {
 
     /**
      * checks if this staff can perform the said action in argument
+     * permissions are segmented per store, a certain user may be able to do
      */
-    private hasPermissionFor = (actionKey: ActionKeys): boolean => {
+    private hasPermissionFor = (
+        actionKey: ActionKeys,
+        storeId: string
+    ): boolean => {
         if (!this.user?.owner) return true; // as a merchant, you can do all things :)
         //if one of the permissions for
         const permissionFound = this.permissions.some(
-            (permission) => permission.action.key === actionKey
+            (permission) =>
+                permission.action.key === actionKey &&
+                storeId === permission.store
         );
         return permissionFound;
     };
@@ -50,24 +56,33 @@ export default class Permission {
      * check both permission and usages privileges to determine if any user can do anything
      * PayloadType could be store, merchant, user etc
      **/
-    // has = async <PayloadType>(
-    //     action: ActionKeys,
-    //     payload: PayloadType
-    // ): Promise<boolean> => {
-    //     if (!this.usage) return false;
-    //     switch (action) {
-    //         case ActionKeys.toChangeStoreName:
-    //             return (
-    //                 this.hasPermissionFor(ActionKeys.toChangeStoreName) &&
-    //                 (await this.usage.has(ActionKeys.toChangeStoreName))
-    //             );
-    //         case ActionKeys.toCreateStore:
-    //             return (
-    //                 this.hasPermissionFor(ActionKeys.toCreateStore) &&
-    //                 (await this.usage.has(ActionKeys.toCreateStore))
-    //             );
-    //         default:
-    //             return false;
-    //     }
-    // };
+    has = async <PayloadType>(
+        action: ActionKeys,
+        payload: PayloadType
+    ): Promise<boolean> => {
+        if (!this.usage) return false;
+        const payloadString = payload as string; // e.g storeId
+        switch (action) {
+            case ActionKeys.toChangeStoreName:
+                return this.hasPermissionFor(
+                    ActionKeys.toChangeStoreName,
+                    payloadString
+                );
+            case ActionKeys.toCreateStore:
+                return (
+                    this.hasPermissionFor(
+                        ActionKeys.toCreateStore,
+                        payloadString
+                    ) &&
+                    (await this.usage.has(
+                        ActionKeys.toCreateStore,
+                        payloadString
+                    ))
+                );
+            case ActionKeys.toAddNewProduct:
+            // return this.hasPermissionFor(ActionKeys.)
+            default:
+                return false;
+        }
+    };
 }

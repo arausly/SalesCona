@@ -1,6 +1,7 @@
 import { Action } from "./action.typing";
 import { MerchantStaffTable } from "./merchantStaff.typing";
 import { RoleTable } from "./role.typing";
+import { StoreTable } from "./store.typing";
 
 export interface ActionForRoleTable {
     id: string;
@@ -8,6 +9,7 @@ export interface ActionForRoleTable {
     role: string;
     action: string;
     merchant_staff: string;
+    store: string;
 }
 
 export interface ActionForRole

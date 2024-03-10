@@ -6,6 +6,7 @@ import { ActionKeys } from "@lib/permissions/typing";
 import { getAffiliateLinksForStoreSinceTimeAgo } from "@services/affiliateLinks/afiiliateLinks.service";
 import { getCouponsForStoreSinceTimeAgo } from "@services/coupons/coupon.service";
 import { getProductsForStore } from "@services/product/product.service";
+import { getStaffsForStore } from "@services/staff/staff.service";
 import { getStores } from "@services/stores/stores.service";
 import {
     UsageAggregate,
@@ -13,16 +14,9 @@ import {
     transformMerchantUsages
 } from "@services/usage/usage.services";
 
-type UsageNotificationQueue = {
-    message: string;
-    action: ActionKeys;
-    currentUsagePrivilege: string;
-};
-
 export default class Usage {
     user: User = null;
     usageAggregate: UsageAggregate | null = null;
-    notificationQueue: UsageNotificationQueue[] = [];
 
     constructor(user: User) {
         this.user = user;
@@ -38,15 +32,6 @@ export default class Usage {
         return this.user?.owner.id ?? this.user?.id;
     }
 
-    private appendQueue = (newNotification: UsageNotificationQueue) =>
-        this.notificationQueue.unshift(newNotification);
-
-    removeFromQueue = (action: ActionKeys) => {
-        this.notificationQueue = this.notificationQueue.filter(
-            (n) => n.action !== action
-        );
-    };
-
     //when store is null, it's because it's a usage above stores level e.g create a store :)
     private getUsage = (usage: ActionKeys, storeId = "store") =>
         this.usageAggregate && this.usageAggregate[`${storeId}`][usage];
@@ -57,30 +42,16 @@ export default class Usage {
         const usage = this.getUsage(ActionKeys.toCreateStore);
         if (!usage) return false;
 
-        if (usage.level) {
-            //can create multiple stores
-            return true;
-        } else {
-            //if check if your store count is less than the usage cap
-            try {
-                const { data, error } = await getStores(this.merchantId!);
-                if (error) return false;
-                if (data.length) {
-                    //already have an exiting store
+        //can create multiple stores
+        if (usage.level) return true;
 
-                    //add notification to queue
-                    this.appendQueue({
-                        currentUsagePrivilege: usage.privilege,
-                        action: ActionKeys.toCreateStore,
-                        message:
-                            "Upgrade store usage limit, to create a new store"
-                    });
-                    return false;
-                }
-            } catch (err) {}
+        //if check if your store count is less than the usage cap
+        try {
+            const { data, error } = await getStores(this.merchantId!);
+            if (error) return false;
+        } catch (err) {}
 
-            return true;
-        }
+        return true;
     };
 
     /**
@@ -100,22 +71,17 @@ export default class Usage {
             const usage = this.getUsage(ActionKeys.toAddNewProduct, storeId);
             if (!usage) return false;
 
-            switch (usage.level) {
-                case 0:
-                    //basic usage level, can't have more than 10 products listed
-                    return products.length < 10;
-                case 1:
-                    //then you can't have more than 20 products
-                    return products.length < 20;
-                case 2:
-                    //then you can't have more than 50 products
-                    return products.length < 50;
-                case 3:
-                    //you can do all things :)
-                    return true;
-                default:
-                    return false;
-            }
+            const productUsageLevelsCapMap = new Map([
+                [0, 10],
+                [1, 20],
+                [2, 50],
+                [3, Infinity]
+            ]);
+
+            return (
+                products.length <
+                productUsageLevelsCapMap.get(usage.level ?? 0)!
+            );
         } catch (err) {
             //todo add to logger error for monitoring
             return false;
@@ -177,7 +143,36 @@ export default class Usage {
         });
     };
 
-    private canUseEmailMarketingFeature = async () => {};
+    private canUseEmailMarketingFeature = (storeId: string) =>
+        !!this.getUsage(ActionKeys.toAccessEmailMarketing, storeId)?.level;
+
+    private canUseCustomTemplate = async (storeId: string) =>
+        !!this.getUsage(ActionKeys.toUseCustomTemplate, storeId)?.level;
+
+    private canUseNotificationFeature = async (storeId: string) =>
+        !!this.getUsage(ActionKeys.toAllowCustomerNotification, storeId)?.level;
+
+    private canAddStaff = async (storeId: string): Promise<boolean> => {
+        //less than one staff existing, then allow
+        //by here return usage level
+        try {
+            const { data, error } = await getStaffsForStore(
+                storeId,
+                this.merchantId!
+            );
+
+            if (error) return false;
+
+            const staffs = data ?? [];
+
+            if (!staffs.length) return true; //no staff
+
+            return !!this.getUsage(ActionKeys.toAddStaffToStore, storeId)
+                ?.level;
+        } catch (err) {
+            return false;
+        }
+    };
 
     //decides what a merchant can and cannot do
     has = async <PayloadType = any>(
@@ -194,6 +189,14 @@ export default class Usage {
                 return await this.canCreateAffiliateLink(payload as string);
             case ActionKeys.toCreateCoupon:
                 return await this.canCreateCouponCodes(payload as string);
+            case ActionKeys.toAccessEmailMarketing:
+                return this.canUseEmailMarketingFeature(payload as string);
+            case ActionKeys.toUseCustomTemplate:
+                return this.canUseCustomTemplate(payload as string);
+            case ActionKeys.toAllowCustomerNotification:
+                return this.canUseNotificationFeature(payload as string);
+            case ActionKeys.toAddStaffToStore:
+                return await this.canAddStaff(payload as string);
             default:
                 return true;
         }

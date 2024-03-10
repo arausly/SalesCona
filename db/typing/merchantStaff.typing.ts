@@ -1,5 +1,6 @@
 import { Merchant, MerchantTable } from "./merchant.typing";
 import { Role } from "./role.typing";
+import { StoreTable } from "./store.typing";
 
 export interface MerchantStaffTable extends MerchantTable {
     owner: string;
@@ -14,12 +15,14 @@ export interface MerchantStaffTable extends MerchantTable {
     country: string;
     /**@private method not to be accessed, sensitive information only used when absolutely necessary */
     lng_lat: string;
+    store: string;
 }
 
 export interface MerchantStaff
-    extends Omit<MerchantStaffTable, "role" | "owner"> {
+    extends Omit<MerchantStaffTable, "role" | "owner" | "store"> {
     owner: Merchant;
     role: Role;
+    store: StoreTable;
 }
 
 export type User = (Merchant & MerchantStaff) | null | undefined;

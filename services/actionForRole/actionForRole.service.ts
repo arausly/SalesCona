@@ -6,6 +6,6 @@ import { supabase } from "@supabase/supabase.browser";
 export const findPermissionsByStaffId = async (id: string) =>
     supabase
         .from(tables.actionsForRoles)
-        .select("*, permission(*)")
+        .select("*,permission(*)")
         .eq("merchant_staff", id)
         .returns<ActionForRole[]>();
