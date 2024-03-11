@@ -52,6 +52,16 @@ export default class Permission {
         return permissionFound;
     };
 
+    private checkPermissionAndUsage = async (
+        action: ActionKeys,
+        payload: string
+    ): Promise<boolean> => {
+        return !!(
+            this.hasPermissionFor(action, payload) &&
+            (await this.usage?.has(ActionKeys.toCreateStore, payload))
+        );
+    };
+
     /**
      * check both permission and usages privileges to determine if any user can do anything
      * PayloadType could be store, merchant, user etc
@@ -64,25 +74,58 @@ export default class Permission {
         const payloadString = payload as string; // e.g storeId
         switch (action) {
             case ActionKeys.toChangeStoreName:
-                return this.hasPermissionFor(
+                return await this.checkPermissionAndUsage(
                     ActionKeys.toChangeStoreName,
                     payloadString
                 );
             case ActionKeys.toCreateStore:
-                return (
-                    this.hasPermissionFor(
-                        ActionKeys.toCreateStore,
-                        payloadString
-                    ) &&
-                    (await this.usage.has(
-                        ActionKeys.toCreateStore,
-                        payloadString
-                    ))
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toCreateStore,
+                    payloadString
                 );
             case ActionKeys.toAddNewProduct:
-            // return this.hasPermissionFor(ActionKeys.)
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toAddNewProduct,
+                    payloadString
+                );
+            case ActionKeys.toCreateAffiliateLink:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toCreateAffiliateLink,
+                    payloadString
+                );
+            case ActionKeys.toCreateCoupon:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toCreateCoupon,
+                    payloadString
+                );
+            case ActionKeys.toAccessEmailMarketing:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toAccessEmailMarketing,
+                    payloadString
+                );
+            case ActionKeys.toUseCustomTemplate:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toUseCustomTemplate,
+                    payloadString
+                );
+            case ActionKeys.toAllowCustomerNotification:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toAllowCustomerNotification,
+                    payloadString
+                );
+            case ActionKeys.toAddStaffToStore:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toAddStaffToStore,
+                    payloadString
+                );
+            case ActionKeys.toAddImagesToProduct:
+                return await this.checkPermissionAndUsage(
+                    ActionKeys.toAddImagesToProduct,
+                    payloadString
+                );
             default:
-                return false;
+                //if it has no utility checker it's most likely permitted
+                return true;
         }
     };
 }
