@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 //components
 import { Table } from "@components/Table/Table";
 import {
+    BuildingStorefrontIcon,
     EllipsisHorizontalIcon,
     UserGroupIcon,
     UserPlusIcon
@@ -21,18 +22,21 @@ import {
 import { Prompt } from "@components/Dialog/Prompt";
 import { AddNewMember } from "./sheets/add-new-member";
 
-//hooks
-import { useGetUser } from "@hooks/useGetUser";
-
 //utils
 import { excludeKeysFromObj } from "@lib/common.utils";
-import { useBrowserSupabase } from "@lib/supabaseBrowser";
 
 //db
 import { tables } from "@db/tables.db";
 
 //typing
-import { MerchantStaff, Permission, Role } from "../../typing";
+import { listenToChangesIn } from "@services/subscriptions.service";
+import { SettingContext } from "../contexts/setting.context";
+import { updateStaff } from "@services/staff/staff.service";
+import { getRoleById } from "@services/roles/roles.services";
+import { MerchantStaffRolePopulated } from "@db/typing/merchantStaff.typing";
+import { StoreDropdown } from "@components/shared/StoreDropdown";
+import Link from "next/link";
+import { NoData } from "@components/NoData";
 
 const headers = [
     { id: "firstname", label: "Firstname" },
@@ -51,103 +55,80 @@ const pagination = {
     pageItemCount: 10
 };
 
-interface TeamProps {
-    roles: Role[];
-    permissions: Permission[];
-}
-
-export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
-    const { user } = useGetUser();
-    const [members, setMembers] = React.useState<MerchantStaff[]>([]);
-    const [fetchingMembers, setFetchingMembers] =
-        React.useState<boolean>(false);
+export const Team = () => {
     const [openDeletePrompt, setOpenDeletePrompt] =
         React.useState<boolean>(false);
     const [openSuspendPrompt, setOpenSuspendPrompt] =
         React.useState<boolean>(false);
     const [editingMember, setEditingMember] = React.useState<boolean>(false); //for remove & suspend
     const [selectedMemberStaff, setSelectedMemberStaff] =
-        React.useState<MerchantStaff>();
+        React.useState<MerchantStaffRolePopulated>();
     const [] = React.useState<boolean>();
-    const { supabase } = useBrowserSupabase();
     const sheetTriggerRef = React.useRef();
 
+    const {
+        loading,
+        actions,
+        roles,
+        selectStore,
+        stores,
+        setStaffsByStore,
+        currentStore,
+        staffsByStore
+    } = React.useContext(SettingContext);
+
     React.useEffect(() => {
-        const subscription = supabase
-            .channel(tables.merchantStaffs)
-            .on(
-                "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: tables.merchantStaffs
-                },
+        if (!currentStore) return () => {}; // do nothing
+        const subscription = listenToChangesIn(
+            tables.merchantStaffs,
+            "*",
+            async (payload) => {
+                switch (payload.eventType) {
+                    case "INSERT":
+                        setStaffsByStore((prev) => ({
+                            ...prev,
+                            [currentStore.id]: [
+                                ...prev[currentStore.id],
+                                payload.new
+                            ]
+                        }));
+                        break;
+                    case "DELETE":
+                        setStaffsByStore((prev) => ({
+                            ...prev,
+                            [currentStore.id]: prev[currentStore.id].filter(
+                                (oldMember) => oldMember.id !== payload.old.id
+                            )
+                        }));
+                        break;
+                    case "UPDATE":
+                        let memberPayload = payload.new;
+                        const { data, error } = await getRoleById(
+                            memberPayload.role
+                        );
 
-                async (payload) => {
-                    let memberPayload = payload.new as MerchantStaff;
-                    const { data, error } = await supabase
-                        .from(tables.roles)
-                        .select()
-                        .eq("id", memberPayload.role);
-
-                    if (data?.length && !error) {
-                        memberPayload.role = data[0] as Role;
-                    }
-
-                    switch (payload.eventType) {
-                        case "INSERT":
-                            setMembers((prev) => [
-                                ...prev,
-                                payload.new as MerchantStaff
-                            ]);
-                            break;
-                        case "DELETE":
-                            setMembers((prev) => [
-                                ...prev.filter(
-                                    (oldMember) =>
-                                        oldMember.id !== payload.old.id
-                                )
-                            ]);
-                            break;
-                        case "UPDATE":
-                            setMembers((prev) =>
-                                prev.map((oldMember) => {
+                        if (data?.length && !error) {
+                            memberPayload.role = data[0];
+                        }
+                        setStaffsByStore((prev) => ({
+                            ...prev,
+                            [currentStore.id]: prev[currentStore.id].map(
+                                (oldMember) => {
                                     if (oldMember.id === memberPayload.id) {
                                         return memberPayload;
                                     }
                                     return oldMember;
-                                })
-                            );
-                    }
+                                }
+                            )
+                        }));
                 }
-            )
-            .subscribe();
+            }
+        );
 
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
-
-    React.useEffect(() => {
-        (async () => {
-            if (user) {
-                try {
-                    setFetchingMembers(true);
-                    const { data, error } = await supabase
-                        .from(tables.merchantStaffs)
-                        .select("*,role(*)")
-                        .eq("owner", user.id)
-                        .returns<MerchantStaff[]>();
-                    if (data && !error) {
-                        setMembers(data);
-                    }
-                } catch (err) {
-                } finally {
-                    setFetchingMembers(false);
-                }
-            }
-        })();
-    }, [user]);
+    }, [currentStore]);
 
     const openMemberCreationSheet = React.useCallback(() => {
         const trigger = sheetTriggerRef?.current as any;
@@ -156,7 +137,11 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
         }
     }, [sheetTriggerRef]);
 
-    const MemberActions = ({ member }: { member: MerchantStaff }) => {
+    const MemberActions = ({
+        member
+    }: {
+        member: MerchantStaffRolePopulated;
+    }) => {
         const handleEdit = () => {
             setSelectedMemberStaff(member);
             openMemberCreationSheet();
@@ -207,6 +192,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
         );
     };
 
+    const members = staffsByStore[currentStore?.id ?? ""] ?? [];
     const rows = React.useMemo(
         () =>
             members.reduce((acc, m) => {
@@ -249,10 +235,10 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                         : { suspended: !selectedMemberStaff.suspended };
 
                 setEditingMember(true);
-                const { error } = await supabase
-                    .from(tables.merchantStaffs)
-                    .update(payload)
-                    .eq("id", selectedMemberStaff.id);
+                const { error } = await updateStaff(
+                    selectedMemberStaff.id,
+                    payload
+                );
                 if (!error) {
                     toast(
                         <p className="text-sm">Removed staff successfully</p>,
@@ -280,6 +266,20 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
         openMemberCreationSheet();
     }, []);
 
+    if (!stores.length)
+        return (
+            <div className="flex flex-col items-center justify-center">
+                <NoData msg="You have to create stores first to add your staff" />
+                <Link
+                    href="/dashboard/stores/create"
+                    className="w-48 h-10 mt-4 rounded-lg primary-bg shadow-md border transition border-[#6d67e4] hover:bg-indigo-500 flex justify-center items-center"
+                >
+                    <BuildingStorefrontIcon className="h-5 w-5 text-white mr-2" />
+                    <p className="text-white text-sm">Create store</p>
+                </Link>
+            </div>
+        );
+
     return (
         <>
             <Prompt
@@ -306,11 +306,17 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
             />
             <AddNewMember
                 roles={roles}
-                permissions={permissions}
+                permissions={actions}
                 ref={sheetTriggerRef}
                 currentMember={selectedMemberStaff}
             />
             <div className="flex flex-col w-full items-center justify-center px-0 md:px-6 mt-16 lg:px-8">
+                <div className="mb-4">
+                    <StoreDropdown
+                        stores={stores}
+                        handleSelection={selectStore}
+                    />
+                </div>
                 {(rows.length && (
                     <button
                         onClick={handleOpenNewMemberSheet}
@@ -325,7 +331,7 @@ export const Team: React.FC<TeamProps> = ({ roles, permissions }) => {
                     title="Members"
                     headers={headers}
                     onSearch={() => {}}
-                    loading={fetchingMembers}
+                    loading={loading}
                     onPaginate={() => {}}
                     pagination={pagination}
                     rows={rows}

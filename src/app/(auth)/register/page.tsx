@@ -12,7 +12,8 @@ import { useBrowserSupabase } from "@lib/supabaseBrowser";
 //db
 import { tables } from "@db/tables.db";
 //types
-import { Merchant, MerchantStaff } from "../../dashboard/typing";
+import { MerchantStaffTable } from "@db/typing/merchantStaff.typing";
+import { MerchantTable } from "@db/typing/merchant.typing";
 //utils
 import { extractStaffId } from "@lib/common.utils";
 //images
@@ -46,7 +47,7 @@ export default function Register({
     const router = useRouter();
     const { supabase } = useBrowserSupabase();
     const [existingMerchantStaff, setExistingMerchantStaff] =
-        React.useState<MerchantStaff>();
+        React.useState<MerchantStaffTable>();
 
     //check for merchant staff and set defaults for inputs
     React.useEffect(() => {
@@ -57,10 +58,10 @@ export default function Register({
                     const { id } = extractedInfo;
                     //check that merchant with Id exist
                     const { data, error } = await supabase
-                        .from(tables.merchant_staffs)
+                        .from(tables.merchantStaffs)
                         .select("*,owner(*)")
                         .eq("id", id)
-                        .returns<MerchantStaff[]>();
+                        .returns<MerchantStaffTable[]>();
 
                     if (data?.length && !error) {
                         const merchant_staff = data[0];
@@ -80,7 +81,7 @@ export default function Register({
             return handleSubmit(async (values) => {
                 try {
                     setLoading(true);
-                    let merchant: Merchant | undefined = undefined;
+                    let merchant: MerchantTable | undefined = undefined;
 
                     //create merchant if not merchant_staff
                     if (!staffAuthInfo) {
@@ -91,7 +92,7 @@ export default function Register({
                                     email: values.email
                                 })
                                 .select()
-                                .returns<Merchant[]>();
+                                .returns<MerchantTable[]>();
 
                         if (merchantData && !merchantError) {
                             merchant = merchantData[0];

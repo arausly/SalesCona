@@ -7,20 +7,39 @@ import { storageKeys } from "@lib/constants";
 import { onlyIfWindowIsDefined } from "@lib/common.utils";
 
 //typings
-import { User } from "@supabase/supabase-js";
 import { tables } from "@db/tables.db";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { Merchant } from "@db/typing/merchant.typing";
+import { MerchantStaff, User } from "@db/typing/merchantStaff.typing";
+
+/**
+ * When a user signs up, either as a merchant or staff.
+ * the table data gets added as a metadata,
+ * however in-app a different convention is expected for ease of work
+ * @param user
+ * @returns
+ */
+const reconstructUser = <T>(user: SupabaseUser): T => {
+    const merchantStaff = user.user_metadata.merchant_staff;
+    if (merchantStaff) {
+        return {
+            ...merchantStaff,
+            ...user,
+            user_metadata: undefined
+        } as T;
+    }
+    const merchant = user.user_metadata.merchant;
+    return {
+        ...merchant,
+        ...user,
+        user_metadata: undefined
+    } as T;
+};
 
 export const useGetUser = () => {
     const [user, setUser] = React.useState<User>();
     const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
-
-    // //ensures the current user is fetched first at most once
-    // React.useEffect(() => {
-    //     onlyIfWindowIsDefined(() => {
-    //         sessionStorage.removeItem(storageKeys.user);
-    //     });
-    // }, []);
 
     //subsequent retries per page should feed from the storage if exists
     React.useEffect(() => {
@@ -35,18 +54,23 @@ export const useGetUser = () => {
                         setUser(JSON.parse(storedUser));
                     } else {
                         const {
-                            data: { user: authUserInfo }
+                            data: { user: userData }
                         } = await supabase.auth.getUser();
-                        if (authUserInfo) {
+                        if (userData) {
                             sessionStorage.setItem(
                                 storageKeys.user,
-                                JSON.stringify(authUserInfo)
+                                JSON.stringify(userData)
                             );
-                            setUser(authUserInfo);
+                            const isMerchant =
+                                !!userData?.user_metadata.merchant;
+
+                            const reconstructedUser = isMerchant
+                                ? reconstructUser<Merchant>(userData)
+                                : reconstructUser<MerchantStaff>(userData);
+
+                            setUser(reconstructedUser as User);
 
                             ///track to record when users signed in last
-                            const isMerchant =
-                                authUserInfo?.user_metadata.merchant;
                             await supabase
                                 .from(
                                     isMerchant
@@ -54,10 +78,9 @@ export const useGetUser = () => {
                                         : tables.merchantStaffs
                                 )
                                 .update({
-                                    last_sign_in_at:
-                                        authUserInfo.last_sign_in_at
+                                    last_sign_in_at: userData.last_sign_in_at
                                 })
-                                .eq("id", authUserInfo.id);
+                                .eq("id", userData.id);
                         }
                     }
                 }

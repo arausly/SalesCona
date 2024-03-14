@@ -20,9 +20,14 @@ export interface MerchantStaffTable extends MerchantTable {
 
 export interface MerchantStaff
     extends Omit<MerchantStaffTable, "role" | "owner" | "store"> {
-    owner: Merchant;
+    owner: Merchant | null;
+    role: Role | null;
+    store: StoreTable | null;
+}
+
+export interface MerchantStaffRolePopulated
+    extends Omit<MerchantStaffTable, "role"> {
     role: Role;
-    store: StoreTable;
 }
 
 export type User = (Merchant & MerchantStaff) | null | undefined;

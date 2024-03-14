@@ -29,7 +29,7 @@ export const Profile = () => {
 
     React.useEffect(() => {
         if (user) {
-            const { firstname, lastname } = user?.user_metadata;
+            const { firstname, lastname } = user;
             setFormState({ firstname, lastname });
         }
     }, [user]);

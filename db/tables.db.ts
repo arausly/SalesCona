@@ -26,4 +26,7 @@ export const tables = {
     emailTemplates: "email_templates",
     merchantEmails: "merchant_emails",
     shopTemplates: "shop_templates"
-};
+} as const;
+
+export type tableKeys = keyof typeof tables;
+export type tableType = (typeof tables)[tableKeys];

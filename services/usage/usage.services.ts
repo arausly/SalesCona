@@ -3,8 +3,18 @@ import {
     MerchantUsage,
     MerchantUsagePopulatedAction
 } from "@db/typing/merchantUsage.typing";
+import { Usage } from "@db/typing/usage.typing";
 import { ActionKeys } from "@lib/permissions/typing";
 import { supabase } from "@supabase/supabase.browser";
+
+//get all usages for this app
+export const getAppUsages = async () =>
+    (
+        await supabase
+            .from(tables.usages)
+            .select("*,category(*)")
+            .returns<Usage[]>()
+    ).data ?? [];
 
 /** get all the merchant usages */
 export const getMerchantUsages = async (merchantId?: string) => {
@@ -27,6 +37,7 @@ export type UsageAggregate = {
     };
 };
 
+//transformers
 export const transformMerchantUsages = (
     merchantUsages: MerchantUsagePopulatedAction[]
 ) => {
@@ -54,4 +65,23 @@ export const transformMerchantUsages = (
         }
         return aggregate;
     }, {} as UsageAggregate);
+};
+
+export type UsageCategoryType = {
+    [key: string]: Usage[];
+};
+
+//organize the usages into categories
+export const transformUsagesToUsageCategories = (
+    usages: Usage[]
+): UsageCategoryType => {
+    return usages.reduce((categories, usage) => {
+        const usageCategory = usage.category.name;
+        if (categories[usageCategory]) {
+            categories[usageCategory].push(usage);
+        } else {
+            categories[usageCategory] = [usage];
+        }
+        return categories;
+    }, {} as UsageCategoryType);
 };
