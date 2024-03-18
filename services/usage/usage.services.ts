@@ -3,7 +3,7 @@ import {
     MerchantUsage,
     MerchantUsagePopulatedAction
 } from "@db/typing/merchantUsage.typing";
-import { Usage } from "@db/typing/usage.typing";
+import { Usage, UsageTable } from "@db/typing/usage.typing";
 import { ActionKeys } from "@lib/permissions/typing";
 import { supabase } from "@supabase/supabase.browser";
 
@@ -26,6 +26,13 @@ export const getMerchantUsages = async (merchantId?: string) => {
         .returns<MerchantUsagePopulatedAction[]>();
     return !error && data ? data : [];
 };
+
+export const getAllFreeAppUsages = async () =>
+    await supabase
+        .from(tables.usages)
+        .select()
+        .eq("is_free", true)
+        .returns<UsageTable[]>();
 
 //usages per store
 export type UsageAggregate = {

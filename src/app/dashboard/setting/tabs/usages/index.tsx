@@ -22,8 +22,8 @@ export const UsageTab: React.FC<UsageProps> = ({}) => {
                 handleSelection={settingContext.selectStore}
             />
             <UsageSummary />
-            <Tabs defaultValue="usages" className="w-full">
-                <TabsList>
+            <Tabs defaultValue="usages" className="w-full flex flex-col">
+                <TabsList className="w-fit self-center">
                     <TabsTrigger value="usages">Usages</TabsTrigger>
                     <TabsTrigger value="billings">Billing</TabsTrigger>
                 </TabsList>

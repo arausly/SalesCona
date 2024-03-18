@@ -29,7 +29,7 @@ export default class Usage {
     }
 
     get merchantId() {
-        return this.user?.owner.id ?? this.user?.id;
+        return this.user?.owner?.id ?? this.user?.id;
     }
 
     //when store is null, it's because it's a usage above stores level e.g create a store :)

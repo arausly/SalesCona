@@ -11,7 +11,6 @@ import { Tooltip } from "@components/Tooltip";
 import { useGetLocationCategory } from "@hooks/useGetLocationCategory";
 
 export const UsageSummary = () => {
-    const { user } = useGetUser();
     const { currentStore, loading } = React.useContext(SettingContext);
     const { ifNG } = useGetLocationCategory();
     const userHasSubscription = !!currentStore?.usage_start_date;
@@ -62,7 +61,7 @@ export const UsageSummary = () => {
                         <Tooltip
                             message="See usages below for more info"
                             side="right"
-                            tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-4"
+                            tooltipContentClasses="bg-[#3C4048] text-white font-light w-fit ml-0 pl-4"
                         >
                             <div className="flex justify-center items-center ml-2 cursor-pointer">
                                 <InformationCircleIcon className="w-5 h-5" />
