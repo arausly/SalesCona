@@ -24,7 +24,7 @@ import {
     categorizeMerchantStaffPerStore,
     getStaffsForMerchant
 } from "@services/staff/staff.service";
-import { Store, StoreTable } from "@db/typing/store.typing";
+import { StoreTable } from "@db/typing/store.typing";
 import { getStores } from "@services/stores/stores.service";
 
 interface SettingContextProps {
@@ -84,7 +84,7 @@ export const SettingsProvider = ({
         if (!merchantId) return () => {}; //do nothing
         setLoading(true);
         Promise.all([
-            getStores(merchantId).then(({ data }) => {
+            getStores(merchantId).then(async ({ data }) => {
                 const fetchedStores = data ?? [];
                 setStores(fetchedStores);
                 //select the first store by default

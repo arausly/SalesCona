@@ -1,4 +1,4 @@
-export interface IpLocation {
+export interface IPLocation {
     ip: string;
     network: string;
     version: string;

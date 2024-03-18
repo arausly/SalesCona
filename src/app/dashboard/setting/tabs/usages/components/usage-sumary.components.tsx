@@ -7,27 +7,37 @@ import { useGetUser } from "@hooks/useGetUser";
 import { dateToReadableFormat } from "@lib/format-utils";
 import { SettingContext } from "../../../contexts/setting.context";
 import { Spinner } from "@components/Spinner";
+import { Tooltip } from "@components/Tooltip";
+import { useGetLocationCategory } from "@hooks/useGetLocationCategory";
 
 export const UsageSummary = () => {
     const { user } = useGetUser();
     const { currentStore, loading } = React.useContext(SettingContext);
-    const userHasSubscription = !!user?.usage_start_date;
+    const { ifNG } = useGetLocationCategory();
+    const userHasSubscription = !!currentStore?.usage_start_date;
 
-    if (!user) return null;
+    if (!currentStore) return null;
     if (loading) return <Spinner size="medium" />;
+
+    const {
+        usage_start_date,
+        next_billing_date,
+        next_billing_amount_naira,
+        next_billing_amount_usd
+    } = currentStore;
 
     const billingInfo = [
         {
             title: "Start Date",
-            content: dateToReadableFormat(user.usage_start_date)
+            content: dateToReadableFormat(usage_start_date)
         },
         {
             title: "Next Billing Date",
-            content: dateToReadableFormat(user.next_billing_date)
+            content: dateToReadableFormat(next_billing_date)
         },
         {
             title: "Next Billing Amount",
-            content: user.next_billing_amount_naira
+            content: ifNG(next_billing_amount_naira, next_billing_amount_usd)
         }
     ];
 
@@ -48,11 +58,19 @@ export const UsageSummary = () => {
             </CardHeader>
             <CardContent>
                 <p className="text-xl flex items-center font-semibold">
-                    {userHasSubscription ? "Using 4 privileges" : "Free"}
+                    {userHasSubscription
+                        ? `Using ${currentStore.total_privileges ?? 0} privileges`
+                        : "Free"}
                     {userHasSubscription && (
-                        <div className="flex justify-center items-center ml-2 cursor-pointer">
-                            <InformationCircleIcon className="w-5 h-5" />
-                        </div>
+                        <Tooltip
+                            message="See usages below for more info"
+                            side="right"
+                            tooltipContentClasses="bg-[#3C4048] text-white w-fit ml-0 pl-4"
+                        >
+                            <div className="flex justify-center items-center ml-2 cursor-pointer">
+                                <InformationCircleIcon className="w-5 h-5" />
+                            </div>
+                        </Tooltip>
                     )}
                 </p>
             </CardContent>
@@ -63,9 +81,9 @@ export const UsageSummary = () => {
                         SalesCona
                     </p>
                 ) : (
-                    <div className="flex items-center space-x-20">
+                    <div className="flex items-center space-x-32">
                         {billingInfo.map((info) => (
-                            <div className="flex flex-col">
+                            <div key={info.title} className="flex flex-col">
                                 <p className="text-sm mb-4">{info.title}</p>
                                 <p className="text-base font-semibold text-center">
                                     {info.content}

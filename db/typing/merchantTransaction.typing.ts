@@ -5,7 +5,7 @@
  * This is different merchant's billing which refer to charges for usages
  **/
 
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 
 export interface MerchantTransactionTable {
     id: string;
@@ -17,5 +17,5 @@ export interface MerchantTransactionTable {
 
 export interface MerchantTransaction
     extends Omit<MerchantTransactionTable, "merchant"> {
-    merchant: MerchantTable;
+    merchant: Merchant;
 }

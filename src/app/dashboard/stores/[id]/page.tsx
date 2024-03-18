@@ -21,8 +21,8 @@ import { ProductsTableView } from "../components/ProductsTableView";
 import { Product } from "../typing";
 import { ProductsGridView } from "../components/ProductsGridView";
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
-import { supabaseTables } from "@lib/constants";
 import { useGetUser } from "@hooks/useGetUser";
+import { tables } from "@db/tables.db";
 
 //todo add correct from API categories
 const categories = [
@@ -108,7 +108,7 @@ export default function Store({
     );
     const [page, setPage] = React.useState<number>(1);
     const [loading, setLoading] = React.useState<boolean>(false);
-    const user = useGetUser();
+    const { user } = useGetUser();
     const { supabase } = useBrowserSupabase();
     const searchParamsInstance = useSearchParams()!;
     const router = useRouter();
@@ -121,7 +121,7 @@ export default function Store({
                     const limit = 10;
                     const offset = limit * (page - 1);
                     const { data, error } = await supabase
-                        .from(supabaseTables.products)
+                        .from(tables.products)
                         .select()
                         .eq("store_slug", params.id)
                         .eq("user", user?.id)

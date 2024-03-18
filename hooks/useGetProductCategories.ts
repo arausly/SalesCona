@@ -52,7 +52,7 @@ export const useGetProductCategories = () => {
             if (!label?.trim()) return;
             try {
                 const { error, data } = await supabase
-                    .from(tables.product_categories)
+                    .from(tables.productCategories)
                     .insert({ label: label.trim().toLowerCase() })
                     .select();
                 if (!error && data) {

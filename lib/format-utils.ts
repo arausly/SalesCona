@@ -124,3 +124,9 @@ export const dateToReadableFormat = (date: string) =>
         month: "short",
         year: "numeric"
     });
+
+export const formatPriceBasedOnCurrency = (price: number, isNigeria = true) =>
+    new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: isNigeria ? "NGN" : "USD"
+    }).format(price);

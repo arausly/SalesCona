@@ -1,4 +1,4 @@
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 
 export interface StoreTable {
     id: string;
@@ -18,8 +18,13 @@ export interface StoreTable {
     pickup_store_address: string;
     general_discount: number;
     subdomain: string;
+    next_billing_date: string;
+    next_billing_amount_usd: number;
+    next_billing_amount_naira: number;
+    usage_start_date: string;
+    total_privileges: number;
 }
 
 export interface Store extends Omit<StoreTable, "merchant"> {
-    merchant: MerchantTable;
+    merchant: Merchant;
 }

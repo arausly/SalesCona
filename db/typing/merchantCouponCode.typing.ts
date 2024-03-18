@@ -1,4 +1,4 @@
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 import { ProductTable } from "./product.typing";
 import { StoreTable } from "./store.typing";
 
@@ -17,7 +17,7 @@ export interface MerchantCouponCodeTable {
 
 export interface MerchantCouponCode
     extends Omit<MerchantCouponCodeTable, "merchant" | "store" | "product"> {
-    merchant: MerchantTable | null;
+    merchant: Merchant | null;
     store: StoreTable | null;
     product: ProductTable | null;
 }

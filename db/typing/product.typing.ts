@@ -1,4 +1,4 @@
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 import { MerchantStaffTable } from "./merchantStaff.typing";
 import { StoreTable } from "./store.typing";
 
@@ -29,5 +29,5 @@ export interface Product
     extends Omit<ProductTable, "store" | "staff_creator" | "merchant_creator"> {
     store: StoreTable;
     staff_creator: MerchantStaffTable | null | undefined;
-    merchant_creator: MerchantTable | null | undefined;
+    merchant_creator: Merchant | null | undefined;
 }

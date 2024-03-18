@@ -1,4 +1,4 @@
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 import { StoreTable } from "./store.typing";
 import { Usage, UsageTable } from "./usage.typing";
 
@@ -13,7 +13,7 @@ export interface MerchantUsageTable {
 
 export interface MerchantUsage
     extends Omit<MerchantUsageTable, "merchant" | "usage" | "store"> {
-    merchant: MerchantTable;
+    merchant: Merchant;
     usage: UsageTable;
     store: StoreTable;
 }

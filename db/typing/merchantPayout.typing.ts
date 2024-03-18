@@ -1,4 +1,4 @@
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 
 /** this is merchant's payout config,
  * whether they would like to receive their money after a while*/
@@ -12,5 +12,5 @@ export interface MerchantPayoutTable {
 }
 
 export interface MerchantPayout extends Omit<MerchantPayoutTable, "merchant"> {
-    merchant: MerchantTable;
+    merchant: Merchant;
 }

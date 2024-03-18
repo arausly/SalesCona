@@ -1,4 +1,4 @@
-import { MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 
 export interface MerchantChargeTable {
     id: string;
@@ -10,5 +10,5 @@ export interface MerchantChargeTable {
 }
 
 export interface MerchantCharge extends Omit<MerchantChargeTable, "merchant"> {
-    merchant: MerchantTable;
+    merchant: Merchant;
 }
