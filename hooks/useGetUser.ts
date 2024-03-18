@@ -8,14 +8,18 @@ import { onlyIfWindowIsDefined } from "@lib/common.utils";
 
 //typings
 import { tables } from "@db/tables.db";
+import { User } from "@db/typing/merchantStaff.typing";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { Merchant } from "@db/typing/merchant.typing";
-import { MerchantStaff, User } from "@db/typing/merchantStaff.typing";
 import { getMerchantByAuthId } from "@services/merchant/merchant.services";
 import { getMerchantStaffByAuthId } from "@services/staff/staff.service";
 
 export const useGetUser = () => {
-    const [user, setUser] = React.useState<User>();
+    const [user, setUser] = React.useState<User>(() => {
+        return onlyIfWindowIsDefined(() => {
+            const storedUser = sessionStorage.getItem(storageKeys.user);
+            return storedUser ? JSON.parse(storedUser) : undefined;
+        });
+    });
     const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
 
@@ -38,7 +42,7 @@ export const useGetUser = () => {
                         const isMerchant = !!userData?.user_metadata.merchant;
 
                         if (userData) {
-                            await updateUser(userData.id, isMerchant);
+                            await initializeUserInfo(userData, isMerchant);
                             ///track to record when users signed in last
                             await supabase
                                 .from(
@@ -57,17 +61,19 @@ export const useGetUser = () => {
         })();
     }, [supabase.auth, forceRefresh]);
 
-    const updateUser = React.useCallback(
-        (authId: string, isMerchant: boolean) => {
+    const initializeUserInfo = React.useCallback(
+        (user: SupabaseUser, isMerchant: boolean) => {
             const util = isMerchant
                 ? getMerchantByAuthId
                 : getMerchantStaffByAuthId;
-            util(authId).then(({ data }) => {
+            util(user.id).then(({ data }) => {
                 if (!data?.length) return;
                 const currentUser = data[0];
                 setUser((prevUser) => {
+                    //supabase auth id is overwritten by merchant or staff id
                     const updatedUser = {
                         ...(prevUser ?? {}),
+                        ...user,
                         ...currentUser
                     } as User;
                     sessionStorage.setItem(
@@ -81,5 +87,7 @@ export const useGetUser = () => {
         []
     );
 
-    return { user, setForceRefresh, updateUser };
+    const triggerUpdate = React.useCallback(() => setForceRefresh(true), []);
+
+    return { user, triggerUpdate };
 };

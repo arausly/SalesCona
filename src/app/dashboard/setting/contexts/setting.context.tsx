@@ -111,7 +111,7 @@ export const SettingsProvider = ({
         return () => {
             subscription.unsubscribe();
         };
-    }, [merchantId]);
+    }, [user?.id]);
 
     const value = {
         ...defaultSettings,

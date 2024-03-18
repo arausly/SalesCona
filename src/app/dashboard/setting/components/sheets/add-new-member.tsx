@@ -13,10 +13,8 @@ import {
     SheetTrigger
 } from "@components/ui/sheet";
 import { Button } from "@components/Button";
-import { Modal } from "@components/Dialog/Dialog";
 import { inputClasses } from "@components/Input/input";
 import Dropdown from "@components/Menudropdown";
-import { MerchantStaff, Permission, Role } from "../../../typing";
 import { CreateNewRole } from "./create-new-role";
 import { Prompt } from "@components/Dialog/Prompt";
 
@@ -26,10 +24,13 @@ import { useBrowserSupabase } from "@lib/supabaseBrowser";
 
 //db
 import { tables } from "@db/tables.db";
+import { Action } from "@db/typing/action.typing";
+import { MerchantStaff } from "@db/typing/merchantStaff.typing";
+import { Role } from "@db/typing/role.typing";
 
 interface AddNewMemberProps {
     roles: Array<Role>;
-    permissions: Permission[];
+    permissions: Action[];
     currentMember?: MerchantStaff;
 }
 
@@ -85,7 +86,7 @@ export const AddNewMember = React.forwardRef(
             };
             setFormState({ ...initialPayload });
             setFormStateCopy({ ...initialPayload });
-            setSelectedRole(currentMember?.role);
+            setSelectedRole(currentMember?.role ?? undefined);
         }, [currentMember]);
 
         /** toggle cancel prompt */

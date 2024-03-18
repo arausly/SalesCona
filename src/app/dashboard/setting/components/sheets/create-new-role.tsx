@@ -17,9 +17,6 @@ import {
 import { inputClasses } from "@components/Input/input";
 import { Switch } from "@components/ui/switch";
 
-//typing
-import { Permission, Role } from "../../../typing";
-
 //hooks
 import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { useGetUser } from "@hooks/useGetUser";
@@ -27,8 +24,12 @@ import { useGetUser } from "@hooks/useGetUser";
 //db
 import { tables } from "@db/tables.db";
 
+//typing
+import { Action } from "@db/typing/action.typing";
+import { RoleTable } from "@db/typing/role.typing";
+
 interface CreateNewRoleProps {
-    permissions: Permission[];
+    permissions: Action[];
 }
 
 export const CreateNewRole = React.forwardRef(
@@ -63,7 +64,7 @@ export const CreateNewRole = React.forwardRef(
                         merchant: user.id
                     })
                     .select()
-                    .returns<Role[]>();
+                    .returns<RoleTable[]>();
 
                 if (data?.length && !error) {
                     const permissionsForRoles = permissions.map(

@@ -47,14 +47,11 @@ export const UsageSummary = () => {
                 <p className="text-sm">
                     Usage details for {currentStore?.name}
                 </p>
-                <div className="flex items-center">
-                    <Button className="primary-bg">Add usages</Button>
-                    {userHasSubscription ? (
-                        <Button className="ml-4" variant="ghost">
-                            <p className="text-red-400">Cancel usages</p>
-                        </Button>
-                    ) : null}
-                </div>
+                {userHasSubscription ? (
+                    <Button className="ml-4" variant="ghost">
+                        <p className="text-red-400">Cancel usages</p>
+                    </Button>
+                ) : null}
             </CardHeader>
             <CardContent>
                 <p className="text-xl flex items-center font-semibold">

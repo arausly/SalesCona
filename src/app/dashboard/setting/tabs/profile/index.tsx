@@ -25,7 +25,7 @@ export const Profile = () => {
         lastname: ""
     });
     const { supabase } = useBrowserSupabase();
-    const { user, setForceRefresh } = useGetUser();
+    const { user, triggerUpdate } = useGetUser();
 
     React.useEffect(() => {
         if (user) {
@@ -63,7 +63,7 @@ export const Profile = () => {
                         .from(tables.merchants)
                         .update({ ...formState })
                         .eq("id", user.id);
-                    setForceRefresh(true);
+                    triggerUpdate();
                 }
             } catch (err) {
             } finally {
