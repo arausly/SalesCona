@@ -1,17 +1,14 @@
 import { tables } from "@db/tables.db";
 import { UsageTable } from "@db/typing/usage.typing";
+import { ErrorResponse, SuccessResponse } from "@lib/route-utils";
 import { supabaseServer } from "@lib/supabaseServer";
-import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     const payload = await request.json();
     const supabase = await supabaseServer();
 
     if (!payload || !(payload.merchant && payload.store))
-        return NextResponse.json({
-            status: 400,
-            msg: "Missing required parameters"
-        });
+        return ErrorResponse.badRequest();
 
     try {
         const { data: freeUsages, error } = await supabase
@@ -31,14 +28,11 @@ export async function POST(request: Request) {
                         usage: usage.id
                     }))
                 );
-            if (!usageError) return NextResponse.json({ status: 200 });
+            if (!usageError) return SuccessResponse.ok();
 
-            return NextResponse.json({
-                status: 500,
-                msg: "something went wrong"
-            });
+            return ErrorResponse.internalServerError();
         }
     } catch (err) {
-        return NextResponse.json({ status: 500, msg: "something went wrong" });
+        return ErrorResponse.internalServerError();
     }
 }
