@@ -15,8 +15,10 @@ export const StoreDropdown: React.FC<StoreDropdownProps> = ({
 }) => {
     const formattedStores = React.useMemo(
         () => stores.map((s) => ({ ...s, label: s.name })),
-        []
+        [stores]
     );
+
+    if (!stores.length) return null;
 
     return (
         <Dropdown<StoreTable>

@@ -13,7 +13,8 @@ import { useBrowserSupabase } from "@lib/supabaseBrowser";
 import { tables } from "@db/tables.db";
 //types
 import { MerchantStaffTable } from "@db/typing/merchantStaff.typing";
-import { MerchantTable } from "@db/typing/merchant.typing";
+import { Merchant } from "@db/typing/merchant.typing";
+
 //utils
 import { extractStaffId } from "@lib/common.utils";
 //images
@@ -81,23 +82,6 @@ export default function Register({
             return handleSubmit(async (values) => {
                 try {
                     setLoading(true);
-                    let merchant: MerchantTable | undefined = undefined;
-
-                    //create merchant if not merchant_staff
-                    if (!staffAuthInfo) {
-                        const { data: merchantData, error: merchantError } =
-                            await supabase
-                                .from(tables.merchants)
-                                .insert({
-                                    email: values.email
-                                })
-                                .select()
-                                .returns<MerchantTable[]>();
-
-                        if (merchantData && !merchantError) {
-                            merchant = merchantData[0];
-                        }
-                    }
 
                     //create user as either a merchant or a merchant_staff
                     const { data, error } = await supabase.auth.signUp({
@@ -107,8 +91,7 @@ export default function Register({
                             data: {
                                 firstname: values.firstname,
                                 lastname: values.lastname,
-                                merchant_staff: existingMerchantStaff,
-                                merchant
+                                isMerchant: !staffAuthInfo
                             }
                         }
                     });
@@ -119,13 +102,37 @@ export default function Register({
                                 : "Something unexpected happened"
                         );
                     } else if (data.user && !staffAuthInfo) {
-                        //no merchant_staff markers then create as merchant
-                        //todo replace with database triggers
-                        await supabase.from(tables.merchants).update({
-                            email: data.user.email,
-                            user: data.user.id
-                        });
-                        router.replace("/verify");
+                        const auth_id = data.user.id;
+                        let createUserError;
+                        if (!staffAuthInfo) {
+                            //no merchant_staff markers then create as merchant
+                            //todo replace with database triggers
+                            //create merchant if not merchant_staff
+                            const { data: merchantData, error: merchantError } =
+                                await supabase
+                                    .from(tables.merchants)
+                                    .insert({
+                                        email: values.email,
+                                        firstname: values.firstname,
+                                        lastname: values.lastname,
+                                        auth_id
+                                    })
+                                    .select()
+                                    .returns<Merchant[]>();
+
+                            createUserError = merchantError;
+                        } else {
+                            await supabase
+                                .from(tables.merchantStaffs)
+                                .update({ auth_id })
+                                .eq("id", existingMerchantStaff?.id);
+                        }
+
+                        if (createUserError) {
+                            router.replace("/verify");
+                        } else {
+                            setErrMsg("Something unexpected happened"); // todo add toaster way better
+                        }
                     }
                 } catch (err) {
                 } finally {
@@ -133,7 +140,7 @@ export default function Register({
                 }
             })();
         },
-        [handleSubmit, router, supabase.auth]
+        [handleSubmit, router, supabase.auth, existingMerchantStaff]
     );
 
     return (

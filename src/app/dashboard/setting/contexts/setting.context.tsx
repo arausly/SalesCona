@@ -84,7 +84,12 @@ export const SettingsProvider = ({
         if (!merchantId) return () => {}; //do nothing
         setLoading(true);
         Promise.all([
-            getStores(merchantId).then(({ data }) => setStores(data ?? [])),
+            getStores(merchantId).then(({ data }) => {
+                const fetchedStores = data ?? [];
+                setStores(fetchedStores);
+                //select the first store by default
+                setSelectedStore(fetchedStores[0]);
+            }),
             getStaffsForMerchant(merchantId)
                 .then(categorizeMerchantStaffPerStore)
                 .then((staffCat) => setStaffsByStore(staffCat)),

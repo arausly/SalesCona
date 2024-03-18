@@ -6,7 +6,7 @@ import authImage from "@assets/images/auth-image.jpeg";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-    title: "Sign up page",
+    title: "Auth page", //todo change based on specific auth page
     description: "simple solution for taking your shop digital"
 };
 

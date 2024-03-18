@@ -116,3 +116,11 @@ export const formatTimeAgo = (timestamp: number): string => {
     const years = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 365));
     return `${years} ${years !== 1 ? "yrs" : "yr"} ago`;
 };
+
+//Jan 10, 2024
+export const dateToReadableFormat = (date: string) =>
+    new Date(date).toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });

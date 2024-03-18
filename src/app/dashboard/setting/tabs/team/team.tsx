@@ -20,7 +20,7 @@ import {
     DropdownMenuTrigger
 } from "@components/ui/dropdown-menu";
 import { Prompt } from "@components/Dialog/Prompt";
-import { AddNewMember } from "./sheets/add-new-member";
+import { AddNewMember } from "../../components/sheets/add-new-member";
 
 //utils
 import { excludeKeysFromObj } from "@lib/common.utils";
@@ -30,7 +30,7 @@ import { tables } from "@db/tables.db";
 
 //typing
 import { listenToChangesIn } from "@services/subscriptions.service";
-import { SettingContext } from "../contexts/setting.context";
+import { SettingContext } from "../../contexts/setting.context";
 import { updateStaff } from "@services/staff/staff.service";
 import { getRoleById } from "@services/roles/roles.services";
 import { MerchantStaffRolePopulated } from "@db/typing/merchantStaff.typing";

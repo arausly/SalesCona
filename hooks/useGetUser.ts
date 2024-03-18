@@ -11,30 +11,8 @@ import { tables } from "@db/tables.db";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Merchant } from "@db/typing/merchant.typing";
 import { MerchantStaff, User } from "@db/typing/merchantStaff.typing";
-
-/**
- * When a user signs up, either as a merchant or staff.
- * the table data gets added as a metadata,
- * however in-app a different convention is expected for ease of work
- * @param user
- * @returns
- */
-const reconstructUser = <T>(user: SupabaseUser): T => {
-    const merchantStaff = user.user_metadata.merchant_staff;
-    if (merchantStaff) {
-        return {
-            ...merchantStaff,
-            ...user,
-            user_metadata: undefined
-        } as T;
-    }
-    const merchant = user.user_metadata.merchant;
-    return {
-        ...merchant,
-        ...user,
-        user_metadata: undefined
-    } as T;
-};
+import { getMerchantByAuthId } from "@services/merchant/merchant.services";
+import { getMerchantStaffByAuthId } from "@services/staff/staff.service";
 
 export const useGetUser = () => {
     const [user, setUser] = React.useState<User>();
@@ -50,26 +28,17 @@ export const useGetUser = () => {
                     setForceRefresh(false); //run again, by then you would be false;
                 } else {
                     const storedUser = sessionStorage.getItem(storageKeys.user);
-                    if (storedUser) {
+                    if (storedUser && storedUser !== "undefined") {
                         setUser(JSON.parse(storedUser));
                     } else {
                         const {
                             data: { user: userData }
                         } = await supabase.auth.getUser();
+
+                        const isMerchant = !!userData?.user_metadata.merchant;
+
                         if (userData) {
-                            sessionStorage.setItem(
-                                storageKeys.user,
-                                JSON.stringify(userData)
-                            );
-                            const isMerchant =
-                                !!userData?.user_metadata.merchant;
-
-                            const reconstructedUser = isMerchant
-                                ? reconstructUser<Merchant>(userData)
-                                : reconstructUser<MerchantStaff>(userData);
-
-                            setUser(reconstructedUser as User);
-
+                            await updateUser(userData.id, isMerchant);
                             ///track to record when users signed in last
                             await supabase
                                 .from(
@@ -88,5 +57,29 @@ export const useGetUser = () => {
         })();
     }, [supabase.auth, forceRefresh]);
 
-    return { user, setForceRefresh };
+    const updateUser = React.useCallback(
+        (authId: string, isMerchant: boolean) => {
+            const util = isMerchant
+                ? getMerchantByAuthId
+                : getMerchantStaffByAuthId;
+            util(authId).then(({ data }) => {
+                if (!data?.length) return;
+                const currentUser = data[0];
+                setUser((prevUser) => {
+                    const updatedUser = {
+                        ...(prevUser ?? {}),
+                        ...currentUser
+                    } as User;
+                    sessionStorage.setItem(
+                        storageKeys.user,
+                        JSON.stringify(updatedUser)
+                    );
+                    return updatedUser;
+                });
+            });
+        },
+        []
+    );
+
+    return { user, setForceRefresh, updateUser };
 };

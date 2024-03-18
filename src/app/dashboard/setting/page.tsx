@@ -4,10 +4,10 @@ import React from "react";
 import { Tab } from "@headlessui/react";
 
 //components
-import { Profile } from "./components/profile";
-import { ChangePassword } from "./components/change-password";
-import { Team } from "./components/team";
-import { UsageTab } from "./components/usages";
+import { Profile } from "./tabs/profile";
+import { ChangePassword } from "./tabs/change-password";
+import { Team } from "./tabs/team/team";
+import { UsageTab } from "./tabs/usages";
 
 //hooks
 import { usePathname, useRouter } from "next/navigation";

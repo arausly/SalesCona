@@ -23,6 +23,13 @@ export const getStaffsForMerchant = async (merchantId: string) =>
             .returns<MerchantStaffRolePopulated[]>()
     ).data ?? [];
 
+export const getMerchantStaffByAuthId = async (authId: string) =>
+    await supabase
+        .from(tables.merchantStaffs)
+        .select()
+        .eq("auth_id", authId)
+        .returns<MerchantStaffTable[]>();
+
 //update one staff
 export const updateStaff = async (
     staffId: string,

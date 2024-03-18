@@ -1,8 +1,8 @@
-import { Merchant, MerchantTable } from "./merchant.typing";
+import { Merchant } from "./merchant.typing";
 import { Role } from "./role.typing";
 import { StoreTable } from "./store.typing";
 
-export interface MerchantStaffTable extends MerchantTable {
+export interface MerchantStaffTable extends Merchant {
     owner: string;
     auth_id: string;
     last_active: string;

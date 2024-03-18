@@ -74,8 +74,8 @@ export const Profile = () => {
     );
 
     if (!user) return null;
-    const { firstname, lastname } = user?.user_metadata;
-    const name = user.user_metadata?.full_name ?? `${firstname} ${lastname}`;
+    const { firstname, lastname } = user;
+    const name = `${firstname} ${lastname}`;
 
     // if the user updated either the firstname or the lastname.
     const changeExist =
