@@ -3,6 +3,7 @@ export interface Bank {
     name: string;
     code: string;
     supports_transfer: boolean;
+    logo?: string;
 }
 
 export interface SupportedCountry {

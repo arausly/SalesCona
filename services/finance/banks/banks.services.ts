@@ -12,9 +12,21 @@ export const getSupportedCountries = async (): Promise<SupportedCountry[]> =>
  * @param country  e.g nigeria | ghana
  * @returns
  */
-export const getBanks = async (country: string): Promise<Bank[]> =>
-    (
-        await (
-            await fetch(`https://api.paystack.co/bank?country=${country}`)
-        ).json()
-    ).data;
+export const getBanks = async (country: string): Promise<Bank[]> => {
+    const [pkBanks, ngBanks] = await Promise.all([
+        (
+            await (
+                await fetch(`https://api.paystack.co/bank?country=${country}`)
+            ).json()
+        ).data as Bank[],
+        (await (await fetch("https://nigerianbanks.xyz")).json()) as Bank[]
+    ]);
+
+    return pkBanks.map((pkBank) => {
+        const logo = ngBanks.find((nb) => nb.code === pkBank.code)?.logo ?? "";
+        return {
+            ...pkBank,
+            logo
+        };
+    });
+};

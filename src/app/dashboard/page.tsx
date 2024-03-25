@@ -18,10 +18,6 @@ import shirt from "@assets/images/shirts.webp";
 import bag from "@assets/images/bag.jpeg";
 import { Rating } from "@components/Rating";
 import { RegularAvatar } from "@components/Avatar/RegularAvatar";
-import {
-    getMerchantUsages,
-    transformMerchantUsages
-} from "@services/usage/usage.services";
 
 const dateSelections = [
     { label: "Last 24 hours" },

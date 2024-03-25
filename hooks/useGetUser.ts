@@ -14,12 +14,12 @@ import { getMerchantByAuthId } from "@services/merchant/merchant.services";
 import { getMerchantStaffByAuthId } from "@services/staff/staff.service";
 
 export const useGetUser = () => {
-    const [user, setUser] = React.useState<User>(() => {
-        return onlyIfWindowIsDefined(() => {
+    const [user, setUser] = React.useState<User>(() =>
+        onlyIfWindowIsDefined(() => {
             const storedUser = sessionStorage.getItem(storageKeys.user);
             return storedUser ? JSON.parse(storedUser) : undefined;
-        });
-    });
+        })
+    );
     const [forceRefresh, setForceRefresh] = React.useState<boolean>(false);
     const { supabase } = useBrowserSupabase();
 

@@ -21,7 +21,7 @@ export const getMerchantUsages = async (merchantId?: string) => {
     if (!merchantId) return [];
     const { data, error } = await supabase
         .from(tables.merchantUsages)
-        .select("*,usage(*, associated_action(*))")
+        .select("*,usage(*,category(*),associated_action(*))")
         .eq("merchant", merchantId)
         .returns<MerchantUsagePopulatedAction[]>();
     return !error && data ? data : [];
@@ -92,3 +92,30 @@ export const transformUsagesToUsageCategories = (
         return categories;
     }, {} as UsageCategoryType);
 };
+
+export interface MerchantUsagesByStoreCategory {
+    [storeIdOrKey: string]: {
+        [key: string]: (Usage & { active: boolean })[];
+    };
+}
+
+export const transformToMerchantStoreUsageCategory = (
+    merchantUsages: MerchantUsagePopulatedAction[]
+) =>
+    merchantUsages.reduce((acc, entry) => {
+        const storeId = entry.store ?? "store"; //some usages are above store level
+        const category = entry.usage.category.name;
+        const usage = { ...entry.usage, active: entry.active };
+        if (acc[storeId]) {
+            if (acc[storeId][category]) {
+                acc[storeId][category].push(usage);
+            } else {
+                acc[storeId][category] = [usage];
+            }
+        } else {
+            acc[storeId] = {
+                [category]: [usage]
+            };
+        }
+        return acc;
+    }, {} as MerchantUsagesByStoreCategory);

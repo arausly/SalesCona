@@ -24,7 +24,6 @@ export const useGetLocationCategory = (): {
     const { user, triggerUpdate } = useGetUser();
 
     React.useEffect(() => {
-        console.log({ user });
         if (!user || !user.country) {
             getLocationFromIP().then(async (location) => {
                 const isNigeria =

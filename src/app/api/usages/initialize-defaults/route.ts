@@ -21,12 +21,26 @@ export async function POST(request: Request) {
             const { error: usageError } = await supabase
                 .from(tables.merchantUsages)
                 .insert(
-                    freeUsages.map((usage) => ({
-                        merchant: payload.merchant,
-                        store: payload.store,
-                        active: true,
-                        usage: usage.id
-                    }))
+                    freeUsages.map((usage) => {
+                        //store usages privileges exist outside of the store scope
+                        const outerScopeUsages = [
+                            "a02e1bd7-6a11-4166-8bff-477742bd5738",
+                            "0ad8087b-3e68-4f29-93b6-bdfb85cadd4c"
+                        ];
+                        if (outerScopeUsages.includes(usage.id))
+                            return {
+                                active: true,
+                                usage: usage.id,
+                                merchant: payload.merchant
+                            };
+
+                        return {
+                            merchant: payload.merchant,
+                            store: payload.store,
+                            active: true,
+                            usage: usage.id
+                        };
+                    })
                 );
             if (!usageError) return SuccessResponse.ok();
 

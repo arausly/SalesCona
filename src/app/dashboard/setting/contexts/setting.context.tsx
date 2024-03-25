@@ -14,8 +14,11 @@ import { getAction } from "@services/action/action.service";
 
 // services
 import {
+    MerchantUsagesByStoreCategory,
     UsageCategoryType,
     getAppUsages,
+    getMerchantUsages,
+    transformToMerchantStoreUsageCategory,
     transformUsagesToUsageCategories
 } from "@services/usage/usage.services";
 import { REALTIME_POSTGRES_CHANGES_LISTEN_EVENT } from "@supabase/supabase-js";
@@ -26,6 +29,12 @@ import {
 } from "@services/staff/staff.service";
 import { StoreTable } from "@db/typing/store.typing";
 import { getStores } from "@services/stores/stores.service";
+import {
+    AccountsByStore,
+    bankServices,
+    bankTransformers
+} from "@services/merchantBankAccounts/merchantBankAccount.service";
+import { Bank } from "@services/finance/banks/typing";
 
 interface SettingContextProps {
     //roles created by user
@@ -41,6 +50,8 @@ interface SettingContextProps {
     selectStore: (store: StoreTable) => void;
     currentStore: StoreTable | undefined;
     loading: boolean;
+    merchantUsagesByStore: MerchantUsagesByStoreCategory;
+    bankAccountsByStore: AccountsByStore;
 }
 
 const NOP = () => {};
@@ -55,7 +66,9 @@ const defaultSettings = {
     setStaffsByStore: NOP,
     selectStore: NOP,
     loading: false,
-    currentStore: undefined
+    currentStore: undefined,
+    merchantUsagesByStore: {},
+    bankAccountsByStore: {}
 };
 
 export const SettingContext = React.createContext<SettingContextProps>({
@@ -76,7 +89,12 @@ export const SettingsProvider = ({
     const [staffsByStore, setStaffsByStore] =
         React.useState<StoreStaffCategory>({});
     const [stores, setStores] = React.useState<StoreTable[]>([]);
+    const [bankAccountsByStore, setBankAccountsByStore] =
+        React.useState<AccountsByStore>({});
+    const [merchantUsagesByStore, setMerchantUsagesByStore] =
+        React.useState<MerchantUsagesByStoreCategory>({});
     const [selectedStore, setSelectedStore] = React.useState<StoreTable>();
+    const [banks, setBanks] = React.useState<Bank[]>([]);
     const { user } = useGetUser();
     const merchantId = user?.owner ? user.owner.id : user?.id;
 
@@ -97,7 +115,14 @@ export const SettingsProvider = ({
                 .then(transformUsagesToUsageCategories)
                 .then((usageCat) => setUsageCategory(usageCat)),
             getRoles(merchantId!).then(({ data }) => setRoles(data ?? [])),
-            getAction().then(({ data }) => setActions(data ?? []))
+            getAction().then(({ data }) => setActions(data ?? [])),
+            getMerchantUsages(merchantId)
+                .then(transformToMerchantStoreUsageCategory)
+                .then(setMerchantUsagesByStore),
+            bankServices
+                .getAccountsForMerchant()
+                .then(bankTransformers.categorizeAccountsByStore)
+                .then(setBankAccountsByStore)
         ]).finally(() => setLoading(false));
 
         const subscription = listenToChangesIn(
@@ -124,7 +149,9 @@ export const SettingsProvider = ({
         setStaffsByStore,
         selectStore: setSelectedStore,
         currentStore: selectedStore,
-        loading
+        loading,
+        merchantUsagesByStore,
+        bankAccountsByStore
     };
     return (
         <SettingContext.Provider value={value}>

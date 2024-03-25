@@ -8,6 +8,7 @@ export interface MerchantBankAccountTable {
     bank_code: string;
     account_number: string;
     merchant: string;
+    store: string;
 }
 
 export interface MerchantBankAccount
