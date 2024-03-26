@@ -9,6 +9,11 @@ export interface MerchantBankAccountTable {
     account_number: string;
     merchant: string;
     store: string;
+    logo: string;
+    is_daily: boolean;
+    is_weekly: boolean;
+    is_monthly: boolean;
+    country: string;
 }
 
 export interface MerchantBankAccount

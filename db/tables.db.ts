@@ -12,7 +12,6 @@ export const tables = {
     merchantBillings: "merchant_billings",
     merchantCards: "merchant_cards",
     merchantCharges: "merchant_charges",
-    merchantPayouts: "merchant_payout",
     merchantTransactions: "merchant_transactions",
     merchantUsages: "merchant_usages",
     usageCategories: "usage_categories",

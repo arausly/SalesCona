@@ -25,13 +25,13 @@ import { useBrowserSupabase } from "@lib/supabaseBrowser";
 //db
 import { tables } from "@db/tables.db";
 import { Action } from "@db/typing/action.typing";
-import { MerchantStaff } from "@db/typing/merchantStaff.typing";
-import { Role } from "@db/typing/role.typing";
+import { MerchantStaffRolePopulated } from "@db/typing/merchantStaff.typing";
+import { Role, RoleTable } from "@db/typing/role.typing";
 
 interface AddNewMemberProps {
-    roles: Array<Role>;
+    roles: Array<RoleTable>;
     permissions: Action[];
-    currentMember?: MerchantStaff;
+    currentMember?: MerchantStaffRolePopulated;
 }
 
 interface MemberPayload {

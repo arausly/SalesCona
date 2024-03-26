@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 
 //context
 import { SettingContext } from "../../contexts/setting.context";
+import { StoreBankAccount } from "./components/bank-accounts.components";
 
 interface UsageProps {}
 
@@ -32,6 +33,7 @@ export const UsageTab: React.FC<UsageProps> = ({}) => {
                 </TabsContent>
                 <TabsContent value="billings">Billing history here</TabsContent>
             </Tabs>
+            <StoreBankAccount />
         </div>
     );
 };

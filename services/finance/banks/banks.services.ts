@@ -5,7 +5,10 @@ import { Bank, SupportedCountry } from "./typing";
  * @returns
  */
 export const getSupportedCountries = async (): Promise<SupportedCountry[]> =>
-    (await (await fetch("https://api.paystack.co/country")).json()).data;
+    (
+        (await (await fetch("https://api.paystack.co/country")).json()).data ??
+        []
+    ).map((c: SupportedCountry) => ({ ...c, label: c.name }));
 
 /**
  * Get all the banks for a country
@@ -13,19 +16,25 @@ export const getSupportedCountries = async (): Promise<SupportedCountry[]> =>
  * @returns
  */
 export const getBanks = async (country: string): Promise<Bank[]> => {
-    const [pkBanks, ngBanks] = await Promise.all([
-        (
-            await (
-                await fetch(`https://api.paystack.co/bank?country=${country}`)
-            ).json()
-        ).data as Bank[],
-        (await (await fetch("https://nigerianbanks.xyz")).json()) as Bank[]
-    ]);
+    let ngBanks: Bank[] = [];
+    const pkBanks = (
+        await (
+            await fetch(`https://api.paystack.co/bank?country=${country}`)
+        ).json()
+    ).data as Bank[];
+
+    if (country === "nigeria") {
+        ngBanks = (await (
+            await fetch("https://nigerianbanks.xyz")
+        ).json()) as Bank[];
+    }
 
     return pkBanks.map((pkBank) => {
         const logo = ngBanks.find((nb) => nb.code === pkBank.code)?.logo ?? "";
         return {
             ...pkBank,
+            value: pkBank.name,
+            label: pkBank.name,
             logo
         };
     });

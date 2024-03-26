@@ -34,7 +34,8 @@ import {
     bankServices,
     bankTransformers
 } from "@services/merchantBankAccounts/merchantBankAccount.service";
-import { Bank } from "@services/finance/banks/typing";
+import { SupportedCountry } from "@services/finance/banks/typing";
+import { getSupportedCountries } from "@services/finance/banks/banks.services";
 
 interface SettingContextProps {
     //roles created by user
@@ -52,6 +53,7 @@ interface SettingContextProps {
     loading: boolean;
     merchantUsagesByStore: MerchantUsagesByStoreCategory;
     bankAccountsByStore: AccountsByStore;
+    bankSupportedCountries: SupportedCountry[];
 }
 
 const NOP = () => {};
@@ -68,7 +70,8 @@ const defaultSettings = {
     loading: false,
     currentStore: undefined,
     merchantUsagesByStore: {},
-    bankAccountsByStore: {}
+    bankAccountsByStore: {},
+    bankSupportedCountries: []
 };
 
 export const SettingContext = React.createContext<SettingContextProps>({
@@ -94,7 +97,9 @@ export const SettingsProvider = ({
     const [merchantUsagesByStore, setMerchantUsagesByStore] =
         React.useState<MerchantUsagesByStoreCategory>({});
     const [selectedStore, setSelectedStore] = React.useState<StoreTable>();
-    const [banks, setBanks] = React.useState<Bank[]>([]);
+    const [bankSupportedCountries, setBankSupportedCountries] = React.useState<
+        SupportedCountry[]
+    >([]);
     const { user } = useGetUser();
     const merchantId = user?.owner ? user.owner.id : user?.id;
 
@@ -122,7 +127,8 @@ export const SettingsProvider = ({
             bankServices
                 .getAccountsForMerchant()
                 .then(bankTransformers.categorizeAccountsByStore)
-                .then(setBankAccountsByStore)
+                .then(setBankAccountsByStore),
+            getSupportedCountries().then(setBankSupportedCountries)
         ]).finally(() => setLoading(false));
 
         const subscription = listenToChangesIn(
@@ -151,7 +157,8 @@ export const SettingsProvider = ({
         currentStore: selectedStore,
         loading,
         merchantUsagesByStore,
-        bankAccountsByStore
+        bankAccountsByStore,
+        bankSupportedCountries
     };
     return (
         <SettingContext.Provider value={value}>

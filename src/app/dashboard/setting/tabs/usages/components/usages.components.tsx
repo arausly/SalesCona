@@ -90,6 +90,7 @@ export const Usages = () => {
                                         usageChanges[title] ?? []
                                     ).find((u) => u.id === privilege.id) as any;
 
+                                    //change exists if not default to merchant usage
                                     const isChecked =
                                         foundChange?.active ??
                                         foundUsage?.active;

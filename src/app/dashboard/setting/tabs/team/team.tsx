@@ -37,6 +37,7 @@ import { MerchantStaffRolePopulated } from "@db/typing/merchantStaff.typing";
 import { StoreDropdown } from "@components/shared/StoreDropdown";
 import Link from "next/link";
 import { NoData } from "@components/NoData";
+import { Role } from "@db/typing/role.typing";
 
 const headers = [
     { id: "firstname", label: "Firstname" },
