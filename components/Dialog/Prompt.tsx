@@ -7,7 +7,7 @@ interface PromptProps {
     action: () => void;
     actionMsg: string;
     title: string;
-    contentMsg: string;
+    contentMsg: string | JSX.Element;
     actionWorking?: boolean;
 }
 
@@ -20,6 +20,12 @@ export const Prompt = ({
     actionMsg,
     actionWorking
 }: PromptProps) => {
+    const content =
+        typeof contentMsg === "string" ? (
+            <p className="mb-2 text-sm font-light">{contentMsg}</p>
+        ) : (
+            contentMsg
+        );
     return (
         <Modal
             dialogClassName="z-50"
@@ -27,9 +33,7 @@ export const Prompt = ({
             isOpen={isOpen}
             toggleModal={toggleModal}
         >
-            <div className="flex flex-col w-full mt-2">
-                <p className="mb-2 text-sm font-light">{contentMsg}</p>
-            </div>
+            <div className="flex flex-col w-full mt-2">{content}</div>
             <div className="mt-4 flex items-center justify-end">
                 <button
                     type="button"

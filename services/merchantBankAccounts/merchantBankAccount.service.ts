@@ -8,9 +8,22 @@ const getAccountsForMerchant = async () =>
         await supabase
             .from(tables.merchantBankAccounts)
             .select()
+            .eq("is_deleted", false)
             .returns<MerchantBankAccountTable[]>()
     ).data ?? [];
 
+const createAccount = async (payload: Partial<MerchantBankAccountTable>) =>
+    await supabase
+        .from(tables.merchantBankAccounts)
+        .insert(payload)
+        .select()
+        .returns<MerchantBankAccountTable[]>();
+
+const deleteAccount = async (id: string) =>
+    await supabase
+        .from(tables.merchantBankAccounts)
+        .update({ is_deleted: true })
+        .eq("id", id);
 //transformers
 
 export interface AccountsByStore {
@@ -28,7 +41,9 @@ const categorizeAccountsByStore = (accounts: MerchantBankAccountTable[]) =>
     }, {} as AccountsByStore);
 
 export const bankServices = {
-    getAccountsForMerchant
+    getAccountsForMerchant,
+    createAccount,
+    deleteAccount
 };
 
 export const bankTransformers = {

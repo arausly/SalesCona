@@ -3,7 +3,6 @@ import React from "react";
 import { Button } from "@components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@components/ui/card";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { useGetUser } from "@hooks/useGetUser";
 import { dateToReadableFormat } from "@lib/format-utils";
 import { SettingContext } from "../../../contexts/setting.context";
 import { Spinner } from "@components/Spinner";

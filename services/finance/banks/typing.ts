@@ -6,6 +6,8 @@ export interface Bank {
     code: string;
     supports_transfer: boolean;
     logo?: string;
+    slug: string;
+    currency: string;
 }
 
 export interface SupportedCountry {

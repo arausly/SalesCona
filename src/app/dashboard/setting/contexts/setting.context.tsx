@@ -54,6 +54,9 @@ interface SettingContextProps {
     merchantUsagesByStore: MerchantUsagesByStoreCategory;
     bankAccountsByStore: AccountsByStore;
     bankSupportedCountries: SupportedCountry[];
+    setBankAccountsByStore: React.Dispatch<
+        React.SetStateAction<AccountsByStore>
+    >;
 }
 
 const NOP = () => {};
@@ -71,7 +74,8 @@ const defaultSettings = {
     currentStore: undefined,
     merchantUsagesByStore: {},
     bankAccountsByStore: {},
-    bankSupportedCountries: []
+    bankSupportedCountries: [],
+    setBankAccountsByStore: NOP
 };
 
 export const SettingContext = React.createContext<SettingContextProps>({
@@ -158,7 +162,8 @@ export const SettingsProvider = ({
         loading,
         merchantUsagesByStore,
         bankAccountsByStore,
-        bankSupportedCountries
+        bankSupportedCountries,
+        setBankAccountsByStore
     };
     return (
         <SettingContext.Provider value={value}>

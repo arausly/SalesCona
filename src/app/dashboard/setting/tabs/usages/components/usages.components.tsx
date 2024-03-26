@@ -90,11 +90,6 @@ export const Usages = () => {
                                         usageChanges[title] ?? []
                                     ).find((u) => u.id === privilege.id) as any;
 
-                                    //change exists if not default to merchant usage
-                                    const isChecked =
-                                        foundChange?.active ??
-                                        foundUsage?.active;
-
                                     return (
                                         <React.Fragment key={privilege.name}>
                                             <div className="flex items-center justify-between">
@@ -103,7 +98,7 @@ export const Usages = () => {
                                                     defaultChecked={
                                                         merchantHasPrivilege
                                                     }
-                                                    checked={isChecked}
+                                                    // checked={isChecked}
                                                     onCheckedChange={() =>
                                                         handleSwitchChangeForUsage(
                                                             privilege

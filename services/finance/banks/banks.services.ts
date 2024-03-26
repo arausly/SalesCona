@@ -29,13 +29,17 @@ export const getBanks = async (country: string): Promise<Bank[]> => {
         ).json()) as Bank[];
     }
 
-    return pkBanks.map((pkBank) => {
+    return pkBanks.reduce((banks, pkBank) => {
         const logo = ngBanks.find((nb) => nb.code === pkBank.code)?.logo ?? "";
-        return {
-            ...pkBank,
-            value: pkBank.name,
-            label: pkBank.name,
-            logo
-        };
-    });
+        if (pkBank.currency !== "USD") {
+            //TODO change this later, when capable of making usd transfers
+            banks.push({
+                ...pkBank,
+                value: pkBank.name,
+                label: pkBank.name,
+                logo
+            });
+        }
+        return banks;
+    }, [] as Bank[]);
 };
