@@ -20,7 +20,6 @@ export async function POST(request: Request) {
                 }
             )
         ).json();
-        console.log({ res });
         if (res && res.status) return SuccessResponse.ok(res.message, res.data);
     } catch (err) {
         return ErrorResponse.internalServerError();

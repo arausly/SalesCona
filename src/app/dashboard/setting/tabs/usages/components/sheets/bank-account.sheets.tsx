@@ -13,7 +13,6 @@ import {
 } from "@components/ui/sheet";
 import { Bank, SupportedCountry } from "@services/finance/banks/typing";
 import { getBanks } from "@services/finance/banks/banks.services";
-import { MerchantBankAccountTable } from "@db/typing/merchantBankAccount.typing";
 import Dropdown from "@components/Menudropdown";
 import {
     BanknotesIcon,
@@ -50,6 +49,27 @@ const remittances = [
     { id: "weekly", label: "Weekly", value: "weekly" }
 ];
 
+const defaultFreq = {
+    is_daily: false,
+    is_monthly: false,
+    is_weekly: false
+};
+
+const remittanceMapping = {
+    monthly: {
+        ...defaultFreq,
+        is_monthly: true
+    },
+    weekly: {
+        ...defaultFreq,
+        is_weekly: true
+    },
+    daily: {
+        ...defaultFreq,
+        is_daily: true
+    }
+} as const;
+
 export const BankAccountFormSheet = React.forwardRef((props, ref: any) => {
     const {
         bankSupportedCountries,
@@ -67,14 +87,13 @@ export const BankAccountFormSheet = React.forwardRef((props, ref: any) => {
     const [acctNumberBlurred, setAcctNumberBlurred] =
         React.useState<boolean>(false);
     const [remittanceFrequency, setRemittanceFrequency] = React.useState({
-        is_daily: false,
-        is_monthly: false,
-        is_weekly: false
+        ...defaultFreq
     });
     const [country, setCountry] = React.useState<SupportedCountry>();
     const [savingChanges, setSavingChanges] = React.useState<boolean>(false);
     const [selectedCountry, setSelectedCountry] =
         React.useState<SupportedCountry>();
+    const [formErrorMsg, setFormErrorMsg] = React.useState<string>("");
 
     const toggleSheet = useToggleSheet(ref);
 
@@ -115,8 +134,14 @@ export const BankAccountFormSheet = React.forwardRef((props, ref: any) => {
 
     const saveAccount = React.useCallback(async () => {
         try {
-            setSavingChanges(true);
+            if (!accountName) {
+                setFormErrorMsg(
+                    "Account name is required, make sure your account number and bank is correct"
+                );
+                return;
+            }
             if (!currentStore || !user) return;
+            setSavingChanges(true);
             const merchant = user.owner ? user.owner.id : user.id;
             const { data, error } = await bankServices.createAccount({
                 account_name: accountName,
@@ -151,29 +176,10 @@ export const BankAccountFormSheet = React.forwardRef((props, ref: any) => {
     ]);
 
     const handleRemittancePeriodChange = React.useCallback(
-        (period: (typeof remittances)[number]) => {
-            setRemittanceFrequency((prev) => {
-                switch (period.id) {
-                    case "monthly":
-                        return {
-                            ...prev,
-                            is_monthly: true
-                        };
-                    case "weekly":
-                        return {
-                            ...prev,
-                            is_weekly: true
-                        };
-                    case "daily":
-                        return {
-                            ...prev,
-                            is_daily: true
-                        };
-                    default:
-                        return prev;
-                }
-            });
-        },
+        (period: (typeof remittances)[number]) =>
+            setRemittanceFrequency(
+                remittanceMapping[period.id as keyof typeof remittanceMapping]
+            ),
         []
     );
 
@@ -287,6 +293,11 @@ export const BankAccountFormSheet = React.forwardRef((props, ref: any) => {
                             Account name
                         </Label>
                         <Input disabled type="text" placeholder={accountName} />
+                        {formErrorMsg && (
+                            <p className="text-xs text-red-400">
+                                {formErrorMsg}
+                            </p>
+                        )}
                     </div>
                     <div className="flex items-center justify-between">
                         <Label
@@ -328,8 +339,12 @@ export const BankAccountFormSheet = React.forwardRef((props, ref: any) => {
                     )}
                 </div>
                 <SheetFooter className="mt-4">
-                    <Button type="submit" onClick={saveAccount}>
-                        Add account
+                    <Button
+                        disabled={savingChanges}
+                        type="submit"
+                        onClick={saveAccount}
+                    >
+                        {savingChanges ? <Spinner /> : "Add account"}
                     </Button>
                 </SheetFooter>
             </SheetContent>
